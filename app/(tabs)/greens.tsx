@@ -5,6 +5,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  ImageBackground,
+  TextInput,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 
@@ -23,6 +25,7 @@ export default function Tab() {
     { name: "Bell Peppers", servings: 0 },
     { name: "Green Beans", servings: 0 },
   ]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
@@ -70,52 +73,84 @@ export default function Tab() {
   const totalServings = vegetables.reduce((sum, veg) => sum + veg.servings, 0);
   const progress = Math.min((totalServings / dailyGoal) * 100, 100); // Cap at 100%
 
+  const filteredVegetables = vegetables.filter((veg) =>
+    veg.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Daily Vegetable Tracker</Text>
+    <ImageBackground
+      source={require("../../assets/images/background.jpeg")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.todayBox}>
+          <Text style={styles.title}>Tänään</Text>
+          {/* Progress meter */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressBar, { width: `${progress}%` }]} />
+            <Text style={styles.progressText}>
+              {totalServings} of {dailyGoal} servings
+            </Text>
+          </View>
+        </View>
 
-      {/* Progress meter */}
-      <View style={styles.progressContainer}>
-        <View style={[styles.progressBar, { width: `${progress}%` }]} />
-        <Text style={styles.progressText}>
-          {totalServings} of {dailyGoal} servings
-        </Text>
+        {/* Celebration Animation */}
+        <Animated.View
+          style={[
+            styles.celebration,
+            {
+              opacity: celebrationOpacity,
+              transform: [{ scale: celebrationScale }],
+            },
+          ]}
+        >
+          <Text style={styles.celebrationText}>🎉 Hienoa työtä! 🎉</Text>
+        </Animated.View>
+
+        {/* Add search input */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search vegetables..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#666"
+          />
+        </View>
+
+        <ScrollView style={styles.scrollView}>
+          {filteredVegetables.map((veg, index) => (
+            <TouchableOpacity
+              key={veg.name}
+              style={styles.vegItem}
+              onPress={() => addServing(vegetables.indexOf(veg))}
+            >
+              <Text style={styles.vegName}>{veg.name}</Text>
+              <Text style={styles.servings}>{veg.servings} servings</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
-
-      {/* Celebration Animation */}
-      <Animated.View
-        style={[
-          styles.celebration,
-          {
-            opacity: celebrationOpacity,
-            transform: [{ scale: celebrationScale }],
-          },
-        ]}
-      >
-        <Text style={styles.celebrationText}>🎉 Daily Goal Achieved! 🎉</Text>
-      </Animated.View>
-
-      <ScrollView style={styles.scrollView}>
-        {vegetables.map((veg, index) => (
-          <TouchableOpacity
-            key={veg.name}
-            style={styles.vegItem}
-            onPress={() => addServing(index)}
-          >
-            <Text style={styles.vegName}>{veg.name}</Text>
-            <Text style={styles.servings}>{veg.servings} servings</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255)",
     padding: 24,
+  },
+  todayBox: {
+    backgroundColor: "#f7f9f8",
+    padding: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e8eee9",
   },
   title: {
     fontSize: 32,
@@ -199,5 +234,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  searchContainer: {
+    marginBottom: 16,
+    width: "100%",
+  },
+  searchInput: {
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#e8eee9",
+    color: "#333333",
   },
 });

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ImageBackground } from "react-native";
 export default function Tab() {
   return (
     <ImageBackground
-      source={require("../../assets/images/Designer.jpeg")} // Adjust the path to your image
+      source={require("../../assets/images/background.jpeg")} // Adjust the path to your image
       style={styles.container}
       resizeMode="cover"
     >
