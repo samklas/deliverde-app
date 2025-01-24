@@ -19,7 +19,6 @@ export default function TabLayout() {
         options={{
           title: "Reseptit",
           tabBarIcon: ({ color }) => (
-            //<FontAwesome size={28} name="home" color={color} />
             <Ionicons size={28} name="document-text-sharp" color={color} />
           ),
         }}
@@ -29,18 +28,16 @@ export default function TabLayout() {
         options={{
           title: "Vihannekset",
           tabBarIcon: ({ color }) => (
-            //<FontAwesome size={28} name="cog" color={color} />
             <Ionicons size={28} name="checkmark" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: "Asetukset",
+          title: "Profiili",
           tabBarIcon: ({ color }) => (
-            //<FontAwesome size={28} name="cog" color={color} />
-            <Ionicons size={28} name="settings" color={color} />
+            <Ionicons size={28} name="person" color={color} />
           ),
         }}
       />
