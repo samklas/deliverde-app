@@ -1,6 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import { Image } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -18,6 +19,17 @@ export default function TabLayout() {
         name="recipes"
         options={{
           title: "Reseptit",
+          headerTitle: "",
+          headerBackground: () => (
+            <Image
+              source={require("../../assets/images/background.jpeg")} // Adjust the path to your image
+              style={{
+                height: "100%",
+                width: "100%",
+                resizeMode: "cover",
+              }}
+            />
+          ),
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="document-text-sharp" color={color} />
           ),
@@ -27,6 +39,18 @@ export default function TabLayout() {
         name="greens"
         options={{
           title: "Vihannekset",
+          headerTitle: "",
+          headerBackground: () => (
+            <Image
+              source={require("../../assets/images/background.jpeg")} // Adjust the path to your image
+              style={{
+                height: "100%",
+                width: "100%",
+                resizeMode: "cover",
+              }}
+            />
+          ),
+
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="checkmark" color={color} />
           ),

@@ -84,8 +84,21 @@ export default function Tab() {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
+        {/* Today box */}
         <View style={styles.todayBox}>
           <Text style={styles.title}>Tänään</Text>
+          {/* Progress meter */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressBar, { width: `${progress}%` }]} />
+            <Text style={styles.progressText}>
+              {totalServings} of {dailyGoal} servings
+            </Text>
+          </View>
+        </View>
+
+        {/* Week box */}
+        <View style={styles.todayBox}>
+          <Text style={styles.title}>Viikko</Text>
           {/* Progress meter */}
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { width: `${progress}%` }]} />
@@ -112,7 +125,7 @@ export default function Tab() {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search vegetables..."
+            placeholder="Etsi vihanneksia..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholderTextColor="#666"
@@ -143,7 +156,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(255, 255, 255)",
-    padding: 24,
+    //padding: 24,
   },
   todayBox: {
     backgroundColor: "#f7f9f8",
@@ -151,6 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#e8eee9",
+    width: "100%",
   },
   title: {
     fontSize: 32,
@@ -162,6 +176,8 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     marginTop: 10,
+    backgroundColor: "#ffffff",
+    padding: 20,
   },
   vegItem: {
     flexDirection: "row",
@@ -236,6 +252,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   searchContainer: {
+    marginTop: 20,
     marginBottom: 16,
     width: "100%",
   },
