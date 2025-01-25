@@ -5,7 +5,23 @@ import { Image } from "react-native";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "green" }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "green",
+        headerBackground: () => {
+          return (
+            <Image
+              source={require("../../assets/images/header-background.png")} // Adjust the path to your image
+              style={{
+                height: "100%",
+                width: "100%",
+                resizeMode: "cover",
+              }}
+            />
+          );
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -19,17 +35,6 @@ export default function TabLayout() {
         name="recipes"
         options={{
           title: "Reseptit",
-          headerTitle: "",
-          headerBackground: () => (
-            <Image
-              source={require("../../assets/images/background.jpeg")} // Adjust the path to your image
-              style={{
-                height: "100%",
-                width: "100%",
-                resizeMode: "cover",
-              }}
-            />
-          ),
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="document-text-sharp" color={color} />
           ),
@@ -39,18 +44,6 @@ export default function TabLayout() {
         name="greens"
         options={{
           title: "Vihannekset",
-          headerTitle: "",
-          headerBackground: () => (
-            <Image
-              source={require("../../assets/images/background.jpeg")} // Adjust the path to your image
-              style={{
-                height: "100%",
-                width: "100%",
-                resizeMode: "cover",
-              }}
-            />
-          ),
-
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="checkmark" color={color} />
           ),

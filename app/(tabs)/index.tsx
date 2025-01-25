@@ -1,21 +1,70 @@
-import { View, Text, StyleSheet, ImageBackground } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  ScrollView,
+  Pressable,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo/vector-icons
 
 export default function Tab() {
   return (
     <ImageBackground
-      source={require("../../assets/images/background.jpeg")} // Adjust the path to your image
+      source={require("../../assets/images/background.jpeg")}
       style={styles.container}
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>Tervetuloa Deliverde-sovellukseen!</Text>
-          <View style={styles.divider} />
-          <Text style={styles.subtitle}>
-            Tällä sovelluksella voit valita ja ostaa vihannekset ja reseptit
-            Deliverde-sovellukseen!
-          </Text>
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Text style={styles.welcomeText}>Hei Samppa! 👋</Text>
+
+          {/* Streak Box */}
+          <Pressable style={styles.streakBox}>
+            <View style={styles.streakHeader}>
+              <Ionicons name="flame" size={24} color="#ff6b6b" />
+              <Text style={styles.streakCount}>7 päivän putki!</Text>
+            </View>
+            <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
+          </Pressable>
+
+          {/* Daily Goals */}
+          <View style={styles.box}>
+            <Text style={styles.boxTitle}>Päivän tavoitteet</Text>
+            <View style={styles.goalRow}>
+              <Ionicons name="checkmark-circle" size={24} color="#4cd964" />
+              <Text style={styles.goalText}>Syö 5 annosta kasviksia</Text>
+            </View>
+            <View style={styles.goalRow}>
+              <Ionicons name="radio-button-off" size={24} color="#8e8e93" />
+              <Text style={styles.goalText}>Kokeile uutta reseptiä</Text>
+            </View>
+          </View>
+
+          {/* Monthly Challenge */}
+          <View style={styles.box}>
+            <Text style={styles.boxTitle}>Kuukauden haaste</Text>
+            <Text style={styles.challengeText}>
+              Kokeile 5 uutta kasvisreseptiä
+            </Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progress, { width: "60%" }]} />
+            </View>
+            <Text style={styles.progressText}>3/5 suoritettu</Text>
+          </View>
+
+          {/* Recipe of the Month */}
+          <View style={[styles.box, styles.recipeBox]}>
+            <Text style={styles.boxTitle}>Kuukauden resepti</Text>
+            <View style={styles.recipeContent}>
+              <View style={styles.recipePlaceholder} />
+              <Text style={styles.recipeTitle}>Kesäinen Kasvisrisotto</Text>
+              <Text style={styles.recipeDetails}>
+                30 min • Helppo • 4 annosta
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
       </View>
     </ImageBackground>
   );
@@ -25,8 +74,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    paddingTop: 200,
-    paddingBottom: 200,
   },
   contentContainer: {
     flex: 1,
@@ -57,7 +104,105 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 1)", // Semi-transparent white overlay
-    padding: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 16,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#0c4c25",
+    marginBottom: 20,
+  },
+  box: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  streakBox: {
+    backgroundColor: "#fff8f8",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  streakHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  streakCount: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 8,
+    color: "#ff6b6b",
+  },
+  streakSubtext: {
+    color: "#666",
+    fontSize: 14,
+  },
+  boxTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0c4c25",
+    marginBottom: 12,
+  },
+  goalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  goalText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#333",
+  },
+  challengeText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 12,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: "#e9ecef",
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  progress: {
+    height: "100%",
+    backgroundColor: "#4cd964",
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "right",
+  },
+  recipeBox: {
+    marginBottom: 32,
+  },
+  recipeContent: {
+    alignItems: "center",
+  },
+  recipePlaceholder: {
+    width: "100%",
+    height: 160,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  recipeTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  recipeDetails: {
+    fontSize: 14,
+    color: "#666",
   },
 });
