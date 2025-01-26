@@ -8,6 +8,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "green",
+        headerTitle: "DeliVerde",
+        headerTitleStyle: {
+          color: "white",
+        },
         headerBackground: () => {
           return (
             <Image
@@ -45,7 +49,7 @@ export default function TabLayout() {
         options={{
           title: "Vihannekset",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="nutrition" color={color} />
+            <Ionicons size={28} name="leaf" color={color} />
           ),
         }}
       />

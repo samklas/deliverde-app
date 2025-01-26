@@ -17,8 +17,6 @@ export default function Tab() {
     >
       <View style={styles.overlay}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* <Text style={styles.welcomeText}>Hei Samppa! 👋</Text> */}
-
           {/* Combined Streak and Daily Goals Box */}
           <View style={styles.combinedBox}>
             <View style={styles.streakHeader}>
