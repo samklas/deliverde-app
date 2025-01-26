@@ -19,17 +19,16 @@ export default function Tab() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* <Text style={styles.welcomeText}>Hei Samppa! 👋</Text> */}
 
-          {/* Streak Box */}
-          <Pressable style={styles.streakBox}>
+          {/* Combined Streak and Daily Goals Box */}
+          <View style={styles.combinedBox}>
             <View style={styles.streakHeader}>
               <Ionicons name="leaf" size={24} color="#4cd964" />
               <Text style={styles.streakCount}>7 päivän putki!</Text>
             </View>
             <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
-          </Pressable>
 
-          {/* Daily Goals */}
-          <View style={styles.box}>
+            <View style={styles.goalsDivider} />
+
             <Text style={styles.boxTitle}>Päivän tavoitteet</Text>
             <View style={styles.goalRow}>
               <Ionicons name="checkmark-circle" size={24} color="#4cd964" />
@@ -127,11 +126,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  streakBox: {
-    backgroundColor: "#f0fff0",
+  combinedBox: {
+    backgroundColor: "white",
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4cd964",
   },
   streakHeader: {
     flexDirection: "row",
@@ -139,7 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   streakCount: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     marginLeft: 8,
     color: "#0c4c25",
@@ -147,6 +153,12 @@ const styles = StyleSheet.create({
   streakSubtext: {
     color: "#666",
     fontSize: 14,
+    marginBottom: 4,
+  },
+  goalsDivider: {
+    height: 1,
+    backgroundColor: "#e0e0e0",
+    marginVertical: 16,
   },
   boxTitle: {
     fontSize: 18,
@@ -157,10 +169,11 @@ const styles = StyleSheet.create({
   goalRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingLeft: 4,
   },
   goalText: {
-    marginLeft: 8,
+    marginLeft: 12,
     fontSize: 16,
     color: "#333",
   },
