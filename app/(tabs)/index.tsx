@@ -17,12 +17,12 @@ export default function Tab() {
     >
       <View style={styles.overlay}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.welcomeText}>Hei Samppa! 👋</Text>
+          {/* <Text style={styles.welcomeText}>Hei Samppa! 👋</Text> */}
 
           {/* Streak Box */}
           <Pressable style={styles.streakBox}>
             <View style={styles.streakHeader}>
-              <Ionicons name="flame" size={24} color="#ff6b6b" />
+              <Ionicons name="leaf" size={24} color="#4cd964" />
               <Text style={styles.streakCount}>7 päivän putki!</Text>
             </View>
             <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   streakBox: {
-    backgroundColor: "#fff8f8",
+    backgroundColor: "#f0fff0",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 8,
-    color: "#ff6b6b",
+    color: "#0c4c25",
   },
   streakSubtext: {
     color: "#666",
