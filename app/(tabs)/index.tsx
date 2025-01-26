@@ -57,7 +57,10 @@ export default function Tab() {
           <View style={[styles.box, styles.recipeBox]}>
             <Text style={styles.boxTitle}>Kuukauden resepti</Text>
             <View style={styles.recipeContent}>
-              <View style={styles.recipePlaceholder} />
+              <ImageBackground
+                source={require("../../assets/images/meal.png")}
+                style={styles.recipeImage}
+              />
               <Text style={styles.recipeTitle}>Kesäinen Kasvisrisotto</Text>
               <Text style={styles.recipeDetails}>
                 30 min • Helppo • 4 annosta
@@ -204,5 +207,11 @@ const styles = StyleSheet.create({
   recipeDetails: {
     fontSize: 14,
     color: "#666",
+  },
+  recipeImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 12,
   },
 });

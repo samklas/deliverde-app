@@ -36,7 +36,7 @@ export default function TabLayout() {
         options={{
           title: "Reseptit",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="document-text-sharp" color={color} />
+            <Ionicons size={28} name="receipt" color={color} />
           ),
         }}
       />
@@ -45,7 +45,7 @@ export default function TabLayout() {
         options={{
           title: "Vihannekset",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="checkmark" color={color} />
+            <Ionicons size={28} name="nutrition" color={color} />
           ),
         }}
       />
