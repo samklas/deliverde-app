@@ -16,14 +16,18 @@ type VegetableEntry = {
 };
 
 export default function Tab() {
-  const [dailyGoal, setDailyGoal] = useState(5); // Default goal of 5 servings
+  const [dailyGoal, setDailyGoal] = useState(5);
   const [vegetables, setVegetables] = useState<VegetableEntry[]>([
-    { name: "Spinach", servings: 0 },
-    { name: "Broccoli", servings: 0 },
-    { name: "Carrots", servings: 0 },
-    { name: "Kale", servings: 0 },
-    { name: "Bell Peppers", servings: 0 },
-    { name: "Green Beans", servings: 0 },
+    { name: "Salaatti", servings: 0 },
+    { name: "Tomaatti", servings: 0 },
+    { name: "Kesäkurpitsa", servings: 0 },
+    { name: "Kurkku", servings: 0 },
+    { name: "Pinaatti", servings: 0 },
+    { name: "Parsakaali", servings: 0 },
+    { name: "Porkkana", servings: 0 },
+    { name: "Lehtikaali", servings: 0 },
+    { name: "Paprika", servings: 0 },
+    { name: "Vihreät pavut", servings: 0 },
   ]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -91,19 +95,7 @@ export default function Tab() {
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { width: `${progress}%` }]} />
             <Text style={styles.progressText}>
-              {totalServings} of {dailyGoal} servings
-            </Text>
-          </View>
-        </View>
-
-        {/* Week box */}
-        <View style={styles.todayBox}>
-          <Text style={styles.title}>Viikko</Text>
-          {/* Progress meter */}
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { width: `${progress}%` }]} />
-            <Text style={styles.progressText}>
-              {totalServings} of {dailyGoal} servings
+              {totalServings} / {dailyGoal} annosta
             </Text>
           </View>
         </View>
@@ -140,7 +132,7 @@ export default function Tab() {
               onPress={() => addServing(vegetables.indexOf(veg))}
             >
               <Text style={styles.vegName}>{veg.name}</Text>
-              <Text style={styles.servings}>{veg.servings} servings</Text>
+              <Text style={styles.servings}>{veg.servings} annosta</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -155,73 +147,87 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255)",
-    //padding: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 16,
+    paddingTop: 20,
   },
   todayBox: {
-    backgroundColor: "#f7f9f8",
-    padding: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e8eee9",
-    width: "100%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 20,
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1a472a",
+    marginBottom: 16,
     textAlign: "center",
+    letterSpacing: 0.5,
   },
   scrollView: {
     flex: 1,
     marginTop: 10,
-    backgroundColor: "#ffffff",
-    padding: 20,
+    backgroundColor: "transparent",
+    paddingHorizontal: 4,
   },
   vegItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#f7f9f8",
+    backgroundColor: "white",
     marginBottom: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e8eee9",
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
   vegName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "500",
-    color: "#333333",
+    color: "#2d3436",
   },
   servings: {
-    fontSize: 16,
-    color: "#0c4c25",
+    fontSize: 15,
+    color: "#1a472a",
     fontWeight: "600",
   },
   progressContainer: {
-    height: 36,
-    backgroundColor: "#f7f9f8",
-    borderRadius: 18,
-    marginBottom: 24,
+    height: 40,
+    backgroundColor: "#f5f9f7",
+    borderRadius: 20,
+    marginBottom: 8,
     overflow: "hidden",
     position: "relative",
-    borderWidth: 1,
-    borderColor: "#e8eee9",
   },
   progressBar: {
     position: "absolute",
     height: "100%",
-    backgroundColor: "#0c4c25",
+    backgroundColor: "#2d8a5f",
+    borderRadius: 20,
   },
   progressText: {
     position: "absolute",
     width: "100%",
     textAlign: "center",
-    lineHeight: 36,
-    color: "#333333",
+    lineHeight: 40,
+    color: "#2d3436",
     fontWeight: "600",
+    fontSize: 15,
     zIndex: 1,
   },
   celebration: {
@@ -234,35 +240,40 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   celebrationText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1a472a",
+    backgroundColor: "white",
     paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   searchContainer: {
-    marginTop: 20,
-    marginBottom: 16,
+    marginVertical: 16,
     width: "100%",
   },
   searchInput: {
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: "white",
+    padding: 14,
+    borderRadius: 14,
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#e8eee9",
-    color: "#333333",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
+    color: "#2d3436",
   },
 });

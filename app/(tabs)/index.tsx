@@ -55,7 +55,7 @@ export default function Tab() {
             <Text style={styles.boxTitle}>Kuukauden resepti</Text>
             <View style={styles.recipeContent}>
               <ImageBackground
-                source={require("../../assets/images/meal.png")}
+                source={require("../../assets/images/meal4.png")}
                 style={styles.recipeImage}
               />
               <Text style={styles.recipeTitle}>Kesäinen Kasvisrisotto</Text>
