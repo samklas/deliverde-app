@@ -36,20 +36,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="greens"
+        options={{
+          title: "Tavoitteet",
+          tabBarIcon: ({ color }) => (
+            <Ionicons size={28} name="leaf" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="recipes"
         options={{
           title: "Reseptit",
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="receipt" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="greens"
-        options={{
-          title: "Vihannekset",
-          tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="leaf" color={color} />
           ),
         }}
       />
