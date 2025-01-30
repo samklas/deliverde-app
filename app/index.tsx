@@ -58,7 +58,7 @@ export default function Test() {
         </Text>
       </Pressable>
 
-      <Link href="/(tabs)" style={styles.link}>
+      <Link href="/splash" style={styles.link}>
         Go to Home
       </Link>
     </View>
