@@ -7,6 +7,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo/vector-icons
+import { Link } from "expo-router";
 
 export default function Tab() {
   return (
