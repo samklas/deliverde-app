@@ -1,12 +1,26 @@
 import { Link, router } from "expo-router";
 import { Text, View, TextInput, Pressable, StyleSheet } from "react-native";
-import { useState } from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useEffect, useState } from "react";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Test() {
+export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    const id = getUserId();
+    if (id !== null) {
+      console.log("is logged in");
+    } else {
+      console.log("is not logged in");
+    }
+  }, []);
 
   const handleLogin = async () => {
     try {
@@ -17,13 +31,34 @@ export default function Test() {
         email,
         password
       );
-      console.log("Logged in successfully:", userCredential.user.uid);
+      console.log(userCredential);
+      storeUserId(userCredential.user.uid);
+      getUserId();
       router.push("/(tabs)");
-      // Navigate to tabs after successful login
     } catch (error) {
       console.error("Error logging in:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const storeUserId = async (value: string) => {
+    try {
+      await AsyncStorage.setItem("id", value);
+    } catch (e) {
+      console.log("error: " + e);
+    }
+  };
+
+  const getUserId = async () => {
+    try {
+      const value = await AsyncStorage.getItem("id");
+      if (value !== null) {
+        console.log("id from ascyn storage: " + value);
+        return value;
+      }
+    } catch (e) {
+      // error reading value
     }
   };
 
