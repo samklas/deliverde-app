@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   ImageBackground,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 
 export default function Tab() {
   const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
+  const [recipes2, setRecipes2] = useState([]);
 
   // Temporary mock data - replace with your actual data source
   const recipes = [
@@ -36,6 +39,26 @@ export default function Tab() {
         return require("../../assets/images/meal1.png"); // fallback image
     }
   };
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "recipes"));
+        // const recipesData = querySnapshot.docs.map((doc) => ({
+        //   id: doc.id,
+        //   ...doc.data(),
+        // }));
+
+        querySnapshot.forEach((doc) => {
+          console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+        });
+      } catch (err) {
+        console.error("Virhe reseptejä haettaessa: ", err);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
 
   return (
     <ImageBackground
