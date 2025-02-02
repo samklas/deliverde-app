@@ -7,25 +7,38 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { auth } from "@/firebaseConfig";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const id = getUserId();
-    if (id !== null) {
-      console.log("is logged in");
-    } else {
-      console.log("is not logged in");
-    }
+    const checkLoginStatus = async () => {
+      const userId = await AsyncStorage.getItem("id");
+
+      if (userId) {
+        setIsLoggedIn(true);
+        router.push("/(tabs)");
+      } else {
+        console.log("ei userId:tä");
+        setIsLoggedIn(false);
+      }
+
+      setLoading(false);
+    };
+
+    checkLoginStatus();
   }, []);
 
   const handleLogin = async () => {
     try {
       setIsLoading(true);
-      const auth = getAuth();
+      //const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -62,42 +75,46 @@ export default function Login() {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome</Text>
+  if (!isLoggedIn) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <Pressable
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={isLoading}
-      >
-        <Text style={styles.buttonText}>
-          {isLoading ? "Logging in..." : "Login"}
-        </Text>
-      </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.buttonText}>
+            {isLoading ? "Logging in..." : "Login"}
+          </Text>
+        </Pressable>
 
-      <Link href="/splash" style={styles.link}>
-        Go to Home
-      </Link>
-    </View>
-  );
+        <Link href="/splash" style={styles.link}>
+          Go to Home
+        </Link>
+      </View>
+    );
+  }
+
+  return null;
 }
 
 const styles = StyleSheet.create({

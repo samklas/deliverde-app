@@ -1,6 +1,20 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { auth } from "@/firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { signOut } from "firebase/auth";
+import { View, Text, StyleSheet, Image, Button } from "react-native";
 
 export default function Tab() {
+  const handleLogout = async () => {
+    try {
+      auth.signOut();
+      await AsyncStorage.removeItem("id");
+      router.push("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
@@ -23,6 +37,12 @@ export default function Tab() {
           <Text>📚 Read 12 books this year</Text>
         </View>
       </View>
+      <Button
+        title="Sign Out"
+        onPress={async () => {
+          await handleLogout();
+        }}
+      />
     </View>
   );
 }
