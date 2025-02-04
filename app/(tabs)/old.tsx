@@ -5,14 +5,26 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  Image,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
+import { db, storage } from "@/firebaseConfig";
+import { getDownloadURL, ref } from "firebase/storage";
 
-export default function Tab() {
+type Recipe = {
+  id: string;
+  created: string;
+  imageUrl: string;
+  title: string;
+  ingredients: string[];
+  instructions: string;
+};
+
+export default function Test() {
   const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
-  const [recipes2, setRecipes2] = useState([]);
+  const [recipes2, setRecipes2] = useState<Recipe[]>([]);
+  const [imageUrl, setImageUrl] = useState("");
 
   // Temporary mock data - replace with your actual data source
   const recipes = [
@@ -44,21 +56,38 @@ export default function Tab() {
     const fetchRecipes = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "recipes"));
-        // const recipesData = querySnapshot.docs.map((doc) => ({
-        //   id: doc.id,
-        //   ...doc.data(),
-        // }));
+        let test: Recipe[] = [];
+        querySnapshot.forEach(async (doc) => {
+          const data = doc.data();
+          const recipe: Recipe = {
+            id: doc.id,
+            created: data.created,
+            imageUrl: await getImageUrl(data.imageUrl),
+            title: data.title,
+            ingredients: data.ingredients,
+            instructions: data.insructions,
+          };
 
-        querySnapshot.forEach((doc) => {
-          console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+          console.log("recipe: " + recipe);
+
+          test.push(recipe);
         });
+
+        setRecipes2(test);
       } catch (err) {
         console.error("Virhe reseptejä haettaessa: ", err);
       }
     };
 
     fetchRecipes();
+    console.log("reseptit: " + JSON.stringify(recipes2));
   }, []);
+
+  const getImageUrl = async (url: string) => {
+    const refrence = ref(storage, url);
+    const imageUrl = await getDownloadURL(refrence);
+    return imageUrl;
+  };
 
   return (
     <ImageBackground
