@@ -119,7 +119,7 @@ export default function Login() {
             </Text>
           </Pressable>
 
-          <Link href="/splash" style={styles.link}>
+          <Link href="/register" style={styles.link}>
             Rekisteröidy
           </Link>
         </View>
