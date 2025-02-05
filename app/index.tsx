@@ -1,5 +1,12 @@
 import { Link, router } from "expo-router";
-import { Text, View, TextInput, Pressable, StyleSheet } from "react-native";
+import {
+  Text,
+  View,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
 import { useEffect, useState } from "react";
 import {
   getAuth,
@@ -77,40 +84,46 @@ export default function Login() {
 
   if (!isLoggedIn) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome</Text>
+      <ImageBackground
+        source={require("../assets/images/background.jpeg")}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Text style={styles.title}>Tervetuloa</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        <Pressable
-          style={styles.button}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Logging in..." : "Login"}
-          </Text>
-        </Pressable>
+          <Pressable
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? "Logging in..." : "Kirjaudu sisään"}
+            </Text>
+          </Pressable>
 
-        <Link href="/splash" style={styles.link}>
-          Go to Home
-        </Link>
-      </View>
+          <Link href="/splash" style={styles.link}>
+            Rekisteröidy
+          </Link>
+        </View>
+      </ImageBackground>
     );
   }
 
@@ -120,12 +133,18 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: "white",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 16,
     justifyContent: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
+    color: "#0c4c25",
     marginBottom: 20,
     textAlign: "center",
   },
@@ -138,7 +157,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#0c4c25",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
@@ -150,7 +169,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   link: {
-    color: "#007AFF",
+    color: "#0c4c25",
     textAlign: "center",
   },
 });
