@@ -120,7 +120,7 @@ export default function Login() {
           </Pressable>
 
           <Link href="/register" style={styles.link}>
-            Rekisteröidy
+            Eikö ole tiliä? Luo tili painamalla tästä!
           </Link>
         </View>
       </ImageBackground>

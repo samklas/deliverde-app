@@ -5,6 +5,7 @@ import {
   Button,
   StyleSheet,
   ImageBackground,
+  Pressable,
 } from "react-native";
 
 export default function Register() {
@@ -15,24 +16,31 @@ export default function Register() {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <Text style={styles.title}>Register</Text>
+        <Text style={styles.title}>Luo tili</Text>
+        <Text style={styles.inputLabel}>Sähköposti</Text>
         <TextInput
           placeholder="Email"
           keyboardType="email-address"
           style={styles.input}
         />
+        <Text style={styles.inputLabel}>Käyttäjätunnus</Text>
         <TextInput placeholder="Username" style={styles.input} />
+        <Text style={styles.inputLabel}>Salasana</Text>
         <TextInput
           placeholder="Password"
           secureTextEntry={true}
           style={styles.input}
         />
-        <Button
-          title="Submit"
-          onPress={() => {
-            /* Handle registration */
-          }}
-        />
+        <Pressable
+          style={styles.button}
+          //onPress={handleLogin}
+          //disabled={isLoading}
+        >
+          <Text style={styles.buttonText}>
+            {/* {isLoading ? "Logging in..." : "Kirjaudu sisään"} */}
+            Luo tili
+          </Text>
+        </Pressable>
       </View>
     </ImageBackground>
   );
@@ -69,5 +77,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#0c4c25",
+    marginBottom: 5,
+  },
+  button: {
+    backgroundColor: "#0c4c25",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

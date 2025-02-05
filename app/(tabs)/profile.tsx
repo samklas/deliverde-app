@@ -1,7 +1,6 @@
 import { auth } from "@/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { signOut } from "firebase/auth";
 import { View, Text, StyleSheet, Image, Button } from "react-native";
 
 export default function Tab() {
