@@ -17,17 +17,17 @@ export default function Register() {
     >
       <View style={styles.overlay}>
         <Text style={styles.title}>Luo tili</Text>
-        <Text style={styles.inputLabel}>Sähköposti</Text>
+        {/* <Text style={styles.inputLabel}>Sähköposti</Text> */}
         <TextInput
-          placeholder="Email"
+          placeholder="Sähköposti"
           keyboardType="email-address"
           style={styles.input}
         />
-        <Text style={styles.inputLabel}>Käyttäjätunnus</Text>
-        <TextInput placeholder="Username" style={styles.input} />
-        <Text style={styles.inputLabel}>Salasana</Text>
+        {/* <Text style={styles.inputLabel}>Käyttäjätunnus</Text> */}
+        <TextInput placeholder="Käyttäjätunnus" style={styles.input} />
+        {/* <Text style={styles.inputLabel}>Salasana</Text> */}
         <TextInput
-          placeholder="Password"
+          placeholder="Salasana"
           secureTextEntry={true}
           style={styles.input}
         />

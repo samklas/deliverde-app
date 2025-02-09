@@ -25,21 +25,18 @@ export default function Login() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      const userId = await AsyncStorage.getItem("id");
-
-      if (userId) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
         setIsLoggedIn(true);
         router.push("/(tabs)");
       } else {
-        console.log("ei userId:tä");
-        setIsLoggedIn(false);
+        router.push("/");
       }
-
       setLoading(false);
-    };
+    });
 
-    checkLoginStatus();
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const handleLogin = async () => {

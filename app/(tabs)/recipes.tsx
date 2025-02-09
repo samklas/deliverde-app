@@ -31,6 +31,7 @@ type Recipe = {
 export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
 
   useEffect(() => {
     fetchRecipes();
@@ -85,7 +86,32 @@ export default function Tab() {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <View style={styles.tabButtons}></View>
+        <View style={styles.tabButtons}>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeSection === "all" && styles.activeTab,
+            ]}
+            onPress={() => {
+              setActiveSection("all");
+            }}
+          >
+            <Text style={styles.tabText}>Reseptit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeSection === "favorites" && styles.activeTab,
+            ]}
+            onPress={() => {
+              setActiveSection("favorites");
+            }}
+          >
+            <Text style={styles.tabText}>Omat suosikit</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* <View style={styles.tabButtons}></View> */}
         <ScrollView
           style={styles.recipeList}
           showsVerticalScrollIndicator={false}
