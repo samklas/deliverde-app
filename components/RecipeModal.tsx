@@ -1,29 +1,53 @@
 import { Recipe } from "@/app/(tabs)/recipes";
-import React, { useState } from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  FlatList,
+} from "react-native";
 
 type Props = {
   selectedRecipe: Recipe | null;
   isVisible: boolean;
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function RecipeModal({ selectedRecipe, isVisible }: Props) {
-  const [isModalVisible, setIsModalVisible] = useState(isVisible);
-
+export default function RecipeModal({
+  selectedRecipe,
+  isVisible,
+  setIsVisible,
+}: Props) {
   const closeModal = () => {
-    setIsModalVisible(false);
+    setIsVisible(false);
   };
 
   return (
     <Modal
-      visible={isModalVisible}
+      visible={isVisible}
       animationType="slide"
       onRequestClose={closeModal}
     >
       <View style={styles.modalContainer}>
         {selectedRecipe && (
           <>
+            <ImageBackground
+              source={{ uri: selectedRecipe.imageUrl }}
+              style={styles.modalImage}
+            />
             <Text style={styles.modalTitle}>{selectedRecipe.title}</Text>
+            <Text style={styles.ingredientsTitle}>Ainesosat:</Text>
+            <FlatList
+              data={selectedRecipe.ingredients}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <Text style={styles.ingredientsList}>{item}</Text>
+              )}
+            />
+            <Text style={styles.instructionsTitle}>Ohjeet:</Text>
             <Text>{selectedRecipe.instructions}</Text>
             <TouchableOpacity onPress={closeModal}>
               <Text style={styles.closeButton}>Close</Text>
@@ -50,5 +74,26 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     color: "blue",
+  },
+  modalImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  ingredientsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 12,
+  },
+  ingredientsList: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 12,
+  },
+  instructionsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 12,
   },
 });

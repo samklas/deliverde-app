@@ -126,7 +126,6 @@ export default function Tab() {
           </TouchableOpacity>
         </View>
 
-        {/* <View style={styles.tabButtons}></View> */}
         <ScrollView
           style={styles.recipeList}
           showsVerticalScrollIndicator={false}
@@ -163,34 +162,11 @@ export default function Tab() {
         </ScrollView>
       </View>
 
-      {/* <RecipeModal selectedRecipe={selectedRecipe} isVisible={isModalVisible} /> */}
-
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalContainer}>
-          {selectedRecipe && (
-            <>
-              <ImageBackground
-                source={{ uri: selectedRecipe.imageUrl }}
-                style={styles.modalImage}
-              />
-              <Text style={styles.modalTitle}>{selectedRecipe.title}</Text>
-              <Text style={styles.ingredientsTitle}>Ingredients:</Text>
-              <Text style={styles.ingredientsList}>
-                {selectedRecipe.ingredients.join(", ")}
-              </Text>
-              <Text style={styles.instructionsTitle}>Instructions:</Text>
-              <Text>{selectedRecipe.instructions}</Text>
-              <TouchableOpacity onPress={closeModal}>
-                <Text style={styles.closeButton}>Close</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </Modal>
+      <RecipeModal
+        selectedRecipe={selectedRecipe}
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+      />
     </ImageBackground>
   );
 }
@@ -266,41 +242,5 @@ const styles = StyleSheet.create({
   recipeDetails: {
     fontSize: 14,
     color: "#666",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  closeButton: {
-    marginTop: 20,
-    color: "blue",
-  },
-  modalImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  ingredientsTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 12,
-  },
-  ingredientsList: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
-  },
-  instructionsTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 12,
   },
 });
