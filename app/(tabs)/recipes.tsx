@@ -7,18 +7,21 @@ import {
   ImageBackground,
   Image,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db, storage } from "@/firebaseConfig";
 import { getDownloadURL, ref } from "firebase/storage";
+import React from "react";
+import RecipeModal from "@/components/RecipeModal";
 
 type Details = {
   duration: string;
   difficultyLevel: string;
   portionaAmount: string;
 };
-type Recipe = {
+export type Recipe = {
   id: string;
   created: string;
   imageUrl: string;
@@ -32,6 +35,8 @@ export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     fetchRecipes();
@@ -51,7 +56,7 @@ export default function Tab() {
           imageUrl: await getImageUrl(data.imageUrl),
           title: data.title,
           ingredients: data.ingredients,
-          instructions: data.insructions,
+          instructions: data.instructions,
           details: {
             duration: data.details.duration,
             difficultyLevel: data.details.difficultyLevel,
@@ -77,6 +82,16 @@ export default function Tab() {
 
   const modifyFirstLetterToUpperCase = (value: string) => {
     return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
+  const openModal = (recipe: Recipe) => {
+    setSelectedRecipe(recipe);
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setSelectedRecipe(null);
   };
 
   return (
@@ -120,28 +135,62 @@ export default function Tab() {
             <ActivityIndicator />
           ) : (
             recipes.map((recipe) => (
-              <View key={recipe.id} style={[styles.box, styles.recipeBox]}>
-                <View style={styles.recipeContent}>
-                  <ImageBackground
-                    source={{ uri: recipe.imageUrl }}
-                    style={styles.recipeImage}
-                  />
-                  <Text style={styles.recipeTitle}>
-                    {modifyFirstLetterToUpperCase(recipe.title)}
-                  </Text>
-                  <Text style={styles.recipeDetails}>
-                    {`${
-                      recipe.details.duration
-                    } min • ${modifyFirstLetterToUpperCase(
-                      recipe.details.difficultyLevel
-                    )} • ${recipe.details.portionaAmount} annosta`}
-                  </Text>
+              <TouchableOpacity
+                key={recipe.id}
+                onPress={() => openModal(recipe)}
+              >
+                <View style={[styles.box, styles.recipeBox]}>
+                  <View style={styles.recipeContent}>
+                    <ImageBackground
+                      source={{ uri: recipe.imageUrl }}
+                      style={styles.recipeImage}
+                    />
+                    <Text style={styles.recipeTitle}>
+                      {modifyFirstLetterToUpperCase(recipe.title)}
+                    </Text>
+                    <Text style={styles.recipeDetails}>
+                      {`${
+                        recipe.details.duration
+                      } min • ${modifyFirstLetterToUpperCase(
+                        recipe.details.difficultyLevel
+                      )} • ${recipe.details.portionaAmount} annosta`}
+                    </Text>
+                  </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))
           )}
         </ScrollView>
       </View>
+
+      {/* <RecipeModal selectedRecipe={selectedRecipe} isVisible={isModalVisible} /> */}
+
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalContainer}>
+          {selectedRecipe && (
+            <>
+              <ImageBackground
+                source={{ uri: selectedRecipe.imageUrl }}
+                style={styles.modalImage}
+              />
+              <Text style={styles.modalTitle}>{selectedRecipe.title}</Text>
+              <Text style={styles.ingredientsTitle}>Ingredients:</Text>
+              <Text style={styles.ingredientsList}>
+                {selectedRecipe.ingredients.join(", ")}
+              </Text>
+              <Text style={styles.instructionsTitle}>Instructions:</Text>
+              <Text>{selectedRecipe.instructions}</Text>
+              <TouchableOpacity onPress={closeModal}>
+                <Text style={styles.closeButton}>Close</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -217,5 +266,41 @@ const styles = StyleSheet.create({
   recipeDetails: {
     fontSize: 14,
     color: "#666",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  closeButton: {
+    marginTop: 20,
+    color: "blue",
+  },
+  modalImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  ingredientsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 12,
+  },
+  ingredientsList: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 12,
+  },
+  instructionsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 12,
   },
 });
