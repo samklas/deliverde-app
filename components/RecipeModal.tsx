@@ -8,7 +8,9 @@ import {
   StyleSheet,
   ImageBackground,
   FlatList,
+  ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
   selectedRecipe: Recipe | null;
@@ -31,45 +33,77 @@ export default function RecipeModal({
       animationType="slide"
       onRequestClose={closeModal}
     >
-      <View style={styles.modalContainer}>
-        {selectedRecipe && (
-          <>
-            <ImageBackground
-              source={{ uri: selectedRecipe.imageUrl }}
-              style={styles.modalImage}
-            />
-            <Text style={styles.modalTitle}>{selectedRecipe.title}</Text>
-            <Text style={styles.ingredientsTitle}>Ainesosat:</Text>
-            <FlatList
-              data={selectedRecipe.ingredients}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <Text style={styles.ingredientsList}>{item}</Text>
-              )}
-            />
-            <Text style={styles.instructionsTitle}>Ohjeet:</Text>
-            <Text>{selectedRecipe.instructions}</Text>
-            <TouchableOpacity onPress={closeModal}>
-              <Text style={styles.closeButton}>Close</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
+      <ImageBackground
+        source={require("../assets/images/background.jpeg")}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <View style={styles.modalContainer}>
+            {selectedRecipe && (
+              <>
+                <ImageBackground
+                  source={{ uri: selectedRecipe.imageUrl }}
+                  style={styles.modalImage}
+                >
+                  <TouchableOpacity
+                    onPress={closeModal}
+                    style={styles.closeButtonContainer}
+                  >
+                    <Ionicons name="close" size={35} color="white" />
+                  </TouchableOpacity>
+                </ImageBackground>
+                <Text style={styles.modalTitle}>
+                  {modifyFirstLetterToUpperCase(selectedRecipe.title)}
+                </Text>
+                <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+                  <View style={{ backgroundColor: "#ffffff" }}>
+                    <Text style={styles.ingredientsTitle}>Ainesosat</Text>
+                    <FlatList
+                      style={{ width: "100%", paddingLeft: 20 }}
+                      data={selectedRecipe.ingredients}
+                      keyExtractor={(item, index) => index.toString()}
+                      scrollEnabled={false}
+                      renderItem={({ item }) => (
+                        <Text style={styles.ingredientsList}>{item}</Text>
+                      )}
+                    />
+                  </View>
+                  <View style={{ backgroundColor: "#ffffff" }}>
+                    <Text style={styles.instructionsTitle}>Ohjeet</Text>
+                    <Text
+                      style={{ paddingLeft: 20, fontSize: 16, color: "#666" }}
+                    >
+                      {selectedRecipe.instructions}
+                    </Text>
+                  </View>
+                </ScrollView>
+              </>
+            )}
+          </View>
+        </View>
+      </ImageBackground>
     </Modal>
   );
 }
+
+const modifyFirstLetterToUpperCase = (value: string) => {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
 
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    //padding: 20,
   },
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
+    marginTop: 20,
     marginBottom: 20,
+    color: "#0c4c25",
   },
   closeButton: {
     marginTop: 20,
@@ -77,23 +111,49 @@ const styles = StyleSheet.create({
   },
   modalImage: {
     width: "100%",
-    height: 200,
+    height: 250,
     borderRadius: 8,
     marginBottom: 12,
   },
+  ingredientsContainer: {},
   ingredientsTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 12,
+    marginBottom: 5,
+    paddingLeft: 20,
+    textAlign: "left",
+    width: "100%",
   },
   ingredientsList: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#666",
     marginBottom: 12,
+    textAlign: "left",
   },
   instructionsTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 12,
+    marginBottom: 5,
+    width: "100%",
+    paddingLeft: 20,
+  },
+  scrollViewContainer: {
+    // Add any necessary styles for the scroll view container
+  },
+  closeButtonContainer: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1, // Ensure the button is above other elements
+  },
+  background: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
 });
