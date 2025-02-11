@@ -57,7 +57,7 @@ export default function RecipeModal({
                   {modifyFirstLetterToUpperCase(selectedRecipe.title)}
                 </Text>
                 <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-                  <View style={{ backgroundColor: "#ffffff" }}>
+                  <View style={styles.box}>
                     <Text style={styles.ingredientsTitle}>Ainesosat</Text>
                     <FlatList
                       style={{ width: "100%", paddingLeft: 20 }}
@@ -68,14 +68,21 @@ export default function RecipeModal({
                         <Text style={styles.ingredientsList}>{item}</Text>
                       )}
                     />
-                  </View>
-                  <View style={{ backgroundColor: "#ffffff" }}>
-                    <Text style={styles.instructionsTitle}>Ohjeet</Text>
-                    <Text
-                      style={{ paddingLeft: 20, fontSize: 16, color: "#666" }}
-                    >
-                      {selectedRecipe.instructions}
-                    </Text>
+
+                    <View>
+                      <Text style={styles.instructionsTitle}>Valmistus</Text>
+                      <Text
+                        style={{
+                          paddingLeft: 20,
+                          paddingRight: 20,
+                          fontSize: 16,
+                          color: "#666",
+                          marginBottom: 50,
+                        }}
+                      >
+                        {selectedRecipe.instructions}
+                      </Text>
+                    </View>
                   </View>
                 </ScrollView>
               </>
@@ -155,5 +162,16 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
+  },
+  box: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });
