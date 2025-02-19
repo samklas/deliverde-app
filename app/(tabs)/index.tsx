@@ -4,10 +4,9 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
-  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo/vector-icons
-import { Link } from "expo-router";
+import { theme } from "@/theme";
 
 export default function Tab() {
   return (
@@ -74,51 +73,18 @@ export default function Tab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    maxWidth: "100%",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 18,
-    lineHeight: 24,
-    color: "#333333",
-    textAlign: "center",
-    paddingHorizontal: 10,
-  },
-  divider: {
-    width: 60,
-    height: 4,
-    backgroundColor: "#0c4c25",
-    borderRadius: 2,
-    marginBottom: 20,
+    backgroundColor: theme.colors.background,
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    padding: 16,
-  },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 20,
+    backgroundColor: theme.colors.overlay,
+    padding: theme.spacing.medium,
   },
   box: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -126,28 +92,27 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   combinedBox: {
-    backgroundColor: "white",
-    borderRadius: 16,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
     padding: 20,
-    marginBottom: 16,
+    marginBottom: theme.spacing.medium,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
     borderLeftWidth: 4,
-    borderLeftColor: "#4cd964",
+    borderLeftColor: theme.colors.secondary,
   },
   streakHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: theme.spacing.small,
   },
   streakCount: {
     fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 8,
-    color: "#0c4c25",
+    marginLeft: theme.spacing.small,
+    color: theme.colors.primary,
   },
   streakSubtext: {
     color: "#666",
@@ -157,40 +122,39 @@ const styles = StyleSheet.create({
   goalsDivider: {
     height: 1,
     backgroundColor: "#e0e0e0",
-    marginVertical: 16,
+    marginVertical: theme.spacing.medium,
   },
   boxTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 12,
+    fontSize: theme.fonts.subtitle.fontSize,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.small,
   },
   goalRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: theme.spacing.small,
     paddingLeft: 4,
   },
   goalText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: "#333",
+    marginLeft: theme.spacing.small,
+    fontSize: theme.fonts.regular.fontSize,
+    color: theme.colors.text,
   },
   challengeText: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 12,
+    fontSize: theme.fonts.regular.fontSize,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.small,
   },
   progressBar: {
     height: 8,
     backgroundColor: "#e9ecef",
-    borderRadius: 4,
-    marginBottom: 8,
+    borderRadius: theme.borderRadius.small,
+    marginBottom: theme.spacing.small,
   },
   progress: {
     height: "100%",
-    backgroundColor: "#4cd964",
-    borderRadius: 4,
+    backgroundColor: theme.colors.secondary,
+    borderRadius: theme.borderRadius.small,
   },
   progressText: {
     fontSize: 14,
@@ -203,18 +167,10 @@ const styles = StyleSheet.create({
   recipeContent: {
     alignItems: "center",
   },
-  recipePlaceholder: {
-    width: "100%",
-    height: 160,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    marginBottom: 12,
-  },
   recipeTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
+    fontSize: theme.fonts.subtitle.fontSize,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.small,
   },
   recipeDetails: {
     fontSize: 14,
@@ -223,7 +179,7 @@ const styles = StyleSheet.create({
   recipeImage: {
     width: "100%",
     height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.small,
   },
 });
