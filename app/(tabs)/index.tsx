@@ -50,6 +50,26 @@ export default function Tab() {
             <Text style={styles.progressText}>3/5 suoritettu</Text>
           </View>
 
+          {/* Leaderboard of the Month */}
+          <View style={styles.box}>
+            <Text style={styles.boxTitle}>Kuukauden tulostaulukko</Text>
+            <View style={styles.leaderboardRow}>
+              <Text style={styles.leaderboardPosition}>1.</Text>
+              <Text style={styles.leaderboardName}>Käyttäjä A</Text>
+              <Text style={styles.leaderboardScore}>150 pistettä</Text>
+            </View>
+            <View style={styles.leaderboardRow}>
+              <Text style={styles.leaderboardPosition}>2.</Text>
+              <Text style={styles.leaderboardName}>Käyttäjä B</Text>
+              <Text style={styles.leaderboardScore}>120 pistettä</Text>
+            </View>
+            <View style={styles.leaderboardRow}>
+              <Text style={styles.leaderboardPosition}>3.</Text>
+              <Text style={styles.leaderboardName}>Käyttäjä C</Text>
+              <Text style={styles.leaderboardScore}>100 pistettä</Text>
+            </View>
+          </View>
+
           {/* Recipe of the Month */}
           <View style={[styles.box, styles.recipeBox]}>
             <Text style={styles.boxTitle}>Kuukauden resepti</Text>
@@ -111,6 +131,7 @@ const styles = StyleSheet.create({
   },
   streakCount: {
     fontSize: 20,
+    fontWeight: "bold",
     marginLeft: theme.spacing.small,
     color: theme.colors.primary,
   },
@@ -126,6 +147,7 @@ const styles = StyleSheet.create({
   },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
+    fontWeight: "bold",
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
   },
@@ -181,5 +203,23 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: theme.borderRadius.medium,
     marginBottom: theme.spacing.small,
+  },
+  leaderboardRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.small,
+  },
+  leaderboardPosition: {
+    fontSize: theme.fonts.regular.fontSize,
+    color: theme.colors.primary,
+  },
+  leaderboardName: {
+    fontSize: theme.fonts.regular.fontSize,
+    color: theme.colors.text,
+  },
+  leaderboardScore: {
+    fontSize: theme.fonts.regular.fontSize,
+    color: theme.colors.secondary,
   },
 });
