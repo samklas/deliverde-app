@@ -5,9 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
-  Image,
   ActivityIndicator,
-  Modal,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
@@ -15,6 +13,7 @@ import { db, storage } from "@/firebaseConfig";
 import { getDownloadURL, ref } from "firebase/storage";
 import React from "react";
 import RecipeModal from "@/components/RecipeModal";
+import AddRecipeModal from "@/components/AddRecipeModal";
 
 type Details = {
   duration: string;
@@ -37,6 +36,7 @@ export default function Tab() {
   const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isAddRecipeModalVisible, setIsAddRecipeModalVisible] = useState(false);
 
   useEffect(() => {
     fetchRecipes();
@@ -92,6 +92,14 @@ export default function Tab() {
   const closeModal = () => {
     setIsModalVisible(false);
     setSelectedRecipe(null);
+  };
+
+  const openAddRecipeModal = () => {
+    setIsAddRecipeModalVisible(true);
+  };
+
+  const closeAddRecipeModal = () => {
+    setIsAddRecipeModalVisible(false);
   };
 
   return (
@@ -160,12 +168,21 @@ export default function Tab() {
             ))
           )}
         </ScrollView>
+
+        <TouchableOpacity style={styles.addButton} onPress={openAddRecipeModal}>
+          <Text style={styles.addButtonText}>Lisää resepti</Text>
+        </TouchableOpacity>
       </View>
 
       <RecipeModal
         selectedRecipe={selectedRecipe}
         isVisible={isModalVisible}
         setIsVisible={setIsModalVisible}
+      />
+
+      <AddRecipeModal
+        isVisible={isAddRecipeModalVisible}
+        onClose={closeAddRecipeModal}
       />
     </ImageBackground>
   );
@@ -242,5 +259,21 @@ const styles = StyleSheet.create({
   recipeDetails: {
     fontSize: 14,
     color: "#666",
+  },
+  addButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    backgroundColor: "#4cd964",
+    padding: 15,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5,
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
