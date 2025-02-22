@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
+import ImagePickerExample from "./ImagePicker";
+import { theme } from "@/theme";
 
 type Props = {
   isVisible: boolean;
@@ -40,6 +42,7 @@ const AddRecipeModal = ({ isVisible, onClose }: Props) => {
             value={instructions}
             onChangeText={setInstructions}
           />
+          <ImagePickerExample />
           <Button title="Lisää resepti" onPress={handleAddRecipe} />
           <Button title="Peruuta" onPress={onClose} color="red" />
         </View>
@@ -57,21 +60,27 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
+    padding: theme.spacing.medium,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: theme.fonts.subtitle.fontSize,
     fontWeight: "bold",
-    marginBottom: 10,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.small,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    padding: theme.spacing.small,
+    marginBottom: theme.spacing.large,
+    borderRadius: theme.borderRadius.small,
   },
 });
 
