@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db, storage } from "@/firebaseConfig";
+import { auth, db, storage } from "@/firebaseConfig";
 import { getDownloadURL, ref } from "firebase/storage";
 import React from "react";
 import RecipeModal from "@/components/RecipeModal";
@@ -33,6 +33,7 @@ export type Recipe = {
 export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [userFavoriteRecipes, setUserFavoriteRecipes] = useState<Recipe[]>([]);
   const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -40,8 +41,25 @@ export default function Tab() {
 
   useEffect(() => {
     fetchRecipes();
+    getUserFavouriteRecipes();
   }, []);
 
+  const getUserFavouriteRecipes = async () => {
+    const userId = auth.currentUser?.uid;
+    let ids: string[] = [];
+    try {
+      const favRecipes = await getDocs(
+        collection(db, `users/${userId}/favoriteRecipes`)
+      );
+      for (const doc of favRecipes.docs) {
+        console.log(doc.data());
+        ids.push(doc.data().recipeId);
+      }
+      filterFavoriteRecipes(ids);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const fetchRecipes = async () => {
     setIsLoading(true);
     try {
@@ -66,12 +84,21 @@ export default function Tab() {
 
         recipes.push(recipe);
       }
-
+      //console.log(recipes);
       setRecipes(recipes);
       setIsLoading(false);
     } catch (err) {
       console.error("Virhe reseptejä haettaessa: ", err);
     }
+  };
+
+  const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
+    const filteredRecipes = recipes.filter((recipe) =>
+      favoriteRecipeIds.includes(recipe.id)
+    );
+
+    console.log(filteredRecipes);
+    setUserFavoriteRecipes(filteredRecipes);
   };
 
   const getImageUrl = async (url: string) => {
@@ -141,31 +168,33 @@ export default function Tab() {
           {isLoading ? (
             <ActivityIndicator />
           ) : (
-            recipes.map((recipe) => (
-              <TouchableOpacity
-                key={recipe.id}
-                onPress={() => openModal(recipe)}
-              >
-                <View style={[styles.box, styles.recipeBox]}>
-                  <View style={styles.recipeContent}>
-                    <ImageBackground
-                      source={{ uri: recipe.imageUrl }}
-                      style={styles.recipeImage}
-                    />
-                    <Text style={styles.recipeTitle}>
-                      {modifyFirstLetterToUpperCase(recipe.title)}
-                    </Text>
-                    <Text style={styles.recipeDetails}>
-                      {`${
-                        recipe.details.duration
-                      } min • ${modifyFirstLetterToUpperCase(
-                        recipe.details.difficultyLevel
-                      )} • ${recipe.details.portionaAmount} annosta`}
-                    </Text>
+            (activeSection === "all" ? recipes : userFavoriteRecipes).map(
+              (recipe) => (
+                <TouchableOpacity
+                  key={recipe.id}
+                  onPress={() => openModal(recipe)}
+                >
+                  <View style={[styles.box, styles.recipeBox]}>
+                    <View style={styles.recipeContent}>
+                      <ImageBackground
+                        source={{ uri: recipe.imageUrl }}
+                        style={styles.recipeImage}
+                      />
+                      <Text style={styles.recipeTitle}>
+                        {modifyFirstLetterToUpperCase(recipe.title)}
+                      </Text>
+                      <Text style={styles.recipeDetails}>
+                        {`${
+                          recipe.details.duration
+                        } min • ${modifyFirstLetterToUpperCase(
+                          recipe.details.difficultyLevel
+                        )} • ${recipe.details.portionaAmount} annosta`}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            ))
+                </TouchableOpacity>
+              )
+            )
           )}
         </ScrollView>
 
