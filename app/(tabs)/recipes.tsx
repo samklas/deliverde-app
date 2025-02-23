@@ -8,27 +8,22 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 import { auth, db, storage } from "@/firebaseConfig";
 import { getDownloadURL, ref } from "firebase/storage";
 import React from "react";
 import RecipeModal from "@/components/RecipeModal";
 import AddRecipeModal from "@/components/AddRecipeModal";
-
-type Details = {
-  duration: string;
-  difficultyLevel: string;
-  portionaAmount: string;
-};
-export type Recipe = {
-  id: string;
-  created: string;
-  imageUrl: string;
-  title: string;
-  ingredients: string[];
-  instructions: string;
-  details: Details;
-};
+import Icon from "@expo/vector-icons/Ionicons";
+import { theme } from "@/theme";
+import { Recipe } from "@/types/recipe";
+import RecipeBox from "@/components/RecipeBox";
 
 export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +36,6 @@ export default function Tab() {
 
   useEffect(() => {
     fetchRecipes();
-    getUserFavouriteRecipes();
   }, []);
 
   const getUserFavouriteRecipes = async () => {
@@ -97,7 +91,7 @@ export default function Tab() {
       favoriteRecipeIds.includes(recipe.id)
     );
 
-    console.log(filteredRecipes);
+    console.log("filtered recipes: " + JSON.stringify(filteredRecipes));
     setUserFavoriteRecipes(filteredRecipes);
   };
 
@@ -105,10 +99,6 @@ export default function Tab() {
     const refrence = ref(storage, url);
     const imageUrl = await getDownloadURL(refrence);
     return imageUrl;
-  };
-
-  const modifyFirstLetterToUpperCase = (value: string) => {
-    return value.charAt(0).toUpperCase() + value.slice(1);
   };
 
   const openModal = (recipe: Recipe) => {
@@ -127,6 +117,27 @@ export default function Tab() {
 
   const closeAddRecipeModal = () => {
     setIsAddRecipeModalVisible(false);
+  };
+
+  const toggleFavorite = async (recipeId: string) => {
+    // Implement the logic to toggle favorite status
+    console.log(`Toggling favorite status for recipe: ${recipeId}`);
+    const userId = auth.currentUser?.uid;
+    try {
+      await addDoc(collection(db, `users/${userId}/favoriteRecipes`), {
+        recipeId: recipeId,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const removeFavorite = async (recipeId: string) => {
+    const userId = auth.currentUser?.uid;
+    try {
+      const ref = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
+      await deleteDoc(ref);
+    } catch (error) {}
   };
 
   return (
@@ -155,12 +166,12 @@ export default function Tab() {
             ]}
             onPress={() => {
               setActiveSection("favorites");
+              getUserFavouriteRecipes();
             }}
           >
             <Text style={styles.tabText}>Omat suosikit</Text>
           </TouchableOpacity>
         </View>
-
         <ScrollView
           style={styles.recipeList}
           showsVerticalScrollIndicator={false}
@@ -170,29 +181,13 @@ export default function Tab() {
           ) : (
             (activeSection === "all" ? recipes : userFavoriteRecipes).map(
               (recipe) => (
-                <TouchableOpacity
+                <RecipeBox
                   key={recipe.id}
-                  onPress={() => openModal(recipe)}
-                >
-                  <View style={[styles.box, styles.recipeBox]}>
-                    <View style={styles.recipeContent}>
-                      <ImageBackground
-                        source={{ uri: recipe.imageUrl }}
-                        style={styles.recipeImage}
-                      />
-                      <Text style={styles.recipeTitle}>
-                        {modifyFirstLetterToUpperCase(recipe.title)}
-                      </Text>
-                      <Text style={styles.recipeDetails}>
-                        {`${
-                          recipe.details.duration
-                        } min • ${modifyFirstLetterToUpperCase(
-                          recipe.details.difficultyLevel
-                        )} • ${recipe.details.portionaAmount} annosta`}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                  recipe={recipe}
+                  openModal={openModal}
+                  toggleFavorite={toggleFavorite}
+                  userFavoriteRecipes={userFavoriteRecipes}
+                />
               )
             )
           )}
@@ -284,6 +279,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     marginBottom: 4,
+    flexDirection: "row",
+    flex: 1,
   },
   recipeDetails: {
     fontSize: 14,
@@ -304,5 +301,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  heartButton: {
+    // position: "absolute",
+    // top: 10,
+    // right: 10,
+    // zIndex: 1,
   },
 });
