@@ -29,8 +29,6 @@ export default function RecipeBox({
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
 
-  // const [isFavorited, setIsFavorited] = useState<boolean>(false);
-
   let isFavorite = userFavoriteRecipes.some((fav) => fav.id === recipe.id);
 
   return (

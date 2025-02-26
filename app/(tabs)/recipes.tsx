@@ -35,38 +35,28 @@ export default function Tab() {
   const [isAddRecipeModalVisible, setIsAddRecipeModalVisible] = useState(false);
 
   useEffect(() => {
-    fetchRecipes();
-    getUserFavouriteRecipes();
-  }, []);
-
-  // listening favoriteRecipes collection to have real time data
-  const userId = auth.currentUser?.uid;
-  const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
-  const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-    let ids: string[] = [""];
-    snapshot.docs.forEach((doc) => {
-      ids.push(doc.id);
-    });
-
-    filterFavoriteRecipes(ids);
-  });
-
-  const getUserFavouriteRecipes = async () => {
     const userId = auth.currentUser?.uid;
-    let ids: string[] = [];
-    try {
-      const favRecipes = await getDocs(
-        collection(db, `users/${userId}/favoriteRecipes`)
-      );
+    const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
 
-      for (const doc of favRecipes.docs) {
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      let ids: string[] = [];
+      for (const doc of snapshot.docs) {
         ids.push(doc.id);
       }
+
       filterFavoriteRecipes(ids);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    });
+
+    return () => unsubscribe();
+  }, [recipes]);
+
+  useEffect(() => {
+    const initRecipes = async () => {
+      fetchRecipes();
+    };
+
+    initRecipes();
+  }, []);
 
   const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
     const filteredRecipes = recipes.filter((recipe) =>
