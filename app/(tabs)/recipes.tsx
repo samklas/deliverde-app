@@ -9,18 +9,18 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,
   getDocs,
+  onSnapshot,
+  setDoc,
 } from "firebase/firestore";
 import { auth, db, storage } from "@/firebaseConfig";
 import { getDownloadURL, ref } from "firebase/storage";
 import React from "react";
 import RecipeModal from "@/components/RecipeModal";
 import AddRecipeModal from "@/components/AddRecipeModal";
-import Icon from "@expo/vector-icons/Ionicons";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
 import RecipeBox from "@/components/RecipeBox";
@@ -36,7 +36,20 @@ export default function Tab() {
 
   useEffect(() => {
     fetchRecipes();
+    getUserFavouriteRecipes();
   }, []);
+
+  // listening favoriteRecipes collection to have real time data
+  const userId = auth.currentUser?.uid;
+  const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
+  const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+    let ids: string[] = [""];
+    snapshot.docs.forEach((doc) => {
+      ids.push(doc.id);
+    });
+
+    filterFavoriteRecipes(ids);
+  });
 
   const getUserFavouriteRecipes = async () => {
     const userId = auth.currentUser?.uid;
@@ -45,22 +58,30 @@ export default function Tab() {
       const favRecipes = await getDocs(
         collection(db, `users/${userId}/favoriteRecipes`)
       );
+
       for (const doc of favRecipes.docs) {
-        console.log(doc.data());
-        ids.push(doc.data().recipeId);
+        ids.push(doc.id);
       }
       filterFavoriteRecipes(ids);
     } catch (error) {
       console.error(error);
     }
   };
+
+  const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
+    const filteredRecipes = recipes.filter((recipe) =>
+      favoriteRecipeIds.includes(recipe.id)
+    );
+
+    setUserFavoriteRecipes(filteredRecipes);
+  };
+
   const fetchRecipes = async () => {
     setIsLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, "recipes"));
       let recipes: Recipe[] = [];
       for (const doc of querySnapshot.docs) {
-        // Changed from forEach to for...of
         const data = doc.data();
         const recipe: Recipe = {
           id: doc.id,
@@ -78,21 +99,11 @@ export default function Tab() {
 
         recipes.push(recipe);
       }
-      //console.log(recipes);
       setRecipes(recipes);
       setIsLoading(false);
     } catch (err) {
       console.error("Virhe reseptejä haettaessa: ", err);
     }
-  };
-
-  const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
-    const filteredRecipes = recipes.filter((recipe) =>
-      favoriteRecipeIds.includes(recipe.id)
-    );
-
-    console.log("filtered recipes: " + JSON.stringify(filteredRecipes));
-    setUserFavoriteRecipes(filteredRecipes);
   };
 
   const getImageUrl = async (url: string) => {
@@ -106,11 +117,6 @@ export default function Tab() {
     setIsModalVisible(true);
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
-    setSelectedRecipe(null);
-  };
-
   const openAddRecipeModal = () => {
     setIsAddRecipeModalVisible(true);
   };
@@ -119,25 +125,28 @@ export default function Tab() {
     setIsAddRecipeModalVisible(false);
   };
 
-  const toggleFavorite = async (recipeId: string) => {
-    // Implement the logic to toggle favorite status
-    console.log(`Toggling favorite status for recipe: ${recipeId}`);
+  const addToFavorites = async (recipeId: string) => {
     const userId = auth.currentUser?.uid;
+    const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
+
     try {
-      await addDoc(collection(db, `users/${userId}/favoriteRecipes`), {
-        recipeId: recipeId,
-      });
+      await setDoc(favoriteRef, { addedAt: new Date() }); // Add recipe to favorites
+      console.log("Recipe added to favorites!");
     } catch (error) {
-      console.error(error);
+      console.error("Error adding to favorites: ", error);
     }
   };
 
-  const removeFavorite = async (recipeId: string) => {
+  const removeFromFavorites = async (recipeId: string) => {
     const userId = auth.currentUser?.uid;
+    const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
+
     try {
-      const ref = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
-      await deleteDoc(ref);
-    } catch (error) {}
+      await deleteDoc(favoriteRef); // Remove recipe from favorites
+      console.log("Recipe removed from favorites!");
+    } catch (error) {
+      console.error("Error removing from favorites: ", error);
+    }
   };
 
   return (
@@ -166,7 +175,6 @@ export default function Tab() {
             ]}
             onPress={() => {
               setActiveSection("favorites");
-              getUserFavouriteRecipes();
             }}
           >
             <Text style={styles.tabText}>Omat suosikit</Text>
@@ -185,7 +193,8 @@ export default function Tab() {
                   key={recipe.id}
                   recipe={recipe}
                   openModal={openModal}
-                  toggleFavorite={toggleFavorite}
+                  toggleFavorite={addToFavorites}
+                  removeFavorite={removeFromFavorites}
                   userFavoriteRecipes={userFavoriteRecipes}
                 />
               )

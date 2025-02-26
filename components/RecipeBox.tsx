@@ -8,11 +8,13 @@ import {
 import Icon from "@expo/vector-icons/Ionicons";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
+import { useState } from "react";
 
 type Props = {
   recipe: Recipe;
   openModal: (recipe: Recipe) => void;
   toggleFavorite: (recipeId: string) => void;
+  removeFavorite: (recipeId: string) => void;
   userFavoriteRecipes: Recipe[];
 };
 
@@ -20,11 +22,16 @@ export default function RecipeBox({
   recipe,
   openModal,
   toggleFavorite,
+  removeFavorite,
   userFavoriteRecipes,
 }: Props) {
   const modifyFirstLetterToUpperCase = (value: string) => {
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
+
+  // const [isFavorited, setIsFavorited] = useState<boolean>(false);
+
+  let isFavorite = userFavoriteRecipes.some((fav) => fav.id === recipe.id);
 
   return (
     <TouchableOpacity key={recipe.id} onPress={() => openModal(recipe)}>
@@ -37,25 +44,33 @@ export default function RecipeBox({
           <Text style={styles.recipeTitle}>
             {modifyFirstLetterToUpperCase(recipe.title)}
           </Text>
-          <TouchableOpacity
-            style={styles.heartButton}
-            onPress={() => toggleFavorite(recipe.id)}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Icon
-              name={
-                userFavoriteRecipes.some((fav) => fav.id === recipe.id)
-                  ? "heart"
-                  : "heart-outline"
-              }
-              size={30}
-              color={theme.colors.secondary}
-            />
-          </TouchableOpacity>
-          <Text style={styles.recipeDetails}>
-            {`${recipe.details.duration} min • ${modifyFirstLetterToUpperCase(
-              recipe.details.difficultyLevel
-            )} • ${recipe.details.portionaAmount} annosta`}
-          </Text>
+            <Text style={styles.recipeDetails}>
+              {`${recipe.details.duration} min • ${modifyFirstLetterToUpperCase(
+                recipe.details.difficultyLevel
+              )} • ${recipe.details.portionaAmount} annosta`}
+            </Text>
+            <TouchableOpacity
+              style={styles.heartButton}
+              onPress={() => {
+                isFavorite
+                  ? removeFavorite(recipe.id)
+                  : toggleFavorite(recipe.id);
+              }}
+            >
+              <Icon
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={30}
+                color={theme.colors.secondary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -93,8 +108,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     marginBottom: 4,
-    flexDirection: "row",
-    flex: 1,
   },
   recipeDetails: {
     fontSize: 14,
@@ -117,9 +130,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   heartButton: {
-    // position: "absolute",
-    // top: 10,
-    // right: 10,
-    // zIndex: 1,
+    marginLeft: 30,
   },
 });
