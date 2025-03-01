@@ -15,6 +15,7 @@ import { data } from "@/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetableModal from "@/components/AddVegetableModal";
 import { Vegetable } from "@/types/vegetable";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Tab() {
   const [dailyGoal, setDailyGoal] = useState(800);
@@ -46,6 +47,7 @@ export default function Tab() {
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
   const [vegetable, setVegetable] = useState<Vegetable>();
+  const [total, setTotal] = useState(0);
 
   const vegetables2 = data;
 
@@ -96,21 +98,24 @@ export default function Tab() {
         tension: 40,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      // Fade out after 2 seconds
-      setTimeout(() => {
-        Animated.timing(celebrationOpacity, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
-      }, 2000);
-    });
+    ]).start();
+  };
+
+  const closeCelebration = () => {
+    Animated.timing(celebrationOpacity, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   };
 
   //const totalServings = vegetables.reduce((sum, veg) => sum + veg.servings, 0);
-  const totalServings = 0;
-  const progress = Math.min((totalServings / dailyGoal) * 100, 100); // Cap at 100%
+  // const totalServings = 0;
+  const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
+
+  if (progress === 100) {
+    triggerCelebration();
+  }
 
   const filteredVegetables = vegetables.filter((veg) =>
     veg.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -134,7 +139,7 @@ export default function Tab() {
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { width: `${progress}%` }]} />
             <Text style={styles.progressText}>
-              {totalServings} / {dailyGoal}g
+              {total} / {dailyGoal}g
             </Text>
           </View>
         </View>
@@ -142,14 +147,21 @@ export default function Tab() {
         {/* Celebration Animation */}
         <Animated.View
           style={[
-            styles.celebration,
+            styles.fullScreenCelebration,
             {
               opacity: celebrationOpacity,
               transform: [{ scale: celebrationScale }],
             },
           ]}
         >
+          <Ionicons name="leaf" size={64} color="#1a472a" />
           <Text style={styles.celebrationText}>🎉 Hienoa työtä! 🎉</Text>
+          <TouchableOpacity
+            onPress={closeCelebration}
+            style={styles.closeButton}
+          >
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </Animated.View>
 
         {/* Add search input */}
@@ -181,6 +193,7 @@ export default function Tab() {
           isVisible={isVisible}
           vegetable={vegetable}
           onClose={closeModal}
+          setTotal={setTotal}
         />
 
         {/* Last used */}
@@ -294,13 +307,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     zIndex: 1,
   },
-  celebration: {
+  fullScreenCelebration: {
     position: "absolute",
-    top: "40%",
+    top: 0,
     left: 0,
     right: 0,
+    bottom: 0,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     zIndex: 10,
   },
   celebrationText: {
@@ -320,6 +335,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 5,
+    marginTop: 20,
   },
   searchContainer: {
     marginVertical: 16,
@@ -339,5 +355,16 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 2,
     color: "#2d3436",
+  },
+  closeButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#ff6b6b",
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

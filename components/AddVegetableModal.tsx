@@ -1,22 +1,40 @@
 import React, { useState } from "react";
-import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
-import ImagePickerExample from "./ImagePicker";
+import { Modal, View, Text, Button, StyleSheet } from "react-native";
 import { theme } from "@/theme";
 import { Vegetable } from "@/types/vegetable";
+import { Picker } from "@react-native-picker/picker";
 
 type Props = {
   isVisible: boolean;
   vegetable: Vegetable | undefined;
+
   onClose: () => void;
+  setTotal: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const AddVegetableModal = ({ isVisible, vegetable, onClose }: Props) => {
-  const [title, setTitle] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [instructions, setInstructions] = useState("");
+const AddVegetableModal = ({
+  isVisible,
+  vegetable,
+  onClose,
+  setTotal,
+}: Props) => {
+  const [selectedInteger, setSelectedInteger] = useState("0");
+  const [selectedDecimal, setSelectedDecimal] = useState("0");
 
   const handleAddRecipe = () => {
+    setTotal((total) => total + calculateTotalGrams());
     onClose();
+  };
+
+  const calculateTotalGrams = () => {
+    if (vegetable) {
+      const integerGrams = vegetable.averageWeight * parseInt(selectedInteger);
+      const decimalGrams =
+        vegetable.averageWeight * parseFloat(selectedDecimal);
+      return integerGrams + decimalGrams;
+    }
+
+    return 0;
   };
 
   return (
@@ -24,7 +42,48 @@ const AddVegetableModal = ({ isVisible, vegetable, onClose }: Props) => {
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>{vegetable?.name}</Text>
-          <Button title="Lisää resepti" onPress={handleAddRecipe} />
+          <Text style={{ margin: "auto", marginTop: 30, fontSize: 20 }}>
+            {calculateTotalGrams()}g
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Picker
+              selectedValue={selectedInteger}
+              onValueChange={(value, index) => setSelectedInteger(value)}
+              style={{ flex: 1 }}
+              itemStyle={{ fontSize: 20 }}
+            >
+              <Picker.Item label="0" value="0" />
+              <Picker.Item label="1" value="1" />
+              <Picker.Item label="2" value="2" />
+              <Picker.Item label="3" value="3" />
+              <Picker.Item label="4" value="4" />
+              <Picker.Item label="5" value="5" />
+              <Picker.Item label="6" value="6" />
+              <Picker.Item label="7" value="7" />
+              <Picker.Item label="8" value="8" />
+              <Picker.Item label="9" value="9" />
+            </Picker>
+            <Picker
+              selectedValue={selectedDecimal}
+              onValueChange={(value, index) => setSelectedDecimal(value)}
+              style={{ flex: 1 }}
+            >
+              <Picker.Item label="-" value="0.0" />
+              <Picker.Item label="1/2" value="0.5" />
+              <Picker.Item label="1/4" value="0.25" />
+              <Picker.Item label="1/8" value="0.125" />
+              <Picker.Item label="1/16" value="0.0625" />
+            </Picker>
+            <Text style={{ marginLeft: 20, fontSize: 20 }}>kpl</Text>
+          </View>
+
+          <Button title="Lisää" onPress={handleAddRecipe} />
           <Button title="Peruuta" onPress={onClose} color="red" />
         </View>
       </View>
@@ -51,10 +110,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   modalTitle: {
-    fontSize: theme.fonts.subtitle.fontSize,
+    fontSize: 24,
     fontWeight: "bold",
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
+    marginTop: 50,
+    margin: "auto",
   },
   input: {
     borderWidth: 1,
