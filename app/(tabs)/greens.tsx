@@ -9,42 +9,76 @@ import {
   TextInput,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
-
-type VegetableEntry = {
-  name: string;
-  servings: number;
-};
+import { db } from "@/firebaseConfig";
+import { collection, doc, setDoc, addDoc, getDocs } from "firebase/firestore";
+import { data } from "@/data";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AddVegetableModal from "@/components/AddVegetableModal";
+import { Vegetable } from "@/types/vegetable";
 
 export default function Tab() {
-  const [dailyGoal, setDailyGoal] = useState(5);
-  const [vegetables, setVegetables] = useState<VegetableEntry[]>([
-    { name: "Salaatti", servings: 0 },
-    { name: "Tomaatti", servings: 0 },
-    { name: "Kesäkurpitsa", servings: 0 },
-    { name: "Kurkku", servings: 0 },
-    { name: "Pinaatti", servings: 0 },
-    { name: "Parsakaali", servings: 0 },
-    { name: "Porkkana", servings: 0 },
-    { name: "Lehtikaali", servings: 0 },
-    { name: "Paprika", servings: 0 },
-    { name: "Vihreät pavut", servings: 0 },
+  const [dailyGoal, setDailyGoal] = useState(800);
+  const [vegetables, setVegetables] = useState<Vegetable[]>([]);
+  const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([
+    {
+      id: "1",
+      name: "Tomaatti",
+      averageWeight: 150,
+    },
+    {
+      id: "2",
+      name: "Kurkku",
+      averageWeight: 300,
+    },
+    {
+      id: "3",
+      name: "Salaatti",
+      averageWeight: 100,
+    },
+    {
+      id: "4",
+      name: "Porkkana",
+      averageWeight: 150,
+    },
   ]);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [isVisible, setIsVisible] = useState(false);
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
+  const [vegetable, setVegetable] = useState<Vegetable>();
 
-  const addServing = (index: number) => {
-    const newVegetables = [...vegetables];
-    newVegetables[index].servings += 1;
-    setVegetables(newVegetables);
+  const vegetables2 = data;
 
-    // Check if we just hit the goal
-    const newTotal = newVegetables.reduce((sum, veg) => sum + veg.servings, 0);
-    if (newTotal === dailyGoal) {
-      triggerCelebration();
-    }
-  };
+  useEffect(() => {
+    const fetchVegetables = async () => {
+      const cachedVegetables = await AsyncStorage.getItem("vegetables");
+      if (cachedVegetables !== null) {
+        console.log("data haettu cachesta");
+        const veggies: Vegetable[] = JSON.parse(cachedVegetables);
+        setVegetables(veggies);
+      } else {
+        try {
+          const querySnapshot = await getDocs(collection(db, "vegetables"));
+          const fetchedVegetables = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          // Save fetched vegetables to AsyncStorage
+          await AsyncStorage.setItem(
+            "vegetables",
+            JSON.stringify(fetchedVegetables)
+          );
+
+          //setVegetables(fetchedVegetables);
+        } catch (error) {
+          console.error("Error fetching vegetables: ", error);
+        }
+      }
+    };
+
+    fetchVegetables();
+  }, []);
 
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
@@ -74,12 +108,17 @@ export default function Tab() {
     });
   };
 
-  const totalServings = vegetables.reduce((sum, veg) => sum + veg.servings, 0);
+  //const totalServings = vegetables.reduce((sum, veg) => sum + veg.servings, 0);
+  const totalServings = 0;
   const progress = Math.min((totalServings / dailyGoal) * 100, 100); // Cap at 100%
 
   const filteredVegetables = vegetables.filter((veg) =>
     veg.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const closeModal = () => {
+    setIsVisible(false);
+  };
 
   return (
     <ImageBackground
@@ -95,7 +134,7 @@ export default function Tab() {
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { width: `${progress}%` }]} />
             <Text style={styles.progressText}>
-              {totalServings} / {dailyGoal} annosta
+              {totalServings} / {dailyGoal}g
             </Text>
           </View>
         </View>
@@ -124,15 +163,40 @@ export default function Tab() {
           />
         </View>
 
+        {searchQuery.length > 0 && (
+          <ScrollView style={styles.scrollView}>
+            {filteredVegetables.map((veg, index) => (
+              <TouchableOpacity
+                key={veg.id}
+                style={styles.vegItem}
+                onPress={() => setIsVisible(true)}
+              >
+                <Text style={styles.vegName}>{veg.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+
+        <AddVegetableModal
+          isVisible={isVisible}
+          vegetable={vegetable}
+          onClose={closeModal}
+        />
+
+        {/* Last used */}
+
+        <Text>Viimeksi käytetyt</Text>
         <ScrollView style={styles.scrollView}>
-          {filteredVegetables.map((veg, index) => (
+          {lastUsedVegetables.map((veg, index) => (
             <TouchableOpacity
-              key={veg.name}
+              key={veg.id}
               style={styles.vegItem}
-              onPress={() => addServing(vegetables.indexOf(veg))}
+              onPress={() => {
+                setVegetable(veg);
+                setIsVisible(true);
+              }}
             >
               <Text style={styles.vegName}>{veg.name}</Text>
-              <Text style={styles.servings}>{veg.servings} annosta</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
