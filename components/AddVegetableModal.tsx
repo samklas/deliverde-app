@@ -56,7 +56,7 @@ const AddVegetableModal = ({
               selectedValue={selectedInteger}
               onValueChange={(value, index) => setSelectedInteger(value)}
               style={{ flex: 1 }}
-              itemStyle={{ fontSize: 20 }}
+              itemStyle={{ fontSize: 20, color: "#000" }}
             >
               <Picker.Item label="0" value="0" />
               <Picker.Item label="1" value="1" />
@@ -73,6 +73,7 @@ const AddVegetableModal = ({
               selectedValue={selectedDecimal}
               onValueChange={(value, index) => setSelectedDecimal(value)}
               style={{ flex: 1 }}
+              itemStyle={{ fontSize: 20, color: "#000" }}
             >
               <Picker.Item label="-" value="0.0" />
               <Picker.Item label="1/2" value="0.5" />
