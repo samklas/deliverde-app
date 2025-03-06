@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetableModal from "@/components/AddVegetableModal";
 import { Vegetable } from "@/types/vegetable";
 import { Ionicons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
 
 export default function Tab() {
   const [dailyGoal, setDailyGoal] = useState(800);
@@ -48,8 +49,8 @@ export default function Tab() {
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
   const [vegetable, setVegetable] = useState<Vegetable>();
   const [total, setTotal] = useState(0);
-
-  const vegetables2 = data;
+  const [sound, setSound] = useState<Audio.Sound>();
+  const [hasCelebrated, setHasCelebrated] = useState(false);
 
   useEffect(() => {
     const fetchVegetables = async () => {
@@ -86,6 +87,8 @@ export default function Tab() {
     celebrationOpacity.setValue(0);
     celebrationScale.setValue(0.3);
 
+    playSound();
+
     Animated.parallel([
       Animated.timing(celebrationOpacity, {
         toValue: 1,
@@ -109,13 +112,14 @@ export default function Tab() {
     }).start();
   };
 
-  //const totalServings = vegetables.reduce((sum, veg) => sum + veg.servings, 0);
-  // const totalServings = 0;
   const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
 
-  if (progress === 100) {
-    triggerCelebration();
-  }
+  useEffect(() => {
+    if (progress >= 100 && !hasCelebrated) {
+      triggerCelebration();
+      setHasCelebrated(true);
+    }
+  }, [progress, hasCelebrated]);
 
   const filteredVegetables = vegetables.filter((veg) =>
     veg.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -124,6 +128,16 @@ export default function Tab() {
   const closeModal = () => {
     setIsVisible(false);
   };
+
+  async function playSound() {
+    const { sound } = await Audio.Sound.createAsync(
+      require("../../assets/sounds/Hello.mp3")
+    );
+    if (sound) setSound(sound);
+
+    console.log("Playing Sound");
+    await sound.playAsync();
+  }
 
   return (
     <ImageBackground
@@ -139,7 +153,7 @@ export default function Tab() {
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { width: `${progress}%` }]} />
             <Text style={styles.progressText}>
-              {total} / {dailyGoal}g
+              {total}g / {dailyGoal}g
             </Text>
           </View>
         </View>
