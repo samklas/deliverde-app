@@ -220,23 +220,21 @@ export default function Tab() {
           lastUsed={lastUsedVegetables}
         />
 
-        <View style={{ marginTop: theme.spacing.large }}>
-          <Text>Viimeksi käytetyt</Text>
-          <ScrollView style={styles.scrollView}>
-            {lastUsedVegetables.map((veg, index) => (
-              <TouchableOpacity
-                key={veg.id}
-                style={styles.vegItem}
-                onPress={() => {
-                  setVegetable(veg);
-                  setIsVisible(true);
-                }}
-              >
-                <Text style={styles.vegName}>{veg.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        <Text>Viimeksi käytetyt</Text>
+        <ScrollView style={styles.scrollView}>
+          {lastUsedVegetables.map((veg, index) => (
+            <TouchableOpacity
+              key={veg.id}
+              style={styles.vegItem}
+              onPress={() => {
+                setVegetable(veg);
+                setIsVisible(true);
+              }}
+            >
+              <Text style={styles.vegName}>{veg.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
     </ImageBackground>
   );
