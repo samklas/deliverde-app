@@ -11,38 +11,17 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, doc, setDoc, addDoc, getDocs } from "firebase/firestore";
-import { data } from "@/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetableModal from "@/components/AddVegetableModal";
 import { Vegetable } from "@/types/vegetable";
-import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import { Image } from "expo-image";
+import { theme } from "@/theme";
 
 export default function Tab() {
   const [dailyGoal, setDailyGoal] = useState(800);
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
-  const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([
-    {
-      id: "1",
-      name: "Tomaatti",
-      averageWeight: 150,
-    },
-    {
-      id: "2",
-      name: "Kurkku",
-      averageWeight: 300,
-    },
-    {
-      id: "3",
-      name: "Salaatti",
-      averageWeight: 100,
-    },
-    {
-      id: "4",
-      name: "Porkkana",
-      averageWeight: 150,
-    },
-  ]);
+  const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(false);
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
@@ -127,6 +106,7 @@ export default function Tab() {
 
   const closeModal = () => {
     setIsVisible(false);
+    setSearchQuery("");
   };
 
   async function playSound() {
@@ -168,13 +148,18 @@ export default function Tab() {
             },
           ]}
         >
-          <Ionicons name="leaf" size={64} color="#1a472a" />
-          <Text style={styles.celebrationText}>🎉 Hienoa työtä! 🎉</Text>
+          <Image
+            style={{ height: 200, width: 200 }}
+            source={require("../../assets/images/celebration.png")}
+          />
+          <Text style={styles.celebrationText}>
+            Mahtavaa työtä - saavutit päivän tavoitteen!
+          </Text>
           <TouchableOpacity
             onPress={closeCelebration}
             style={styles.closeButton}
           >
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text style={styles.closeButtonText}>Sulje</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -195,7 +180,10 @@ export default function Tab() {
               <TouchableOpacity
                 key={veg.id}
                 style={styles.vegItem}
-                onPress={() => setIsVisible(true)}
+                onPress={() => {
+                  setVegetable(veg);
+                  setIsVisible(true);
+                }}
               >
                 <Text style={styles.vegName}>{veg.name}</Text>
               </TouchableOpacity>
@@ -208,9 +196,8 @@ export default function Tab() {
           vegetable={vegetable}
           onClose={closeModal}
           setTotal={setTotal}
+          setLastUsed={setLastUsedVegetables}
         />
-
-        {/* Last used */}
 
         <Text>Viimeksi käytetyt</Text>
         <ScrollView style={styles.scrollView}>
@@ -329,7 +316,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     zIndex: 10,
   },
   celebrationText: {
@@ -346,6 +333,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
+    textAlign: "center",
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 5,
@@ -371,9 +359,9 @@ const styles = StyleSheet.create({
     color: "#2d3436",
   },
   closeButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "#ff6b6b",
+    marginTop: 40,
+    padding: 15,
+    backgroundColor: theme.colors.secondary,
     borderRadius: 8,
   },
   closeButtonText: {
