@@ -30,6 +30,7 @@ export default function Tab() {
   const [total, setTotal] = useState(0);
   const [sound, setSound] = useState<Audio.Sound>();
   const [hasCelebrated, setHasCelebrated] = useState(false);
+  const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
 
   useEffect(() => {
     const fetchVegetables = async () => {
@@ -59,8 +60,36 @@ export default function Tab() {
       }
     };
 
+    const getLastUsedVegetables = async () => {
+      const lastUsedVegetables = await AsyncStorage.getItem(
+        "lastUsedVegetables"
+      );
+      if (lastUsedVegetables) {
+        setLastUsedVegetables(JSON.parse(lastUsedVegetables) as Vegetable[]);
+      }
+    };
+
     fetchVegetables();
+    getLastUsedVegetables();
   }, []);
+
+  useEffect(() => {
+    if (progress >= 100 && !hasCelebrated) {
+      triggerCelebration();
+      setHasCelebrated(true);
+    }
+  }, [progress, hasCelebrated]);
+
+  useEffect(() => {
+    const setLastUsedVegetables = async () => {
+      await AsyncStorage.setItem(
+        "lastUsedVegetables",
+        JSON.stringify(lastUsedVegetables)
+      );
+    };
+
+    setLastUsedVegetables();
+  }, [lastUsedVegetables]);
 
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
@@ -91,15 +120,6 @@ export default function Tab() {
     }).start();
   };
 
-  const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
-
-  useEffect(() => {
-    if (progress >= 100 && !hasCelebrated) {
-      triggerCelebration();
-      setHasCelebrated(true);
-    }
-  }, [progress, hasCelebrated]);
-
   const filteredVegetables = vegetables.filter((veg) =>
     veg.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -109,7 +129,7 @@ export default function Tab() {
     setSearchQuery("");
   };
 
-  async function playSound() {
+  const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
       require("../../assets/sounds/Hello.mp3")
     );
@@ -117,7 +137,7 @@ export default function Tab() {
 
     console.log("Playing Sound");
     await sound.playAsync();
-  }
+  };
 
   return (
     <ImageBackground
@@ -197,23 +217,26 @@ export default function Tab() {
           onClose={closeModal}
           setTotal={setTotal}
           setLastUsed={setLastUsedVegetables}
+          lastUsed={lastUsedVegetables}
         />
 
-        <Text>Viimeksi käytetyt</Text>
-        <ScrollView style={styles.scrollView}>
-          {lastUsedVegetables.map((veg, index) => (
-            <TouchableOpacity
-              key={veg.id}
-              style={styles.vegItem}
-              onPress={() => {
-                setVegetable(veg);
-                setIsVisible(true);
-              }}
-            >
-              <Text style={styles.vegName}>{veg.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={{ marginTop: theme.spacing.large }}>
+          <Text>Viimeksi käytetyt</Text>
+          <ScrollView style={styles.scrollView}>
+            {lastUsedVegetables.map((veg, index) => (
+              <TouchableOpacity
+                key={veg.id}
+                style={styles.vegItem}
+                onPress={() => {
+                  setVegetable(veg);
+                  setIsVisible(true);
+                }}
+              >
+                <Text style={styles.vegName}>{veg.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
     </ImageBackground>
   );

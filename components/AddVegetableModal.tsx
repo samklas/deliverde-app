@@ -10,6 +10,7 @@ type Props = {
   onClose: () => void;
   setTotal: React.Dispatch<React.SetStateAction<number>>;
   setLastUsed: React.Dispatch<React.SetStateAction<Vegetable[]>>;
+  lastUsed: Vegetable[];
 };
 
 const AddVegetableModal = ({
@@ -18,17 +19,23 @@ const AddVegetableModal = ({
   onClose,
   setTotal,
   setLastUsed,
+  lastUsed,
 }: Props) => {
   const [selectedInteger, setSelectedInteger] = useState("0");
   const [selectedDecimal, setSelectedDecimal] = useState("0");
 
-  const handleAddRecipe = () => {
+  const handleAddVegetable = async () => {
     setTotal((total) => total + calculateTotalGrams());
+
     if (vegetable) {
       setLastUsed((lastUsed) => {
         const exists = lastUsed.find((item) => item.id === vegetable.id);
-        if (!exists) return [vegetable, ...lastUsed];
-
+        if (!exists) {
+          if (lastUsed.length >= 5) {
+            lastUsed.pop();
+          }
+          return [vegetable, ...lastUsed];
+        }
         return lastUsed;
       });
     }
@@ -95,7 +102,7 @@ const AddVegetableModal = ({
             <Text style={{ marginLeft: 20, fontSize: 20 }}>kpl</Text>
           </View>
 
-          <Button title="Lisää" onPress={handleAddRecipe} />
+          <Button title="Lisää" onPress={handleAddVegetable} />
           <Button title="Peruuta" onPress={onClose} color="red" />
         </View>
       </View>
