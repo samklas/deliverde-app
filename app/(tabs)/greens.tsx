@@ -18,6 +18,7 @@ import { Vegetable } from "@/types/vegetable";
 import { Audio } from "expo-av";
 import { Image } from "expo-image";
 import { theme } from "@/theme";
+import CircularProgress from "@/components/CircularProgress";
 
 export default function Tab() {
   const [dailyGoal, setDailyGoal] = useState(800);
@@ -148,13 +149,33 @@ export default function Tab() {
         {/* Today box */}
         <View style={styles.todayBox}>
           <Text style={styles.title}>Tänään</Text>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              margin: 30,
+            }}
+          >
+            <CircularProgress
+              size={150}
+              strokeWidth={10}
+              progress={progress} // Progress in percentage
+              backgroundColor="#e0e0e0"
+              progressColor="#4caf50"
+            />
+          </View>
+          <Text style={styles.progressText}>
+            {total}g / {dailyGoal}g
+          </Text>
+
           {/* Progress meter */}
-          <View style={styles.progressContainer}>
+          {/* <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { width: `${progress}%` }]} />
             <Text style={styles.progressText}>
               {total}g / {dailyGoal}g
             </Text>
-          </View>
+          </View> */}
         </View>
 
         {/* Celebration Animation */}
@@ -263,7 +284,7 @@ const styles = StyleSheet.create({
   },
   todayBox: {
     backgroundColor: "white",
-    padding: 20,
+    padding: 40,
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: "#000",
@@ -274,6 +295,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
+    flex: 1,
+    flexDirection: "column",
   },
   title: {
     fontSize: 28,
@@ -331,7 +354,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   progressText: {
-    position: "absolute",
+    // position: "absolute",
     width: "100%",
     textAlign: "center",
     lineHeight: 40,
