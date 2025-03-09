@@ -7,6 +7,7 @@ import {
   Animated,
   ImageBackground,
   TextInput,
+  Modal,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
@@ -31,6 +32,7 @@ export default function Tab() {
   const [sound, setSound] = useState<Audio.Sound>();
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
+  const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
 
   useEffect(() => {
     const fetchVegetables = async () => {
@@ -77,6 +79,7 @@ export default function Tab() {
     if (progress >= 100 && !hasCelebrated) {
       triggerCelebration();
       setHasCelebrated(true);
+      setIsCelebrationVisible(true);
     }
   }, [progress, hasCelebrated]);
 
@@ -113,11 +116,7 @@ export default function Tab() {
   };
 
   const closeCelebration = () => {
-    Animated.timing(celebrationOpacity, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
+    setIsCelebrationVisible(false);
   };
 
   const filteredVegetables = vegetables.filter((veg) =>
@@ -159,29 +158,41 @@ export default function Tab() {
         </View>
 
         {/* Celebration Animation */}
-        <Animated.View
-          style={[
-            styles.fullScreenCelebration,
-            {
-              opacity: celebrationOpacity,
-              transform: [{ scale: celebrationScale }],
-            },
-          ]}
+        <Modal
+          visible={isCelebrationVisible}
+          transparent={true}
+          animationType="fade"
         >
-          <Image
-            style={{ height: 200, width: 200 }}
-            source={require("../../assets/images/celebration.png")}
-          />
-          <Text style={styles.celebrationText}>
-            Mahtavaa työtä - saavutit päivän tavoitteen!
-          </Text>
-          <TouchableOpacity
-            onPress={closeCelebration}
-            style={styles.closeButton}
-          >
-            <Text style={styles.closeButtonText}>Sulje</Text>
-          </TouchableOpacity>
-        </Animated.View>
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.celebrationContainer,
+                {
+                  opacity: celebrationOpacity,
+                  transform: [{ scale: celebrationScale }],
+                },
+              ]}
+            >
+              {/* <TouchableOpacity
+                onPress={closeCelebration}
+                style={styles.closeIconButton}
+              >
+                <Text style={styles.closeIconText}>✕</Text>
+              </TouchableOpacity> */}
+              <Image
+                style={{ height: 200, width: 200 }}
+                source={require("../../assets/images/Sipuli.png")}
+              />
+              <Text style={styles.celebrationText}>Upeaa työtä!</Text>
+              <TouchableOpacity
+                onPress={closeCelebration}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>Jatka</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </Modal>
 
         {/* Add search input */}
         <View style={styles.searchContainer}>
@@ -329,16 +340,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     zIndex: 1,
   },
-  fullScreenCelebration: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  celebrationContainer: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 1)",
-    zIndex: 10,
+    padding: 20,
   },
   celebrationText: {
     fontSize: 22,
@@ -389,5 +400,17 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  closeIconButton: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    padding: 16,
+    zIndex: 1,
+  },
+  closeIconText: {
+    fontSize: 24,
+    color: "#666",
+    fontWeight: "500",
   },
 });
