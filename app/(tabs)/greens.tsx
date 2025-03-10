@@ -19,6 +19,7 @@ import { Audio } from "expo-av";
 import { Image } from "expo-image";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
+import CelebrationModal from "@/components/CelebrationModal";
 
 export default function Tab() {
   const [dailyGoal, setDailyGoal] = useState(800);
@@ -151,16 +152,13 @@ export default function Tab() {
           <Text style={styles.title}>Tänään</Text>
           <View
             style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              margin: 30,
+              margin: "auto",
             }}
           >
             <CircularProgress
               size={150}
               strokeWidth={10}
-              progress={progress} // Progress in percentage
+              progress={progress}
               backgroundColor="#e0e0e0"
               progressColor="#4caf50"
             />
@@ -168,52 +166,14 @@ export default function Tab() {
           <Text style={styles.progressText}>
             {total}g / {dailyGoal}g
           </Text>
-
-          {/* Progress meter */}
-          {/* <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { width: `${progress}%` }]} />
-            <Text style={styles.progressText}>
-              {total}g / {dailyGoal}g
-            </Text>
-          </View> */}
         </View>
-
         {/* Celebration Animation */}
-        <Modal
-          visible={isCelebrationVisible}
-          transparent={true}
-          animationType="fade"
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.celebrationContainer,
-                {
-                  opacity: celebrationOpacity,
-                  transform: [{ scale: celebrationScale }],
-                },
-              ]}
-            >
-              {/* <TouchableOpacity
-                onPress={closeCelebration}
-                style={styles.closeIconButton}
-              >
-                <Text style={styles.closeIconText}>✕</Text>
-              </TouchableOpacity> */}
-              <Image
-                style={{ height: 200, width: 200 }}
-                source={require("../../assets/images/Sipuli.png")}
-              />
-              <Text style={styles.celebrationText}>Upeaa työtä!</Text>
-              <TouchableOpacity
-                onPress={closeCelebration}
-                style={styles.closeButton}
-              >
-                <Text style={styles.closeButtonText}>Jatka</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Modal>
+        <CelebrationModal
+          isCelebrationVisible={isCelebrationVisible}
+          celebrationOpacity={celebrationOpacity}
+          celebrationScale={celebrationScale}
+          closeCelebration={closeCelebration}
+        />
 
         {/* Add search input */}
         <View style={styles.searchContainer}>
@@ -297,6 +257,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     flex: 1,
     flexDirection: "column",
+    height: 400,
   },
   title: {
     fontSize: 28,
