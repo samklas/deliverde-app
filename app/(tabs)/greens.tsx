@@ -73,8 +73,16 @@ export default function Tab() {
       }
     };
 
+    const getDailyTotal = async () => {
+      const dailyTotal = await AsyncStorage.getItem("dailyTotal");
+      if (dailyTotal !== null) {
+        setTotal(Number(dailyTotal));
+      }
+    };
+
     fetchVegetables();
     getLastUsedVegetables();
+    getDailyTotal();
   }, []);
 
   useEffect(() => {
@@ -95,6 +103,14 @@ export default function Tab() {
 
     setLastUsedVegetables();
   }, [lastUsedVegetables]);
+
+  useEffect(() => {
+    const test = async () => {
+      await AsyncStorage.setItem("dailyTotal", total.toString());
+    };
+
+    test();
+  }, [total]);
 
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
@@ -167,6 +183,7 @@ export default function Tab() {
             {total}g / {dailyGoal}g
           </Text>
         </View>
+
         {/* Celebration Animation */}
         <CelebrationModal
           isCelebrationVisible={isCelebrationVisible}

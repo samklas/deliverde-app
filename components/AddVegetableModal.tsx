@@ -19,7 +19,6 @@ const AddVegetableModal = ({
   onClose,
   setTotal,
   setLastUsed,
-  lastUsed,
 }: Props) => {
   const [selectedInteger, setSelectedInteger] = useState("0");
   const [selectedDecimal, setSelectedDecimal] = useState("0");
