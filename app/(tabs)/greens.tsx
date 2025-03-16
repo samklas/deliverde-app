@@ -77,6 +77,8 @@ export default function Tab() {
       const dailyTotal = await AsyncStorage.getItem("dailyTotal");
       if (dailyTotal !== null) {
         setTotal(Number(dailyTotal));
+
+        if (Number(dailyTotal) >= 900) setHasCelebrated(true);
       }
     };
 
@@ -105,11 +107,11 @@ export default function Tab() {
   }, [lastUsedVegetables]);
 
   useEffect(() => {
-    const test = async () => {
+    const setDailyTotal = async () => {
       await AsyncStorage.setItem("dailyTotal", total.toString());
     };
 
-    test();
+    setDailyTotal();
   }, [total]);
 
   const triggerCelebration = () => {
