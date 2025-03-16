@@ -22,6 +22,10 @@ export default function RootLayout() {
         name="register"
         options={{ headerShown: true, title: "" }}
       />
+      <Stack.Screen
+        name="userDetails"
+        options={{ headerShown: false, title: "" }}
+      />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
