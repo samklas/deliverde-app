@@ -1,14 +1,63 @@
+import { useState } from "react";
 import {
   Text,
   View,
   TextInput,
-  Button,
   StyleSheet,
   ImageBackground,
   Pressable,
+  Alert,
 } from "react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth"; // Make sure you have this config file
+import { auth } from "@/firebaseConfig";
+import { router } from "expo-router";
 
 export default function Register() {
+  const [email, setEmail] = useState("");
+  const [passWord, setPassword] = useState("");
+  const [confirmedPassword, setConfirmedPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isFormValid = () => {
+    if (!email || !passWord || !confirmedPassword) {
+      Alert.alert("Virhe", "Täytä kaikki kentät");
+      return false;
+    }
+
+    if (passWord !== confirmedPassword) {
+      Alert.alert("Virhe", "Salasanat eivät täsmää");
+      return false;
+    }
+
+    if (passWord.length < 6) {
+      Alert.alert("Virhe", "Salasanan tulee olla vähintään 6 merkkiä pitkä");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleRegistration = async () => {
+    const isValid = isFormValid();
+    if (isValid) {
+      setIsLoading(true);
+      try {
+        await createUserWithEmailAndPassword(auth, email, passWord);
+        router.navigate("/userDetails");
+      } catch (error: any) {
+        let errorMessage = "Rekisteröinti epäonnistui";
+        if (error.code === "auth/email-already-in-use") {
+          errorMessage = "Sähköposti on jo käytössä";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Virheellinen sähköpostiosoite";
+        }
+        Alert.alert("Virhe", errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   return (
     <ImageBackground
       source={require("../assets/images/background.jpeg")}
@@ -17,28 +66,32 @@ export default function Register() {
     >
       <View style={styles.overlay}>
         <Text style={styles.title}>Luo tili</Text>
-        {/* <Text style={styles.inputLabel}>Sähköposti</Text> */}
         <TextInput
           placeholder="Sähköposti"
           keyboardType="email-address"
           style={styles.input}
+          onChangeText={(input) => setEmail(input)}
         />
-        {/* <Text style={styles.inputLabel}>Käyttäjätunnus</Text> */}
-        <TextInput placeholder="Käyttäjätunnus" style={styles.input} />
-        {/* <Text style={styles.inputLabel}>Salasana</Text> */}
         <TextInput
           placeholder="Salasana"
           secureTextEntry={true}
           style={styles.input}
+          onChangeText={(input) => setPassword(input)}
         />
+        <TextInput
+          placeholder="Vahvista salasana"
+          secureTextEntry={true}
+          style={styles.input}
+          onChangeText={(input) => setConfirmedPassword(input)}
+        />
+
         <Pressable
           style={styles.button}
-          //onPress={handleLogin}
-          //disabled={isLoading}
+          onPress={handleRegistration}
+          disabled={isLoading}
         >
           <Text style={styles.buttonText}>
-            {/* {isLoading ? "Logging in..." : "Kirjaudu sisään"} */}
-            Luo tili
+            {isLoading ? "Luodaan tiliä..." : "Luo tili"}
           </Text>
         </Pressable>
       </View>
@@ -53,7 +106,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     padding: 16,
     justifyContent: "center",
   },
