@@ -1,18 +1,42 @@
-import { auth } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, Button } from "react-native";
 
 export default function Tab() {
+  const [username, setUsername] = useState("");
+  const [uid, setUid] = useState("");
+
   const handleLogout = async () => {
     try {
       auth.signOut();
-      await AsyncStorage.removeItem("id");
-      router.push("/");
+      // remove all the data from from async storage
+      await AsyncStorage.multiRemove([
+        "id",
+        "username",
+        "dailyTotal",
+        "vegetables",
+        "lastUsedVegetables",
+      ]);
+      router.navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
+  const getUsername = async () => {
+    const username = await AsyncStorage.getItem("username");
+    const uid = await AsyncStorage.getItem("id");
+
+    if (username && uid) {
+      setUsername(username);
+      setUid(uid);
+    }
+  };
+
+  useEffect(() => {
+    getUsername();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -21,7 +45,8 @@ export default function Tab() {
           source={require("../../assets/images/herb.jpg")}
           style={styles.avatar}
         />
-        <Text style={styles.username}>Samppa</Text>
+        <Text style={styles.username}>{username}</Text>
+        <Text style={styles.username}>{uid}</Text>
       </View>
 
       <View style={styles.goalsSection}>

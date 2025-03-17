@@ -4,21 +4,84 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
-  ImageBackground,
+  Alert,
 } from "react-native";
 import { useState } from "react";
-import { Link } from "expo-router";
+import { auth } from "@/firebaseConfig";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
+import { db } from "@/firebaseConfig";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
-  const [level, setLevel] = useState("beginner");
-
+  const [level, setLevel] = useState("aloittelija");
+  const [isLoading, setIsLoading] = useState(false);
   const levels = ["aloittelija", "keskitaso", "kokenut"];
+
+  const isUsernameAvailable = async (username: string) => {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.empty;
+  };
+
+  const isValid = async () => {
+    if (!username.trim()) {
+      Alert.alert("Virhe", "Käyttäjänimi on pakollinen");
+      return false;
+    }
+    if (!(await isUsernameAvailable(username))) {
+      Alert.alert("Virhe", "Käyttäjänimi on jo käytössä");
+      return false;
+    }
+
+    return true;
+  };
+
+  const addUser = async () => {
+    const uid = auth.currentUser?.uid;
+
+    if ((await isValid()) && uid) {
+      setIsLoading(true);
+      try {
+        // Using setDoc with custom ID (uid) instead of addDoc
+        await setDoc(doc(db, "users", uid), {
+          username: username,
+          level: level,
+          createdAt: new Date(),
+          uid: uid,
+        });
+
+        await AsyncStorage.multiSet([
+          ["id", uid],
+          ["username", username],
+        ]);
+
+        router.push("/(tabs)");
+      } catch (error) {
+        console.error("Error adding user:", error);
+        Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <View style={styles.overlay}>
-      <Text style={styles.title}>Käyttäjätiedot</Text>
-
+      <Text style={styles.levelLabel}>
+        Tili luotu onnistuneesti! Asetetaan vielä käyttäjänimi sekä taso, niin
+        sen jälkeen olemme valmiit aloittamaan!
+      </Text>
+      {/* <Text style={styles.title}>Käyttäjätiedot</Text> */}
       <TextInput
         style={styles.input}
         value={username}
@@ -46,16 +109,15 @@ export default function UserDetails() {
         ))}
       </View>
 
-      <Link href="/(tabs)" asChild>
-        <Pressable
-          style={styles.continueButton}
-          onPress={() => {
-            /* Handle continue */
-          }}
-        >
-          <Text style={styles.continueButtonText}>Jatka</Text>
-        </Pressable>
-      </Link>
+      <Pressable
+        style={styles.continueButton}
+        onPress={addUser}
+        disabled={isLoading}
+      >
+        <Text style={styles.continueButtonText}>
+          {isLoading ? "Tallennetaan..." : "Jatka"}
+        </Text>
+      </Pressable>
     </View>
   );
 }

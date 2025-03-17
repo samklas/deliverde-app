@@ -3,7 +3,6 @@ import {
   Text,
   View,
   TextInput,
-  Button,
   StyleSheet,
   ImageBackground,
   Pressable,
@@ -11,7 +10,7 @@ import {
 } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth"; // Make sure you have this config file
 import { auth } from "@/firebaseConfig";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -19,47 +18,45 @@ export default function Register() {
   const [confirmedPassword, setConfirmedPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegistration = async () => {
+  const isFormValid = () => {
     if (!email || !passWord || !confirmedPassword) {
       Alert.alert("Virhe", "Täytä kaikki kentät");
-      return;
+      return false;
     }
 
     if (passWord !== confirmedPassword) {
       Alert.alert("Virhe", "Salasanat eivät täsmää");
-      return;
+      return false;
     }
 
     if (passWord.length < 6) {
       Alert.alert("Virhe", "Salasanan tulee olla vähintään 6 merkkiä pitkä");
-      return;
+      return false;
     }
 
-    setIsLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        passWord
-      );
-      console.log("User registered:", userCredential.user);
-      // Navigate to next screen or show success message
-      Alert.alert("Onnistui", "Tili luotu onnistuneesti!");
-    } catch (error: any) {
-      let errorMessage = "Rekisteröinti epäonnistui";
-      if (error.code === "auth/email-already-in-use") {
-        errorMessage = "Sähköposti on jo käytössä";
-      } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Virheellinen sähköpostiosoite";
-      }
-      Alert.alert("Virhe", errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+    return true;
   };
 
-  // used only for test purposes!
-  //const handleRegistrationSuccess = () => {};
+  const handleRegistration = async () => {
+    const isValid = isFormValid();
+    if (isValid) {
+      setIsLoading(true);
+      try {
+        await createUserWithEmailAndPassword(auth, email, passWord);
+        router.navigate("/userDetails");
+      } catch (error: any) {
+        let errorMessage = "Rekisteröinti epäonnistui";
+        if (error.code === "auth/email-already-in-use") {
+          errorMessage = "Sähköposti on jo käytössä";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Virheellinen sähköpostiosoite";
+        }
+        Alert.alert("Virhe", errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <ImageBackground
@@ -69,16 +66,12 @@ export default function Register() {
     >
       <View style={styles.overlay}>
         <Text style={styles.title}>Luo tili</Text>
-        {/* <Text style={styles.inputLabel}>Sähköposti</Text> */}
         <TextInput
           placeholder="Sähköposti"
           keyboardType="email-address"
           style={styles.input}
           onChangeText={(input) => setEmail(input)}
         />
-        {/* <Text style={styles.inputLabel}>Käyttäjätunnus</Text> */}
-        {/* <TextInput placeholder="Käyttäjätunnus" style={styles.input} /> */}
-        {/* <Text style={styles.inputLabel}>Salasana</Text> */}
         <TextInput
           placeholder="Salasana"
           secureTextEntry={true}
@@ -91,17 +84,16 @@ export default function Register() {
           style={styles.input}
           onChangeText={(input) => setConfirmedPassword(input)}
         />
-        <Link href="/userDetails" asChild>
-          <Pressable
-            style={styles.button}
-            onPress={handleRegistration}
-            disabled={isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? "Luodaan tiliä..." : "Luo tili"}
-            </Text>
-          </Pressable>
-        </Link>
+
+        <Pressable
+          style={styles.button}
+          onPress={handleRegistration}
+          disabled={isLoading}
+        >
+          <Text style={styles.buttonText}>
+            {isLoading ? "Luodaan tiliä..." : "Luo tili"}
+          </Text>
+        </Pressable>
       </View>
     </ImageBackground>
   );

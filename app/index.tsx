@@ -14,22 +14,25 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { auth } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log("on user");
         setIsLoggedIn(true);
         router.push("/(tabs)");
       } else {
+        console.log("ei ole user");
+        setIsLoggedIn(false);
         router.push("/");
       }
       setLoading(false);
@@ -38,6 +41,16 @@ export default function Login() {
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
+
+  const getUsername = async (uid: string) => {
+    const docRef = doc(db, "users", uid);
+    const document = await getDoc(docRef);
+    if (document.exists()) {
+      return document.data().username as string;
+    }
+
+    throw new Error("error");
+  };
 
   const handleLogin = async () => {
     try {
@@ -48,8 +61,10 @@ export default function Login() {
         email,
         password
       );
-      console.log(userCredential);
-      storeUserId(userCredential.user.uid);
+
+      const username = await getUsername(userCredential.user.uid);
+
+      storeUserId(userCredential.user.uid, username);
       getUserId();
       router.push("/(tabs)");
     } catch (error) {
@@ -59,9 +74,12 @@ export default function Login() {
     }
   };
 
-  const storeUserId = async (value: string) => {
+  const storeUserId = async (uid: string, username: string) => {
     try {
-      await AsyncStorage.setItem("id", value);
+      await AsyncStorage.multiSet([
+        ["id", uid],
+        ["username", username],
+      ]);
     } catch (e) {
       console.log("error: " + e);
     }
