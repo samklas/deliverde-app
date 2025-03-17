@@ -7,53 +7,56 @@ import {
   ImageBackground,
 } from "react-native";
 import { useState } from "react";
+import { Link } from "expo-router";
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
   const [level, setLevel] = useState("beginner");
 
-  const levels = ["beginner", "intermediate", "advanced"];
+  const levels = ["aloittelija", "keskitaso", "kokenut"];
 
   return (
-    <ImageBackground
-      source={require("../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <Text style={styles.title}>Käyttäjätiedot</Text>
+    <View style={styles.overlay}>
+      <Text style={styles.title}>Käyttäjätiedot</Text>
 
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Käyttäjänimi"
-        />
+      <TextInput
+        style={styles.input}
+        value={username}
+        onChangeText={setUsername}
+        placeholder="Käyttäjänimi"
+      />
 
-        <Text style={styles.levelLabel}>Valitse tasosi</Text>
-        <View style={styles.levelButtons}>
-          {levels.map((lvl) => (
-            <Pressable
-              key={lvl}
+      <Text style={styles.levelLabel}>Valitse tasosi</Text>
+      <View style={styles.levelButtons}>
+        {levels.map((lvl) => (
+          <Pressable
+            key={lvl}
+            style={[styles.levelButton, level === lvl && styles.selectedLevel]}
+            onPress={() => setLevel(lvl)}
+          >
+            <Text
               style={[
-                styles.levelButton,
-                level === lvl && styles.selectedLevel,
+                styles.levelText,
+                level === lvl && styles.selectedLevelText,
               ]}
-              onPress={() => setLevel(lvl)}
             >
-              <Text
-                style={[
-                  styles.levelText,
-                  level === lvl && styles.selectedLevelText,
-                ]}
-              >
-                {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+              {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
+            </Text>
+          </Pressable>
+        ))}
       </View>
-    </ImageBackground>
+
+      <Link href="/(tabs)" asChild>
+        <Pressable
+          style={styles.continueButton}
+          onPress={() => {
+            /* Handle continue */
+          }}
+        >
+          <Text style={styles.continueButtonText}>Jatka</Text>
+        </Pressable>
+      </Link>
+    </View>
   );
 }
 
@@ -62,9 +65,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  todayBox: {
+    backgroundColor: "white",
+    padding: 40,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    flexDirection: "column",
+  },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    // backgroundColor: "rgba(255, 255, 255, 0.9)",
     padding: 16,
     justifyContent: "center",
   },
@@ -123,5 +141,17 @@ const styles = StyleSheet.create({
   },
   selectedLevelText: {
     color: "white",
+  },
+  continueButton: {
+    backgroundColor: "#0c4c25",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  continueButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

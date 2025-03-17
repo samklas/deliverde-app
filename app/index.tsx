@@ -91,7 +91,7 @@ export default function Login() {
 
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder="Sähköposti"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -100,7 +100,7 @@ export default function Login() {
 
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder="Salasana"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -112,7 +112,7 @@ export default function Login() {
             disabled={isLoading}
           >
             <Text style={styles.buttonText}>
-              {isLoading ? "Logging in..." : "Kirjaudu sisään"}
+              {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
             </Text>
           </Pressable>
 
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     padding: 16,
     justifyContent: "center",
   },

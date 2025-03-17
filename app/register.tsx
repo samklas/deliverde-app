@@ -59,7 +59,7 @@ export default function Register() {
   };
 
   // used only for test purposes!
-  const handleRegistrationSuccess = () => {};
+  //const handleRegistrationSuccess = () => {};
 
   return (
     <ImageBackground
@@ -94,7 +94,7 @@ export default function Register() {
         <Link href="/userDetails" asChild>
           <Pressable
             style={styles.button}
-            onPress={handleRegistrationSuccess}
+            onPress={handleRegistration}
             disabled={isLoading}
           >
             <Text style={styles.buttonText}>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     padding: 16,
     justifyContent: "center",
   },
