@@ -4,11 +4,88 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo/vector-icons
 import { theme } from "@/theme";
+import { observer } from "mobx-react-lite";
+import recipeStore from "@/stores/recipeStore";
+import { useEffect, useState } from "react";
+import {
+  collection,
+  DocumentData,
+  getDocs,
+  QuerySnapshot,
+} from "firebase/firestore";
+import { db, storage } from "@/firebaseConfig";
+import { Recipe } from "@/types/recipe";
+import { getDownloadURL, ref } from "firebase/storage";
+import RecipeBox from "@/components/recipe/RecipeBox";
 
-export default function Tab() {
+const Tab = observer(() => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { setRecipes, setRecipeOfMonth, favoriteRecipes, recipeOfMonth } =
+    recipeStore;
+
+  const fetchRecipes = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "recipes"));
+      const recipes = await mapRecipes(querySnapshot);
+      setRecipes(recipes);
+      const recipeOfMonth = getRecipeOfMonth(recipes);
+      if (recipeOfMonth) setRecipeOfMonth(recipeOfMonth);
+    } catch (err) {
+      console.error("Error occured while fetching recipes: ", err);
+    }
+  };
+
+  const mapRecipes = async (
+    querySnapshot: QuerySnapshot<DocumentData, DocumentData>
+  ) => {
+    let recipes: Recipe[] = [];
+    for (const doc of querySnapshot.docs) {
+      const data = doc.data();
+      const recipe: Recipe = {
+        id: doc.id,
+        created: data.created,
+        imageUrl: await getImageUrl(data.imageUrl),
+        title: data.title,
+        ingredients: data.ingredients,
+        instructions: data.instructions,
+        details: {
+          duration: data.details.duration,
+          difficultyLevel: data.details.difficultyLevel,
+          portionaAmount: data.details.portionAmount,
+        },
+        recipeOfMonth: data.recipeOfMonth,
+      };
+
+      recipes.push(recipe);
+    }
+    return recipes;
+  };
+
+  const getImageUrl = async (url: string) => {
+    const refrence = ref(storage, url);
+    const imageUrl = await getDownloadURL(refrence);
+    return imageUrl;
+  };
+
+  const getRecipeOfMonth = (recipes: Recipe[]) => {
+    const recipeOfMonth = recipes.find((recipe) => recipe.recipeOfMonth);
+    if (recipeOfMonth) return recipeOfMonth;
+  };
+
+  useEffect(() => {
+    const initData = async () => {
+      setIsLoading(true);
+      await fetchRecipes();
+      setIsLoading(false);
+    };
+
+    initData();
+  }, []);
+
   return (
     <ImageBackground
       source={require("../../assets/images/background.jpeg")}
@@ -16,79 +93,83 @@ export default function Tab() {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Combined Streak and Daily Goals Box */}
-          <View style={styles.combinedBox}>
-            <View style={styles.streakHeader}>
-              <Ionicons name="leaf" size={24} color="#4cd964" />
-              <Text style={styles.streakCount}>7 päivän putki!</Text>
-            </View>
-            <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
-
-            <View style={styles.goalsDivider} />
-
-            <Text style={styles.boxTitle}>Päivän tavoitteet</Text>
-            <View style={styles.goalRow}>
-              <Ionicons name="checkmark-circle" size={24} color="#4cd964" />
-              <Text style={styles.goalText}>Syö 5 annosta kasviksia</Text>
-            </View>
-            <View style={styles.goalRow}>
-              <Ionicons name="radio-button-off" size={24} color="#8e8e93" />
-              <Text style={styles.goalText}>Kokeile uutta reseptiä</Text>
-            </View>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={styles.loadingText}>Ladataan...</Text>
           </View>
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Combined Streak and Daily Goals Box */}
+            <View style={styles.combinedBox}>
+              <View style={styles.streakHeader}>
+                <Ionicons name="leaf" size={24} color="#4cd964" />
+                <Text style={styles.streakCount}>7 päivän putki!</Text>
+              </View>
+              <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
 
-          {/* Monthly Challenge */}
-          <View style={styles.box}>
-            <Text style={styles.boxTitle}>Kuukauden haaste</Text>
-            <Text style={styles.challengeText}>
-              Kokeile 5 uutta kasvisreseptiä
-            </Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progress, { width: "60%" }]} />
-            </View>
-            <Text style={styles.progressText}>3/5 suoritettu</Text>
-          </View>
+              <View style={styles.goalsDivider} />
 
-          {/* Leaderboard of the Month */}
-          <View style={styles.box}>
-            <Text style={styles.boxTitle}>Kuukauden tulostaulukko</Text>
-            <View style={styles.leaderboardRow}>
-              <Text style={styles.leaderboardPosition}>1.</Text>
-              <Text style={styles.leaderboardName}>Käyttäjä A</Text>
-              <Text style={styles.leaderboardScore}>150 pistettä</Text>
+              <Text style={styles.boxTitle}>Päivän tavoitteet</Text>
+              <View style={styles.goalRow}>
+                <Ionicons name="checkmark-circle" size={24} color="#4cd964" />
+                <Text style={styles.goalText}>Syö 5 annosta kasviksia</Text>
+              </View>
+              <View style={styles.goalRow}>
+                <Ionicons name="radio-button-off" size={24} color="#8e8e93" />
+                <Text style={styles.goalText}>Kokeile uutta reseptiä</Text>
+              </View>
             </View>
-            <View style={styles.leaderboardRow}>
-              <Text style={styles.leaderboardPosition}>2.</Text>
-              <Text style={styles.leaderboardName}>Käyttäjä B</Text>
-              <Text style={styles.leaderboardScore}>120 pistettä</Text>
-            </View>
-            <View style={styles.leaderboardRow}>
-              <Text style={styles.leaderboardPosition}>3.</Text>
-              <Text style={styles.leaderboardName}>Käyttäjä C</Text>
-              <Text style={styles.leaderboardScore}>100 pistettä</Text>
-            </View>
-          </View>
 
-          {/* Recipe of the Month */}
-          <View style={[styles.box, styles.recipeBox]}>
-            <Text style={styles.boxTitle}>Kuukauden resepti</Text>
-            <View style={styles.recipeContent}>
-              <ImageBackground
-                source={require("../../assets/images/meal4.png")}
-                style={styles.recipeImage}
-              />
-              <Text style={styles.recipeTitle}>Kesäinen Kasvisrisotto</Text>
-              <Text style={styles.recipeDetails}>
-                30 min • Helppo • 4 annosta
+            {/* Monthly Challenge */}
+            <View style={styles.box}>
+              <Text style={styles.boxTitle}>Kuukauden haaste</Text>
+              <Text style={styles.challengeText}>
+                Kokeile 5 uutta kasvisreseptiä
               </Text>
+              <View style={styles.progressBar}>
+                <View style={[styles.progress, { width: "60%" }]} />
+              </View>
+              <Text style={styles.progressText}>3/5 suoritettu</Text>
             </View>
-          </View>
-        </ScrollView>
+
+            {/* Leaderboard of the Month */}
+            <View style={styles.box}>
+              <Text style={styles.boxTitle}>Kuukauden tulostaulukko</Text>
+              <View style={styles.leaderboardRow}>
+                <Text style={styles.leaderboardPosition}>1.</Text>
+                <Text style={styles.leaderboardName}>Käyttäjä A</Text>
+                <Text style={styles.leaderboardScore}>150 pistettä</Text>
+              </View>
+              <View style={styles.leaderboardRow}>
+                <Text style={styles.leaderboardPosition}>2.</Text>
+                <Text style={styles.leaderboardName}>Käyttäjä B</Text>
+                <Text style={styles.leaderboardScore}>120 pistettä</Text>
+              </View>
+              <View style={styles.leaderboardRow}>
+                <Text style={styles.leaderboardPosition}>3.</Text>
+                <Text style={styles.leaderboardName}>Käyttäjä C</Text>
+                <Text style={styles.leaderboardScore}>100 pistettä</Text>
+              </View>
+            </View>
+
+            {recipeOfMonth && (
+              <RecipeBox
+                recipe={recipeOfMonth}
+                openModal={() => console.log("hep")}
+                toggleFavorite={() => console.log("hep")}
+                removeFavorite={() => console.log("hep")}
+                userFavoriteRecipes={favoriteRecipes}
+              />
+            )}
+          </ScrollView>
+        )}
       </View>
     </ImageBackground>
   );
-}
+});
+
+export default Tab;
 
 const styles = StyleSheet.create({
   container: {
@@ -221,5 +302,15 @@ const styles = StyleSheet.create({
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
     color: theme.colors.secondary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: theme.spacing.small,
+    color: theme.colors.primary,
+    fontSize: theme.fonts.regular.fontSize,
   },
 });

@@ -1,4 +1,3 @@
-import { Recipe } from "@/app/(tabs)/recipes";
 import React from "react";
 import {
   Modal,
@@ -11,6 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Recipe } from "@/types/recipe";
 
 type Props = {
   selectedRecipe: Recipe | null;
@@ -34,7 +34,7 @@ export default function RecipeModal({
       onRequestClose={closeModal}
     >
       <ImageBackground
-        source={require("../assets/images/background.jpeg")}
+        source={require("../../assets/images/background.jpeg")}
         style={styles.background}
         resizeMode="cover"
       >

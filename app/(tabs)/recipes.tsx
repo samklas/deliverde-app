@@ -19,11 +19,11 @@ import {
 import { auth, db, storage } from "@/firebaseConfig";
 import { getDownloadURL, ref } from "firebase/storage";
 import React from "react";
-import RecipeModal from "@/components/RecipeModal";
-import AddRecipeModal from "@/components/AddRecipeModal";
+import RecipeModal from "@/components/recipe/RecipeModal";
+import AddRecipeModal from "@/components/recipe/AddRecipeModal";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
-import RecipeBox from "@/components/RecipeBox";
+import RecipeBox from "@/components/recipe/RecipeBox";
 
 export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);

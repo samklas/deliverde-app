@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
-import ImagePickerExample from "./ImagePicker";
 import { theme } from "@/theme";
+import ImagePickerExample from "../ImagePicker";
 
 type Props = {
   isVisible: boolean;

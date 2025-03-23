@@ -6,6 +6,7 @@ export type Recipe = {
   ingredients: string[];
   instructions: string;
   details: Details;
+  recipeOfMonth: boolean;
 };
 
 type Details = {

@@ -2,7 +2,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "@expo/vector-icons/Ionicons";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
-import { useState } from "react";
 import { Image } from "expo-image";
 
 type Props = {
