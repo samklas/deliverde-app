@@ -15,19 +15,26 @@ import {
   collection,
   DocumentData,
   getDocs,
+  onSnapshot,
   QuerySnapshot,
 } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
 import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
 import { getImageUrl } from "@/utils/utils";
 
 const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setRecipes, setRecipeOfMonth, favoriteRecipes, recipeOfMonth } =
-    recipeStore;
+  const {
+    setRecipes,
+    setRecipeOfMonth,
+    favoriteRecipes,
+    recipeOfMonth,
+    recipes,
+    setFavoriteRecipes,
+  } = recipeStore;
 
-  const fetchRecipes = async () => {
+  const getRecipes = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "recipes"));
       const recipes = await mapRecipes(querySnapshot);
@@ -70,10 +77,35 @@ const Tab = observer(() => {
     if (recipeOfMonth) return recipeOfMonth;
   };
 
+  const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
+    const filteredRecipes = recipes.filter((recipe) =>
+      favoriteRecipeIds.includes(recipe.id)
+    );
+
+    setFavoriteRecipes(filteredRecipes);
+  };
+
+  // real time listener for user's favorite recipes
+  useEffect(() => {
+    const userId = auth.currentUser?.uid;
+    const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
+
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      let ids: string[] = [];
+      for (const doc of snapshot.docs) {
+        ids.push(doc.id);
+      }
+
+      filterFavoriteRecipes(ids);
+    });
+
+    return () => unsubscribe();
+  }, [recipes]);
+
   useEffect(() => {
     const initData = async () => {
       setIsLoading(true);
-      await fetchRecipes();
+      await getRecipes();
       setIsLoading(false);
     };
 
