@@ -17,10 +17,10 @@ import {
   getDocs,
   QuerySnapshot,
 } from "firebase/firestore";
-import { db, storage } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
-import { getDownloadURL, ref } from "firebase/storage";
-import RecipeBox from "@/components/recipe/RecipeBox";
+import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
+import { getImageUrl } from "@/utils/utils";
 
 const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -63,12 +63,6 @@ const Tab = observer(() => {
       recipes.push(recipe);
     }
     return recipes;
-  };
-
-  const getImageUrl = async (url: string) => {
-    const refrence = ref(storage, url);
-    const imageUrl = await getDownloadURL(refrence);
-    return imageUrl;
   };
 
   const getRecipeOfMonth = (recipes: Recipe[]) => {
@@ -154,12 +148,10 @@ const Tab = observer(() => {
             </View>
 
             {recipeOfMonth && (
-              <RecipeBox
+              <RecipeBoxV2
                 recipe={recipeOfMonth}
-                openModal={() => console.log("hep")}
-                toggleFavorite={() => console.log("hep")}
-                removeFavorite={() => console.log("hep")}
                 userFavoriteRecipes={favoriteRecipes}
+                isRecipeOfMonth
               />
             )}
           </ScrollView>

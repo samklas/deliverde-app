@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Recipe } from "@/types/recipe";
+import { Image } from "expo-image";
 
 type Props = {
   selectedRecipe: Recipe | null;
@@ -46,6 +47,10 @@ export default function RecipeModal({
                   source={{ uri: selectedRecipe.imageUrl }}
                   style={styles.modalImage}
                 >
+                  <Image
+                    style={styles.modalImage}
+                    source={{ uri: selectedRecipe.imageUrl }}
+                  />
                   <TouchableOpacity
                     onPress={closeModal}
                     style={styles.closeButtonContainer}

@@ -24,6 +24,8 @@ import AddRecipeModal from "@/components/recipe/AddRecipeModal";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
 import RecipeBox from "@/components/recipe/RecipeBox";
+import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
+import { getImageUrl } from "@/utils/utils";
 
 export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +87,7 @@ export default function Tab() {
             difficultyLevel: data.details.difficultyLevel,
             portionaAmount: data.details.portionAmount,
           },
+          recipeOfMonth: data.recipeOfMonth,
         };
 
         recipes.push(recipe);
@@ -96,47 +99,12 @@ export default function Tab() {
     }
   };
 
-  const getImageUrl = async (url: string) => {
-    const refrence = ref(storage, url);
-    const imageUrl = await getDownloadURL(refrence);
-    return imageUrl;
-  };
-
-  const openModal = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setIsModalVisible(true);
-  };
-
   const openAddRecipeModal = () => {
     setIsAddRecipeModalVisible(true);
   };
 
   const closeAddRecipeModal = () => {
     setIsAddRecipeModalVisible(false);
-  };
-
-  const addToFavorites = async (recipeId: string) => {
-    const userId = auth.currentUser?.uid;
-    const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
-
-    try {
-      await setDoc(favoriteRef, { addedAt: new Date() }); // Add recipe to favorites
-      console.log("Recipe added to favorites!");
-    } catch (error) {
-      console.error("Error adding to favorites: ", error);
-    }
-  };
-
-  const removeFromFavorites = async (recipeId: string) => {
-    const userId = auth.currentUser?.uid;
-    const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
-
-    try {
-      await deleteDoc(favoriteRef); // Remove recipe from favorites
-      console.log("Recipe removed from favorites!");
-    } catch (error) {
-      console.error("Error removing from favorites: ", error);
-    }
   };
 
   return (
@@ -179,12 +147,9 @@ export default function Tab() {
           ) : (
             (activeSection === "all" ? recipes : userFavoriteRecipes).map(
               (recipe) => (
-                <RecipeBox
+                <RecipeBoxV2
                   key={recipe.id}
                   recipe={recipe}
-                  openModal={openModal}
-                  toggleFavorite={addToFavorites}
-                  removeFavorite={removeFromFavorites}
                   userFavoriteRecipes={userFavoriteRecipes}
                 />
               )
