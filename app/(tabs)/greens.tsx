@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
-import { collection, doc, setDoc, addDoc, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetableModal from "@/components/AddVegetableModal";
 import { Vegetable } from "@/types/vegetable";
@@ -20,9 +20,12 @@ import { Image } from "expo-image";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
 import CelebrationModal from "@/components/CelebrationModal";
+import { observer } from "mobx-react-lite";
+import challengeStore from "@/stores/challengeStore";
 
-export default function Tab() {
-  const [dailyGoal, setDailyGoal] = useState(800);
+const Tab = observer(() => {
+  const dailyGoal = 800;
+  const { dailyTotal: total, setDailyTotal: setTotal } = challengeStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +33,7 @@ export default function Tab() {
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
   const [vegetable, setVegetable] = useState<Vegetable>();
-  const [total, setTotal] = useState(0);
+  // const [total, setTotal] = useState(0);
   const [sound, setSound] = useState<Audio.Sound>();
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
@@ -74,12 +77,11 @@ export default function Tab() {
     };
 
     const getDailyTotal = async () => {
-      const dailyTotal = await AsyncStorage.getItem("dailyTotal");
-      if (dailyTotal !== null) {
-        setTotal(Number(dailyTotal));
+      // const dailyTotal = await AsyncStorage.getItem("dailyTotal");
+      // if (dailyTotal !== null) {
+      //   setTotal(Number(dailyTotal));
 
-        if (Number(dailyTotal) >= 900) setHasCelebrated(true);
-      }
+      if (Number(total) >= 800) setHasCelebrated(true);
     };
 
     fetchVegetables();
@@ -106,13 +108,13 @@ export default function Tab() {
     setLastUsedVegetables();
   }, [lastUsedVegetables]);
 
-  useEffect(() => {
-    const setDailyTotal = async () => {
-      await AsyncStorage.setItem("dailyTotal", total.toString());
-    };
+  // useEffect(() => {
+  //   const setDailyTotal = async () => {
+  //     await AsyncStorage.setItem("dailyTotal", total.toString());
+  //   };
 
-    setDailyTotal();
-  }, [total]);
+  //   setDailyTotal();
+  // }, [total]);
 
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
@@ -249,7 +251,9 @@ export default function Tab() {
       </View>
     </ImageBackground>
   );
-}
+});
+
+export default Tab;
 
 const styles = StyleSheet.create({
   container: {

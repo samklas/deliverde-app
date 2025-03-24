@@ -17,11 +17,14 @@ import {
   getDocs,
   onSnapshot,
   QuerySnapshot,
+  getDoc,
+  doc,
 } from "firebase/firestore";
 import { auth, db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
 import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
 import { getImageUrl } from "@/utils/utils";
+import challengeStore from "@/stores/challengeStore";
 
 const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,6 +36,7 @@ const Tab = observer(() => {
     recipes,
     setFavoriteRecipes,
   } = recipeStore;
+  const { dailyTotal, setDailyTotal } = challengeStore;
 
   const getRecipes = async () => {
     try {
@@ -85,6 +89,25 @@ const Tab = observer(() => {
     setFavoriteRecipes(filteredRecipes);
   };
 
+  // challenges
+  const getUserDailyTotal = async () => {
+    try {
+      const userId = auth.currentUser?.uid;
+      if (!userId) return;
+
+      const userDoc = await getDoc(doc(db, "users", userId));
+      const userData = userDoc.data();
+
+      if (userData && userData.dailyTotal) {
+        console.log("hep: " + userData.dailyTotal);
+        setDailyTotal(userData.dailyTotal);
+        //return userData.dailyTotal;
+      }
+    } catch (error) {
+      console.error("Error fetching user's daily total:", error);
+    }
+  };
+
   // real time listener for user's favorite recipes
   useEffect(() => {
     const userId = auth.currentUser?.uid;
@@ -103,9 +126,14 @@ const Tab = observer(() => {
   }, [recipes]);
 
   useEffect(() => {
+    console.log(dailyTotal);
+  }, [dailyTotal]);
+
+  useEffect(() => {
     const initData = async () => {
       setIsLoading(true);
       await getRecipes();
+      await getUserDailyTotal();
       setIsLoading(false);
     };
 
@@ -138,12 +166,20 @@ const Tab = observer(() => {
 
               <Text style={styles.boxTitle}>Päivän tavoitteet</Text>
               <View style={styles.goalRow}>
-                <Ionicons name="checkmark-circle" size={24} color="#4cd964" />
-                <Text style={styles.goalText}>Syö 5 annosta kasviksia</Text>
+                <Ionicons
+                  name={
+                    dailyTotal >= 800 ? "checkmark-circle" : "radio-button-off"
+                  }
+                  size={24}
+                  color="#4cd964"
+                />
+                <Text style={styles.goalText}>Syö 800g kasviksia</Text>
               </View>
               <View style={styles.goalRow}>
-                <Ionicons name="radio-button-off" size={24} color="#8e8e93" />
-                <Text style={styles.goalText}>Kokeile uutta reseptiä</Text>
+                <Ionicons name="radio-button-off" size={24} color="#4cd964" />
+                <Text style={styles.goalText}>
+                  TODO: mitä muita päivän tavoitteita?
+                </Text>
               </View>
             </View>
 
@@ -151,7 +187,7 @@ const Tab = observer(() => {
             <View style={styles.box}>
               <Text style={styles.boxTitle}>Kuukauden haaste</Text>
               <Text style={styles.challengeText}>
-                Kokeile 5 uutta kasvisreseptiä
+                TODO: minkälaisia kuukauden haasteita?
               </Text>
               <View style={styles.progressBar}>
                 <View style={[styles.progress, { width: "60%" }]} />
