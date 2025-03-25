@@ -36,7 +36,8 @@ const Tab = observer(() => {
     recipes,
     setFavoriteRecipes,
   } = recipeStore;
-  const { dailyTotal, setDailyTotal } = challengeStore;
+  const { dailyTotal, setDailyTotal, dailyTarget, setDailyTarget } =
+    challengeStore;
 
   const getRecipes = async () => {
     try {
@@ -89,8 +90,7 @@ const Tab = observer(() => {
     setFavoriteRecipes(filteredRecipes);
   };
 
-  // challenges
-  const getUserDailyTotal = async () => {
+  const getUserDetails = async () => {
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) return;
@@ -99,9 +99,17 @@ const Tab = observer(() => {
       const userData = userDoc.data();
 
       if (userData && userData.dailyTotal) {
-        console.log("hep: " + userData.dailyTotal);
         setDailyTotal(userData.dailyTotal);
-        //return userData.dailyTotal;
+      }
+
+      if (userData && userData.level) {
+        if (userData.level === "beginner") {
+          setDailyTarget(300);
+        } else if (userData.level === "intermediate") {
+          setDailyTarget(500);
+        } else {
+          setDailyTarget(800);
+        }
       }
     } catch (error) {
       console.error("Error fetching user's daily total:", error);
@@ -126,14 +134,14 @@ const Tab = observer(() => {
   }, [recipes]);
 
   useEffect(() => {
-    console.log(dailyTotal);
-  }, [dailyTotal]);
+    console.log(dailyTarget);
+  }, [dailyTarget]);
 
   useEffect(() => {
     const initData = async () => {
       setIsLoading(true);
       await getRecipes();
-      await getUserDailyTotal();
+      await getUserDetails();
       setIsLoading(false);
     };
 
@@ -168,23 +176,27 @@ const Tab = observer(() => {
               <View style={styles.goalRow}>
                 <Ionicons
                   name={
-                    dailyTotal >= 800 ? "checkmark-circle" : "radio-button-off"
+                    dailyTotal >= dailyTarget
+                      ? "checkmark-circle"
+                      : "radio-button-off"
                   }
                   size={24}
                   color="#4cd964"
                 />
-                <Text style={styles.goalText}>Syö 800g kasviksia</Text>
+                <Text style={styles.goalText}>
+                  Syö {dailyTarget}g vihanneksia
+                </Text>
               </View>
-              <View style={styles.goalRow}>
+              {/* <View style={styles.goalRow}>
                 <Ionicons name="radio-button-off" size={24} color="#4cd964" />
                 <Text style={styles.goalText}>
                   TODO: mitä muita päivän tavoitteita?
                 </Text>
-              </View>
+              </View> */}
             </View>
 
             {/* Monthly Challenge */}
-            <View style={styles.box}>
+            {/* <View style={styles.box}>
               <Text style={styles.boxTitle}>Kuukauden haaste</Text>
               <Text style={styles.challengeText}>
                 TODO: minkälaisia kuukauden haasteita?
@@ -193,11 +205,11 @@ const Tab = observer(() => {
                 <View style={[styles.progress, { width: "60%" }]} />
               </View>
               <Text style={styles.progressText}>3/5 suoritettu</Text>
-            </View>
+            </View> */}
 
             {/* Leaderboard of the Month */}
             <View style={styles.box}>
-              <Text style={styles.boxTitle}>Kuukauden tulostaulukko</Text>
+              <Text style={styles.boxTitle}>Tulostaulukko</Text>
               <View style={styles.leaderboardRow}>
                 <Text style={styles.leaderboardPosition}>1.</Text>
                 <Text style={styles.leaderboardName}>Käyttäjä A</Text>

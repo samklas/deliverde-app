@@ -7,6 +7,7 @@ class ChallengeStore {
 
   _challenges = {
     dailyTotal: 0,
+    dailyTarget: 0,
   };
 
   get dailyTotal() {
@@ -15,6 +16,14 @@ class ChallengeStore {
 
   setDailyTotal = (dailyTotal: number) => {
     this._challenges.dailyTotal = dailyTotal;
+  };
+
+  get dailyTarget() {
+    return this._challenges.dailyTarget;
+  }
+
+  setDailyTarget = (dailyTarget: number) => {
+    this._challenges.dailyTarget = dailyTarget;
   };
 }
 

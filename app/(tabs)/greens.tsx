@@ -7,7 +7,6 @@ import {
   Animated,
   ImageBackground,
   TextInput,
-  Modal,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
@@ -16,7 +15,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetableModal from "@/components/AddVegetableModal";
 import { Vegetable } from "@/types/vegetable";
 import { Audio } from "expo-av";
-import { Image } from "expo-image";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
 import CelebrationModal from "@/components/CelebrationModal";
@@ -24,8 +22,7 @@ import { observer } from "mobx-react-lite";
 import challengeStore from "@/stores/challengeStore";
 
 const Tab = observer(() => {
-  const dailyGoal = 800;
-  const { dailyTotal: total, setDailyTotal: setTotal } = challengeStore;
+  const { dailyTotal, setDailyTotal, dailyTarget } = challengeStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,10 +30,9 @@ const Tab = observer(() => {
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
   const [vegetable, setVegetable] = useState<Vegetable>();
-  // const [total, setTotal] = useState(0);
   const [sound, setSound] = useState<Audio.Sound>();
   const [hasCelebrated, setHasCelebrated] = useState(false);
-  const progress = Math.min((total / dailyGoal) * 100, 100); // Cap at 100%
+  const progress = Math.min((dailyTotal / dailyTarget) * 100, 100); // Cap at 100%
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
 
   useEffect(() => {
@@ -77,11 +73,7 @@ const Tab = observer(() => {
     };
 
     const getDailyTotal = async () => {
-      // const dailyTotal = await AsyncStorage.getItem("dailyTotal");
-      // if (dailyTotal !== null) {
-      //   setTotal(Number(dailyTotal));
-
-      if (Number(total) >= 800) setHasCelebrated(true);
+      if (Number(dailyTotal) >= dailyTarget) setHasCelebrated(true);
     };
 
     fetchVegetables();
@@ -107,14 +99,6 @@ const Tab = observer(() => {
 
     setLastUsedVegetables();
   }, [lastUsedVegetables]);
-
-  // useEffect(() => {
-  //   const setDailyTotal = async () => {
-  //     await AsyncStorage.setItem("dailyTotal", total.toString());
-  //   };
-
-  //   setDailyTotal();
-  // }, [total]);
 
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
@@ -184,7 +168,7 @@ const Tab = observer(() => {
             />
           </View>
           <Text style={styles.progressText}>
-            {total}g / {dailyGoal}g
+            {dailyTotal}g / {dailyTarget}g
           </Text>
         </View>
 
@@ -228,7 +212,7 @@ const Tab = observer(() => {
           isVisible={isVisible}
           vegetable={vegetable}
           onClose={closeModal}
-          setTotal={setTotal}
+          setTotal={setDailyTotal}
           setLastUsed={setLastUsedVegetables}
           lastUsed={lastUsedVegetables}
         />
