@@ -39,7 +39,7 @@ const Tab = observer(() => {
     recipes,
     setFavoriteRecipes,
   } = recipeStore;
-  const { setDailyTotal, setDailyTarget } = challengeStore;
+  const { setDailyTotal, setDailyTarget, setStreak } = challengeStore;
 
   const getRecipes = async () => {
     try {
@@ -100,21 +100,19 @@ const Tab = observer(() => {
       const userDoc = await getDoc(doc(db, "users", userId));
       const userData = userDoc.data();
 
-      if (userData && userData.dailyTotal) {
-        setDailyTotal(userData.dailyTotal);
-      }
+      if (!userData) return;
 
-      if (userData && userData.level) {
-        if (userData.level === "beginner") {
-          setDailyTarget(300);
-        } else if (userData.level === "intermediate") {
-          setDailyTarget(500);
-        } else {
-          setDailyTarget(800);
-        }
-      }
+      const levelTargets: Record<string, number> = {
+        beginner: 300,
+        intermediate: 500,
+        advanced: 800,
+      };
+
+      setDailyTotal(userData.dailyTotal ?? 0);
+      setDailyTarget(levelTargets[userData.level] ?? 800);
+      setStreak(userData.streak ?? 0);
     } catch (error) {
-      console.error("Error fetching user's daily total:", error);
+      console.error("Error fetching user's details:", error);
     }
   };
 

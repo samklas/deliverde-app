@@ -8,6 +8,7 @@ class ChallengeStore {
   _challenges = {
     dailyTotal: 0,
     dailyTarget: 0,
+    streak: 0,
   };
 
   get dailyTotal() {
@@ -24,6 +25,14 @@ class ChallengeStore {
 
   setDailyTarget = (dailyTarget: number) => {
     this._challenges.dailyTarget = dailyTarget;
+  };
+
+  get streak() {
+    return this._challenges.streak;
+  }
+
+  setStreak = (streak: number) => {
+    this._challenges.streak = streak;
   };
 }
 

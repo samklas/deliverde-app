@@ -5,17 +5,20 @@ import { observer } from "mobx-react-lite";
 import { View, Text, StyleSheet } from "react-native";
 
 const DailyChallengeBox = observer(() => {
-  const { dailyTotal, dailyTarget } = challengeStore;
+  const { dailyTotal, dailyTarget, streak } = challengeStore;
   return (
     <View style={styles.combinedBox}>
-      <View style={styles.streakHeader}>
-        <Ionicons name="leaf" size={24} color="#4cd964" />
-        <Text style={styles.streakCount}>7 päivän putki!</Text>
-      </View>
-      <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
+      {streak > 1 && (
+        <View>
+          <View style={styles.streakHeader}>
+            <Ionicons name="leaf" size={24} color="#4cd964" />
+            <Text style={styles.streakCount}>{streak} päivän putki!</Text>
+          </View>
+          <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
 
-      <View style={styles.goalsDivider} />
-
+          <View style={styles.goalsDivider} />
+        </View>
+      )}
       <Text style={styles.boxTitle}>Päivän tavoite</Text>
       <View style={styles.goalRow}>
         <Ionicons
