@@ -13,7 +13,8 @@ import {
 } from "react-native";
 
 const LeaderboardModal = observer(() => {
-  const { isVisible, setIsVisible } = leaderboardStore;
+  const { isVisible, setIsVisible, users } = leaderboardStore;
+
   return (
     <Modal
       animationType="slide"
@@ -62,7 +63,14 @@ const LeaderboardModal = observer(() => {
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
-                <Text>Tero79</Text>
+                <Text
+                  style={{ fontWeight: "bold", color: theme.colors.primary }}
+                >
+                  {users[1].name}
+                </Text>
+                <Text style={{ color: "#636363" }}>
+                  {users[1].totalScore} pistettä
+                </Text>
               </View>
               <View
                 style={{
@@ -80,7 +88,14 @@ const LeaderboardModal = observer(() => {
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
-                <Text>samppalinna</Text>
+                <Text
+                  style={{ fontWeight: "bold", color: theme.colors.primary }}
+                >
+                  {users[0].name}
+                </Text>
+                <Text style={{ color: "#636363" }}>
+                  {users[0].totalScore} pistettä
+                </Text>
               </View>
               <View
                 style={{
@@ -97,17 +112,24 @@ const LeaderboardModal = observer(() => {
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
-                <Text>Epsutin</Text>
+                <Text
+                  style={{ fontWeight: "bold", color: theme.colors.primary }}
+                >
+                  {users[2].name}
+                </Text>
+                <Text style={{ color: "#636363" }}>
+                  {users[2].totalScore} pistettä
+                </Text>
               </View>
             </View>
-            {/* Add more leaderboard entries here */}
-            {Array.from({ length: 7 }).map((_, index) => (
+            {/* We want to map only users by position between 4-10*/}
+            {users.slice(3, 10).map((user, index) => (
               <View key={index} style={styles.leaderboardRow}>
                 <Text style={styles.leaderboardPosition}>
-                  {index + 4}. Käyttäjä {String.fromCharCode(65 + index)}
+                  {index + 4}. {user.name}
                 </Text>
                 <Text style={styles.leaderboardScore}>
-                  {150 - index * 10} pistettä
+                  {user.totalScore} pistettä
                 </Text>
               </View>
             ))}

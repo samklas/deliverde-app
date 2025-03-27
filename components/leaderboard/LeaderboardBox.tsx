@@ -1,32 +1,47 @@
-import leaderboardStore from "@/stores/leaderboardStore";
+import leaderboardStore, { User } from "@/stores/leaderboardStore";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import { Pressable, View, Text, StyleSheet } from "react-native";
 import LeaderboardModal from "./LeaderboardModal";
+import { useEffect } from "react";
 
 const LeaderboardBox = observer(() => {
-  const { setIsVisible } = leaderboardStore;
+  const { setIsVisible, users } = leaderboardStore;
+  const sortedUsers = users.slice(0, 3);
+
   return (
     <Pressable onPress={() => setIsVisible(true)}>
       <View style={[styles.box, styles.pressableBox]}>
         <Text style={styles.boxTitle}>Tulostaulukko</Text>
-        <View style={styles.leaderboardRow}>
-          <Text style={styles.leaderboardPosition}>1. Epsutin</Text>
-          <Text style={styles.leaderboardScore}>150 pistettä</Text>
-        </View>
-        <View style={styles.leaderboardRow}>
-          <Text style={styles.leaderboardPosition}>2. Tero79</Text>
-          <Text style={styles.leaderboardScore}>120 pistettä</Text>
-        </View>
-        <View style={styles.leaderboardRow}>
-          <Text style={styles.leaderboardPosition}>3. samppalinna</Text>
-          <Text style={styles.leaderboardScore}>100 pistettä</Text>
-        </View>
+        {sortedUsers.map((user, i) => (
+          <Row
+            key={user.id}
+            name={user.name}
+            totalScore={user.totalScore}
+            position={i + 1}
+          />
+        ))}
       </View>
       <LeaderboardModal />
     </Pressable>
   );
 });
+
+type RowProps = {
+  name: string;
+  totalScore: number;
+  position: number;
+};
+const Row = ({ name, totalScore, position }: RowProps) => {
+  return (
+    <View style={styles.leaderboardRow}>
+      <Text style={styles.leaderboardPosition}>
+        {position}. {name}
+      </Text>
+      <Text style={styles.leaderboardScore}>{totalScore} pistettä</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   box: {
