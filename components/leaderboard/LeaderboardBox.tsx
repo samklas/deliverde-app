@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
-    // color: theme.colors.secondary,
+    color: "#666",
   },
 });
 

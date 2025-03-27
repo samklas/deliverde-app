@@ -68,7 +68,7 @@ const LeaderboardModal = observer(() => {
                 >
                   {users[1].name}
                 </Text>
-                <Text style={{ color: "#636363" }}>
+                <Text style={{ color: "#666" }}>
                   {users[1].totalScore} pistettä
                 </Text>
               </View>
@@ -93,7 +93,7 @@ const LeaderboardModal = observer(() => {
                 >
                   {users[0].name}
                 </Text>
-                <Text style={{ color: "#636363" }}>
+                <Text style={{ color: "#666" }}>
                   {users[0].totalScore} pistettä
                 </Text>
               </View>
@@ -117,7 +117,7 @@ const LeaderboardModal = observer(() => {
                 >
                   {users[2].name}
                 </Text>
-                <Text style={{ color: "#636363" }}>
+                <Text style={{ color: "#666" }}>
                   {users[2].totalScore} pistettä
                 </Text>
               </View>
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
-    color: theme.colors.text,
+    color: "#666",
   },
   box: {
     backgroundColor: theme.colors.background,
