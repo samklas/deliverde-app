@@ -1,6 +1,7 @@
 import leaderboardStore from "@/stores/leaderboardStore";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { observer } from "mobx-react-lite";
 import {
   Modal,
@@ -16,25 +17,94 @@ const LeaderboardModal = observer(() => {
   return (
     <Modal
       animationType="slide"
-      transparent={true}
       visible={isVisible}
       onRequestClose={() => setIsVisible(false)}
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
+          <Pressable
+            onPress={() => setIsVisible(false)}
+            style={{ position: "absolute", right: 20 }}
+          >
+            <Ionicons name="close" size={24} color={theme.colors.text} />
+          </Pressable>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Tulostaulukko</Text>
-            <Pressable onPress={() => setIsVisible(false)}>
-              <Ionicons name="close" size={24} color={theme.colors.text} />
-            </Pressable>
           </View>
           <ScrollView>
+            <View
+              style={[
+                {
+                  height: 300,
+                  marginTop: 20,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "row",
+                },
+                styles.box,
+              ]}
+            >
+              <View
+                style={[
+                  {
+                    width: 120,
+                    //margin: 5,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  },
+                ]}
+              >
+                <Ionicons name="trophy" size={32} color="silver" />
+                <Image
+                  source={require("../../assets/images/avatar2.jpg")}
+                  style={{ height: 100, width: "100%" }}
+                  contentFit="contain"
+                />
+                <Text>Tero79</Text>
+              </View>
+              <View
+                style={{
+                  width: 120,
+                  //margin: 5,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingBottom: 50,
+                }}
+              >
+                <Ionicons name="trophy" size={32} color="gold" />
+                <Image
+                  source={require("../../assets/images/avatar3.jpg")}
+                  style={{ height: 100, width: "100%" }}
+                  contentFit="contain"
+                />
+                <Text>samppalinna</Text>
+              </View>
+              <View
+                style={{
+                  width: 120,
+                  //margin: 5,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Ionicons name="trophy" size={32} color="brown" />
+                <Image
+                  source={require("../../assets/images/avatar4.jpg")}
+                  style={{ height: 100, width: "100%" }}
+                  contentFit="contain"
+                />
+                <Text>Epsutin</Text>
+              </View>
+            </View>
             {/* Add more leaderboard entries here */}
-            {Array.from({ length: 10 }).map((_, index) => (
+            {Array.from({ length: 7 }).map((_, index) => (
               <View key={index} style={styles.leaderboardRow}>
-                <Text style={styles.leaderboardPosition}>{index + 1}.</Text>
-                <Text style={styles.leaderboardName}>
-                  Käyttäjä {String.fromCharCode(65 + index)}
+                <Text style={styles.leaderboardPosition}>
+                  {index + 4}. Käyttäjä {String.fromCharCode(65 + index)}
                 </Text>
                 <Text style={styles.leaderboardScore}>
                   {150 - index * 10} pistettä
@@ -55,20 +125,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
     backgroundColor: theme.colors.background,
-    width: "90%",
-    height: "80%",
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
+    width: "100%",
+    // height: "80%",
+    //borderRadius: theme.borderRadius.large,
+    margin: 50,
+    padding: theme.spacing.large,
   },
   modalHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     marginBottom: theme.spacing.medium,
+    marginTop: 20,
   },
   modalTitle: {
     fontSize: theme.fonts.title.fontSize,
@@ -80,6 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing.small,
+    padding: theme.spacing.small,
   },
   leaderboardPosition: {
     fontSize: theme.fonts.regular.fontSize,
@@ -91,6 +163,17 @@ const styles = StyleSheet.create({
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
-    color: theme.colors.secondary,
+    color: theme.colors.text,
+  },
+  box: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });

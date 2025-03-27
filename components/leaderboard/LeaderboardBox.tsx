@@ -11,18 +11,15 @@ const LeaderboardBox = observer(() => {
       <View style={[styles.box, styles.pressableBox]}>
         <Text style={styles.boxTitle}>Tulostaulukko</Text>
         <View style={styles.leaderboardRow}>
-          <Text style={styles.leaderboardPosition}>1.</Text>
-          <Text style={styles.leaderboardName}>Käyttäjä A</Text>
+          <Text style={styles.leaderboardPosition}>1. Epsutin</Text>
           <Text style={styles.leaderboardScore}>150 pistettä</Text>
         </View>
         <View style={styles.leaderboardRow}>
-          <Text style={styles.leaderboardPosition}>2.</Text>
-          <Text style={styles.leaderboardName}>Käyttäjä B</Text>
+          <Text style={styles.leaderboardPosition}>2. Tero79</Text>
           <Text style={styles.leaderboardScore}>120 pistettä</Text>
         </View>
         <View style={styles.leaderboardRow}>
-          <Text style={styles.leaderboardPosition}>3.</Text>
-          <Text style={styles.leaderboardName}>Käyttäjä C</Text>
+          <Text style={styles.leaderboardPosition}>3. samppalinna</Text>
           <Text style={styles.leaderboardScore}>100 pistettä</Text>
         </View>
       </View>
@@ -62,7 +59,7 @@ const styles = StyleSheet.create({
   },
   leaderboardPosition: {
     fontSize: theme.fonts.regular.fontSize,
-    color: theme.colors.primary,
+    // color: theme.colors.primary,
   },
   leaderboardName: {
     fontSize: theme.fonts.regular.fontSize,
@@ -70,7 +67,7 @@ const styles = StyleSheet.create({
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
-    color: theme.colors.secondary,
+    // color: theme.colors.secondary,
   },
 });
 
