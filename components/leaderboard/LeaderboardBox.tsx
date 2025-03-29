@@ -1,7 +1,7 @@
 import leaderboardStore from "@/stores/leaderboardStore";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
-import { Pressable, View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import LeaderboardModal from "./LeaderboardModal";
 
 const LeaderboardBox = observer(() => {
@@ -12,7 +12,7 @@ const LeaderboardBox = observer(() => {
   if (!users[0].username) return null;
 
   return (
-    <Pressable onPress={() => setIsVisible(true)}>
+    <TouchableOpacity onPress={() => setIsVisible(true)}>
       <View style={[styles.box, styles.pressableBox]}>
         <Text style={styles.boxTitle}>Tulostaulukko</Text>
         {sortedUsers.map((user, i) => (
@@ -25,7 +25,7 @@ const LeaderboardBox = observer(() => {
         ))}
       </View>
       <LeaderboardModal />
-    </Pressable>
+    </TouchableOpacity>
   );
 });
 
