@@ -1,13 +1,15 @@
-import leaderboardStore, { User } from "@/stores/leaderboardStore";
+import leaderboardStore from "@/stores/leaderboardStore";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import { Pressable, View, Text, StyleSheet } from "react-native";
 import LeaderboardModal from "./LeaderboardModal";
-import { useEffect } from "react";
 
 const LeaderboardBox = observer(() => {
   const { setIsVisible, users } = leaderboardStore;
   const sortedUsers = users.slice(0, 3);
+
+  // todo: better way to check that users is initialized
+  if (!users[0].username) return null;
 
   return (
     <Pressable onPress={() => setIsVisible(true)}>
@@ -15,9 +17,9 @@ const LeaderboardBox = observer(() => {
         <Text style={styles.boxTitle}>Tulostaulukko</Text>
         {sortedUsers.map((user, i) => (
           <Row
-            key={user.id}
-            name={user.name}
-            totalScore={user.totalScore}
+            key={user.uid}
+            name={user.username}
+            totalScore={user.points}
             position={i + 1}
           />
         ))}

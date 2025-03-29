@@ -15,6 +15,8 @@ import {
 const LeaderboardModal = observer(() => {
   const { isVisible, setIsVisible, users } = leaderboardStore;
 
+  // if (!users[0].username) return null;
+
   return (
     <Modal
       animationType="slide"
@@ -66,10 +68,10 @@ const LeaderboardModal = observer(() => {
                 <Text
                   style={{ fontWeight: "bold", color: theme.colors.primary }}
                 >
-                  {users[1].name}
+                  {users[1].username}
                 </Text>
                 <Text style={{ color: "#666" }}>
-                  {users[1].totalScore} pistettä
+                  {users[1].points} pistettä
                 </Text>
               </View>
               <View
@@ -91,10 +93,10 @@ const LeaderboardModal = observer(() => {
                 <Text
                   style={{ fontWeight: "bold", color: theme.colors.primary }}
                 >
-                  {users[0].name}
+                  {users[0].username}
                 </Text>
                 <Text style={{ color: "#666" }}>
-                  {users[0].totalScore} pistettä
+                  {users[0].points} pistettä
                 </Text>
               </View>
               <View
@@ -115,21 +117,21 @@ const LeaderboardModal = observer(() => {
                 <Text
                   style={{ fontWeight: "bold", color: theme.colors.primary }}
                 >
-                  {users[2].name}
+                  {users[2].username}
                 </Text>
                 <Text style={{ color: "#666" }}>
-                  {users[2].totalScore} pistettä
+                  {users[2].points} pistettä
                 </Text>
               </View>
             </View>
-            {/* We want to map only users by position between 4-10*/}
+            {/* Map users by position between 4-10*/}
             {users.slice(3, 10).map((user, index) => (
               <View key={index} style={styles.leaderboardRow}>
                 <Text style={styles.leaderboardPosition}>
-                  {index + 4}. {user.name}
+                  {index + 4}. {user.username}
                 </Text>
                 <Text style={styles.leaderboardScore}>
-                  {user.totalScore} pistettä
+                  {user.points} pistettä
                 </Text>
               </View>
             ))}

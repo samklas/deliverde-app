@@ -19,15 +19,18 @@ import {
   QuerySnapshot,
   getDoc,
   doc,
+  limit,
 } from "firebase/firestore";
 import { auth, db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
 import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
-import { getImageUrl } from "@/utils/utils";
+import { getCurrentYearMonth, getImageUrl } from "@/utils/utils";
 import challengeStore from "@/stores/challengeStore";
 import LeaderboardBox from "@/components/leaderboard/LeaderboardBox";
 import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
 import LoadingIndicator from "@/components/common/LoadingIndicator";
+import leaderboardStore from "@/stores/leaderboardStore";
+import { LeaderboardUser } from "@/types/users";
 
 const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -40,6 +43,7 @@ const Tab = observer(() => {
     setFavoriteRecipes,
   } = recipeStore;
   const { setDailyTotal, setDailyTarget, setStreak } = challengeStore;
+  const { setUsers } = leaderboardStore;
 
   const getRecipes = async () => {
     try {
@@ -116,6 +120,22 @@ const Tab = observer(() => {
     }
   };
 
+  const getLeaderboardUsers = async () => {
+    const currentYearMonth = getCurrentYearMonth();
+    //todo: limit 100 rows?
+    const querySnapshot = await getDocs(
+      collection(db, `leaderboard/${currentYearMonth}/users`)
+    );
+    const leaderboardUsers: LeaderboardUser[] = querySnapshot.docs.map(
+      (doc) => ({
+        uid: doc.data().uid,
+        username: doc.data().username,
+        points: doc.data().points,
+      })
+    );
+    setUsers(leaderboardUsers);
+  };
+
   // real time listener for user's favorite recipes
   useEffect(() => {
     const userId = auth.currentUser?.uid;
@@ -138,6 +158,7 @@ const Tab = observer(() => {
       setIsLoading(true);
       await getRecipes();
       await getUserDetails();
+      await getLeaderboardUsers();
       setIsLoading(false);
     };
 
@@ -157,6 +178,7 @@ const Tab = observer(() => {
           <ScrollView showsVerticalScrollIndicator={false}>
             <DailyChallengeBox />
             <LeaderboardBox />
+
             {recipeOfMonth && (
               <RecipeBoxV2
                 recipe={recipeOfMonth}

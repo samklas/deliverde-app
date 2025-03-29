@@ -19,6 +19,7 @@ import {
 import { db } from "@/firebaseConfig";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getCurrentYearMonth } from "@/utils/utils";
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
@@ -58,7 +59,12 @@ export default function UserDetails() {
           level: level,
           createdAt: new Date(),
           uid: uid,
+          dailyTotal: 0,
+          score: 0,
+          streak: 0,
         });
+
+        await addUserToLeaderBoard(uid);
 
         await AsyncStorage.multiSet([
           ["id", uid],
@@ -73,6 +79,15 @@ export default function UserDetails() {
         setIsLoading(false);
       }
     }
+  };
+
+  const addUserToLeaderBoard = async (uid: string) => {
+    const currentYearMonth = getCurrentYearMonth();
+    await setDoc(doc(db, `leaderboard/${currentYearMonth}/users`, uid), {
+      username: username,
+      uid: uid,
+      points: 0,
+    });
   };
 
   return (
