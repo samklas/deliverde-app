@@ -15,7 +15,19 @@ import {
 const LeaderboardModal = observer(() => {
   const { isVisible, setIsVisible, users } = leaderboardStore;
 
-  // if (!users[0].username) return null;
+  const getAvatar = (avatarId: string) => {
+    if (avatarId === "1") {
+      return require("../../assets/images/avatar2.jpg");
+    }
+    if (avatarId === "2") {
+      return require("../../assets/images/avatar3.jpg");
+    }
+    if (avatarId === "3") {
+      return require("../../assets/images/avatar4.jpg");
+    }
+  };
+
+  if (!users[0].username) return null;
 
   return (
     <Modal
@@ -61,7 +73,7 @@ const LeaderboardModal = observer(() => {
               >
                 <Ionicons name="trophy" size={32} color="silver" />
                 <Image
-                  source={require("../../assets/images/avatar2.jpg")}
+                  source={getAvatar(users[1].avatarId)}
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
@@ -86,7 +98,7 @@ const LeaderboardModal = observer(() => {
               >
                 <Ionicons name="trophy" size={32} color="gold" />
                 <Image
-                  source={require("../../assets/images/avatar3.jpg")}
+                  source={getAvatar(users[0].avatarId)}
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
@@ -110,7 +122,7 @@ const LeaderboardModal = observer(() => {
               >
                 <Ionicons name="trophy" size={32} color="brown" />
                 <Image
-                  source={require("../../assets/images/avatar4.jpg")}
+                  source={getAvatar(users[2].avatarId)}
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />

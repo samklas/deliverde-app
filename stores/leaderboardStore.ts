@@ -1,7 +1,9 @@
 import { LeaderboardUser } from "@/types/users";
 import { makeAutoObservable } from "mobx";
 
-const initUsers: LeaderboardUser[] = [{ uid: "", username: "", points: 0 }];
+const initUsers: LeaderboardUser[] = [
+  { uid: "", avatarId: "", username: "", points: 0 },
+];
 
 class LeaderboardStore {
   constructor() {

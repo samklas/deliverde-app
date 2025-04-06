@@ -1,4 +1,5 @@
 import { auth, db } from "@/firebaseConfig";
+import userStore from "@/stores/userStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -6,6 +7,7 @@ import { View, Text, StyleSheet, Image, Button, Alert } from "react-native";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
+  const { avatarId } = userStore;
 
   const handleLogout = async () => {
     Alert.alert(
@@ -54,13 +56,22 @@ export default function Tab() {
     getUsername();
   }, []);
 
+  const getAvatar = () => {
+    if (avatarId === "1") {
+      return require("../../assets/images/avatar2.jpg");
+    }
+    if (avatarId === "2") {
+      return require("../../assets/images/avatar3.jpg");
+    }
+    if (avatarId === "3") {
+      return require("../../assets/images/avatar4.jpg");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image
-          source={require("../../assets/images/herb.jpg")}
-          style={styles.avatar}
-        />
+        <Image source={getAvatar()} style={styles.avatar} />
         <Text style={styles.username}>{username}</Text>
       </View>
 

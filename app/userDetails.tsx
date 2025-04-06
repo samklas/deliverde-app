@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Pressable,
   Alert,
+  Image,
 } from "react-native";
 import { useState } from "react";
 import { auth } from "@/firebaseConfig";
@@ -20,12 +21,28 @@ import { db } from "@/firebaseConfig";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getCurrentYearMonth } from "@/utils/utils";
+import userStore from "@/stores/userStore";
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
   const [level, setLevel] = useState("aloittelija");
   const [isLoading, setIsLoading] = useState(false);
-  const levels = ["aloittelija", "keskitaso", "kokenut"];
+  const levels = ["beginner", "intermediate", "advanced"];
+  const [selectedAvatar, setSelectedAvatar] = useState("");
+  const { setAvatarId } = userStore;
+  const avatar1 = {
+    id: "1",
+    item: require("@/assets/images/avatar2.jpg"),
+  };
+  const avatar2 = {
+    id: "2",
+    item: require("@/assets/images/avatar3.jpg"),
+  };
+  const avatar3 = {
+    id: "3",
+    item: require("@/assets/images/avatar4.jpg"),
+  };
+  const avatars = [avatar1, avatar2, avatar3];
 
   const isUsernameAvailable = async (username: string) => {
     const usersRef = collection(db, "users");
@@ -62,6 +79,7 @@ export default function UserDetails() {
           dailyTotal: 0,
           score: 0,
           streak: 0,
+          avatarId: selectedAvatar,
         });
 
         await addUserToLeaderBoard(uid);
@@ -70,6 +88,8 @@ export default function UserDetails() {
           ["id", uid],
           ["username", username],
         ]);
+
+        setAvatarId(selectedAvatar);
 
         router.push("/(tabs)");
       } catch (error) {
@@ -82,10 +102,10 @@ export default function UserDetails() {
   };
 
   const addUserToLeaderBoard = async (uid: string) => {
-    const currentYearMonth = getCurrentYearMonth();
-    await setDoc(doc(db, `leaderboard/${currentYearMonth}/users`, uid), {
+    await setDoc(doc(db, `leaderboard`, uid), {
       username: username,
       uid: uid,
+      avatarId: selectedAvatar,
       points: 0,
     });
   };
@@ -124,6 +144,21 @@ export default function UserDetails() {
         ))}
       </View>
 
+      <Text style={styles.levelLabel}>Valitse avatarisi</Text>
+      <View style={styles.avatarSelection}>
+        {avatars.map((avatar, index) => (
+          <Pressable
+            key={index}
+            onPress={() => setSelectedAvatar(avatar.id)}
+            style={[
+              styles.avatarButton,
+              selectedAvatar === avatar.id && styles.selectedAvatar,
+            ]}
+          >
+            <Image source={avatar.item} style={styles.avatarImage} />
+          </Pressable>
+        ))}
+      </View>
       <Pressable
         style={styles.continueButton}
         onPress={addUser}
@@ -230,5 +265,24 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  avatarSelection: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
+  },
+  avatarButton: {
+    padding: 5,
+    borderWidth: 2,
+    borderColor: "transparent",
+    borderRadius: 50,
+  },
+  selectedAvatar: {
+    borderColor: "#0c4c25",
+  },
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
 });

@@ -31,6 +31,7 @@ import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
 import LoadingIndicator from "@/components/common/LoadingIndicator";
 import leaderboardStore from "@/stores/leaderboardStore";
 import { LeaderboardUser } from "@/types/users";
+import userStore from "@/stores/userStore";
 
 const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -42,7 +43,8 @@ const Tab = observer(() => {
     recipes,
     setFavoriteRecipes,
   } = recipeStore;
-  const { setDailyTotal, setDailyTarget, setStreak } = challengeStore;
+  const { setDailyTotal, setDailyTarget, setStreak } = challengeStore; // todo: change to user store
+  const { setAvatarId } = userStore;
   const { setUsers } = leaderboardStore;
 
   const getRecipes = async () => {
@@ -115,20 +117,19 @@ const Tab = observer(() => {
       setDailyTotal(userData.dailyTotal ?? 0);
       setDailyTarget(levelTargets[userData.level] ?? 800);
       setStreak(userData.streak ?? 0);
+      setAvatarId(userData.avatarId);
     } catch (error) {
       console.error("Error fetching user's details:", error);
     }
   };
 
   const getLeaderboardUsers = async () => {
-    const currentYearMonth = getCurrentYearMonth();
     //todo: limit 100 rows?
-    const querySnapshot = await getDocs(
-      collection(db, `leaderboard/${currentYearMonth}/users`)
-    );
+    const querySnapshot = await getDocs(collection(db, `leaderboard`));
     const leaderboardUsers: LeaderboardUser[] = querySnapshot.docs.map(
       (doc) => ({
         uid: doc.data().uid,
+        avatarId: doc.data().avatarId,
         username: doc.data().username,
         points: doc.data().points,
       })
