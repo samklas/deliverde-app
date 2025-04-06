@@ -1,9 +1,19 @@
-import { auth, db } from "@/firebaseConfig";
+import { auth } from "@/firebaseConfig";
 import userStore from "@/stores/userStore";
+import { theme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, Button, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Alert,
+  ImageBackground,
+  Pressable,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
@@ -52,10 +62,6 @@ export default function Tab() {
     }
   };
 
-  useEffect(() => {
-    getUsername();
-  }, []);
-
   const getAvatar = () => {
     if (avatarId === "1") {
       return require("../../assets/images/avatar2.jpg");
@@ -68,33 +74,88 @@ export default function Tab() {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.profileHeader}>
-        <Image source={getAvatar()} style={styles.avatar} />
-        <Text style={styles.username}>{username}</Text>
-      </View>
+  useEffect(() => {
+    getUsername();
+  }, []);
 
-      <View style={styles.goalsSection}>
-        <Text style={styles.sectionTitle}>Päivän tavoitteet</Text>
-        <View style={styles.goalItem}>
-          <Text>🎯 Päivän tavoite {dailyTarget}g</Text>
+  return (
+    <ImageBackground
+      source={require("../../assets/images/background.jpeg")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.profileHeader}>
+            <Image source={getAvatar()} style={styles.avatar} />
+            <Text style={styles.username}>{username}</Text>
+          </View>
+
+          <View style={[styles.box, { marginTop: 50 }]}>
+            <Text style={styles.sectionTitle}>Päivän tavoite</Text>
+            <View style={styles.goalItem}>
+              <Text> Syö {dailyTarget}g vihanneksia 🥬</Text>
+            </View>
+          </View>
+          <View
+            style={[
+              styles.box,
+              {
+                flex: 0,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              },
+            ]}
+          >
+            <Text>Lähetä palautetta</Text>
+            <Ionicons name="arrow-forward" size={20} />
+          </View>
+
+          <Pressable
+            style={{
+              alignItems: "center",
+              marginBottom: 30,
+              flex: 1,
+              justifyContent: "flex-end",
+            }}
+            onPress={async () => await handleLogout()}
+          >
+            <Text
+              style={{
+                color: theme.colors.primary,
+                fontWeight: "500",
+                borderWidth: 2,
+                borderColor: theme.colors.primary,
+                borderRadius: 20,
+                paddingTop: 10,
+                paddingBottom: 10,
+                paddingLeft: 20,
+                paddingRight: 20,
+              }}
+            >
+              Kirjaudu ulos
+            </Text>
+          </Pressable>
         </View>
       </View>
-      <Button
-        title="Kirjaudu ulos"
-        onPress={async () => {
-          await handleLogout();
-        }}
-      />
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
+    marginTop: 50,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: theme.colors.overlay,
+    padding: theme.spacing.medium,
   },
   profileHeader: {
     alignItems: "center",
@@ -105,6 +166,11 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     marginBottom: 10,
+    // borderWidth: 5,
+
+    // borderColor: theme.colors.primary,
+    // // borderRadius: 25,
+    // // padding: 10,
   },
   username: {
     fontSize: 24,
@@ -113,16 +179,29 @@ const styles = StyleSheet.create({
   },
   goalsSection: {
     marginTop: 20,
+    backgroundColor: theme.colors.background,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 15,
+    color: theme.colors.primary,
   },
   goalItem: {
-    backgroundColor: "#f0f0f0",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+    // backgroundColor: theme.colors.background,
+    // padding: 15,
+    // borderRadius: 10,
+    // marginBottom: 10,
+  },
+  box: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });
