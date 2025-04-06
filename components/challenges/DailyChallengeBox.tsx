@@ -1,11 +1,11 @@
-import challengeStore from "@/stores/challengeStore";
+import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { observer } from "mobx-react-lite";
 import { View, Text, StyleSheet } from "react-native";
 
 const DailyChallengeBox = observer(() => {
-  const { dailyTotal, dailyTarget, streak } = challengeStore;
+  const { dailyTotal, dailyTarget, streak } = userStore;
   return (
     <View style={styles.combinedBox}>
       {streak > 1 && (

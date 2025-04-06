@@ -19,10 +19,11 @@ import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
 import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
-import challengeStore from "@/stores/challengeStore";
+
+import userStore from "@/stores/userStore";
 
 const Tab = observer(() => {
-  const { dailyTotal, setDailyTotal, dailyTarget } = challengeStore;
+  const { dailyTotal, setDailyTotal, dailyTarget } = userStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
   const [searchQuery, setSearchQuery] = useState("");

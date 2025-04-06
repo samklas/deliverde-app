@@ -25,7 +25,7 @@ import { auth, db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
 import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
 import { getCurrentYearMonth, getImageUrl } from "@/utils/utils";
-import challengeStore from "@/stores/challengeStore";
+
 import LeaderboardBox from "@/components/leaderboard/LeaderboardBox";
 import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
 import LoadingIndicator from "@/components/common/LoadingIndicator";
@@ -43,7 +43,7 @@ const Tab = observer(() => {
     recipes,
     setFavoriteRecipes,
   } = recipeStore;
-  const { setDailyTotal, setDailyTarget, setStreak } = challengeStore; // todo: change to user store
+  const { setDailyTotal, setDailyTarget, setStreak } = userStore; // todo: change to user store
   const { setAvatarId } = userStore;
   const { setUsers } = leaderboardStore;
 

@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, Image, Button, Alert } from "react-native";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
-  const { avatarId } = userStore;
+  const { avatarId, dailyTarget } = userStore;
 
   const handleLogout = async () => {
     Alert.alert(
@@ -78,13 +78,7 @@ export default function Tab() {
       <View style={styles.goalsSection}>
         <Text style={styles.sectionTitle}>Päivän tavoitteet</Text>
         <View style={styles.goalItem}>
-          <Text>🎯 1kg vihanneksia</Text>
-        </View>
-        <View style={styles.goalItem}>
-          <Text>💪 Exercise 3 times a week</Text>
-        </View>
-        <View style={styles.goalItem}>
-          <Text>📚 Read 12 books this year</Text>
+          <Text>🎯 Päivän tavoite {dailyTarget}g</Text>
         </View>
       </View>
       <Button

@@ -4,7 +4,7 @@ import { theme } from "@/theme";
 import { Vegetable } from "@/types/vegetable";
 import { Picker } from "@react-native-picker/picker";
 import { observer } from "mobx-react-lite";
-import challengeStore from "@/stores/challengeStore";
+import userStore from "@/stores/userStore";
 
 type Props = {
   isVisible: boolean;
@@ -19,7 +19,7 @@ const AddVegetableModal = observer(
   ({ isVisible, vegetable, onClose, setTotal, setLastUsed }: Props) => {
     const [selectedInteger, setSelectedInteger] = useState("0");
     const [selectedDecimal, setSelectedDecimal] = useState("0");
-    const { dailyTotal, setDailyTotal } = challengeStore;
+    const { dailyTotal, setDailyTotal } = userStore;
 
     const handleAddVegetable = async () => {
       //setTotal((total) => total + calculateTotalGrams());
