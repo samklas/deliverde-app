@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 10,
     marginTop: 50,
   },
   overlay: {
@@ -168,11 +167,6 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     marginBottom: 10,
-    // borderWidth: 5,
-
-    // borderColor: theme.colors.primary,
-    // // borderRadius: 25,
-    // // padding: 10,
   },
   username: {
     fontSize: 24,
@@ -189,12 +183,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: theme.colors.primary,
   },
-  goalItem: {
-    // backgroundColor: theme.colors.background,
-    // padding: 15,
-    // borderRadius: 10,
-    // marginBottom: 10,
-  },
+  goalItem: {},
   box: {
     backgroundColor: theme.colors.background,
     borderRadius: theme.borderRadius.large,
