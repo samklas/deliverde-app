@@ -32,28 +32,18 @@ const Feedback = () => {
     <View style={styles.container}>
       <Text style={styles.heading}>Palautteesi on meille tärkeää!</Text>
       <Text style={{ textAlign: "center" }}>
-        Haluamme jatkuvasti kehittää palveluamme ja tehdä siitä entistäkin
+        Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin
         paremman. Siksi arvostamme suuresti jokaista kommenttia, risua ja
-        ruusua. Kiitos, että autat meitä parantamaan! 💚
+        ruusua.
       </Text>
-      {/* <Text style={styles.label}>Miten arvioisit kokemuksesi? (1-5)</Text>
-      <View style={styles.ratingRow}>
-        {[1, 2, 3, 4, 5].map((num) => (
-          <TouchableOpacity
-            key={num}
-            style={[styles.ratingButton, rating === num && styles.selected]}
-            onPress={() => setRating(num)}
-          >
-            <Text style={styles.ratingText}>{num}</Text>
-          </TouchableOpacity>
-        ))}
-      </View> */}
-
-      {/* <Text style={styles.label}>Vapaa palaute</Text> */}
+      <Text style={{ textAlign: "center", marginTop: 10 }}>
+        Kiitos, että autat meitä parantamaan! 💚
+      </Text>
       <TextInput
         style={styles.input}
         multiline
         placeholder="Kirjoita palautteesi tähän..."
+        placeholderTextColor="#ccc"
         value={feedback}
         onChangeText={setFeedback}
       />
@@ -66,7 +56,14 @@ const Feedback = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 20, marginTop: 50 },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    marginTop: 0,
+    width: "100%",
+  },
   heading: {
     fontSize: 24,
     fontWeight: "bold",
@@ -90,20 +87,23 @@ const styles = StyleSheet.create({
   selected: { backgroundColor: "#5cb85c" },
   ratingText: { fontSize: 16 },
   input: {
-    marginTop: 40,
+    marginTop: 20,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     height: 100,
+    width: "100%",
     padding: 10,
     textAlignVertical: "top",
+    backgroundColor: "#fff",
   },
   submitButton: {
-    marginTop: 40,
+    marginTop: 50,
     backgroundColor: theme.colors.secondary,
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+    width: "100%",
   },
   submitText: { color: "white", fontWeight: "bold", fontSize: 16 },
 });
