@@ -1,57 +1,70 @@
+import { db } from "@/firebaseConfig";
 import { theme } from "@/theme";
+import { addDoc, collection } from "firebase/firestore";
 import { useState } from "react";
 import {
   Alert,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
 const Feedback = () => {
-  const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
 
-  const handleSubmit = () => {
-    if (!rating) {
-      Alert.alert("Valitse arvosana!");
+  const handleSubmit = async () => {
+    if (feedback === "") {
+      Alert.alert("Palaute puuttuu!");
       return;
     }
 
-    // Täällä voisit lähettää tiedot esim. Firebaseen tai API:in
-    Alert.alert(
-      "Kiitos palautteestasi!",
-      `Arvosana: ${rating}\nPalaute: ${feedback}`
-    );
-    setRating(0);
-    setFeedback("");
+    try {
+      // Add a new document with a generated ID
+      await addDoc(collection(db, "leaderboard"), {
+        createdAt: new Date(),
+        feedback: feedback,
+      });
+      Alert.alert("Kiitos palautteestasi!");
+      setFeedback("");
+    } catch (error) {
+      Alert.alert("Virhe tallennettaessa palautetta! Yritä uudestaan.");
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Palautteesi on meille tärkeää!</Text>
-      <Text style={{ textAlign: "center" }}>
-        Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin
-        paremman. Siksi arvostamme suuresti jokaista kommenttia, risua ja
-        ruusua.
-      </Text>
-      <Text style={{ textAlign: "center", marginTop: 10 }}>
-        Kiitos, että autat meitä parantamaan! 💚
-      </Text>
-      <TextInput
-        style={styles.input}
-        multiline
-        placeholder="Kirjoita palautteesi tähän..."
-        placeholderTextColor="#ccc"
-        value={feedback}
-        onChangeText={setFeedback}
-      />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Palautteesi on meille tärkeää!</Text>
+        <Text style={{ textAlign: "center" }}>
+          Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin
+          paremman. Siksi arvostamme suuresti jokaista kommenttia, risua ja
+          ruusua.
+        </Text>
+        <Text style={{ textAlign: "center", marginTop: 10 }}>
+          Kiitos, että autat meitä parantamaan! 💚
+        </Text>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Lähetä</Text>
-      </TouchableOpacity>
-    </View>
+        <TextInput
+          style={styles.input}
+          multiline
+          placeholder="Kirjoita palautteesi tähän..."
+          placeholderTextColor="#ccc"
+          value={feedback}
+          onChangeText={setFeedback}
+        />
+
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={() => handleSubmit()}
+        >
+          <Text style={styles.submitText}>Lähetä</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
