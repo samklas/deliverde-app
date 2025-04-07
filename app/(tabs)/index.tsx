@@ -5,6 +5,7 @@ import {
   ImageBackground,
   ScrollView,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo/vector-icons
 import { theme } from "@/theme";
@@ -32,6 +33,7 @@ import LoadingIndicator from "@/components/common/LoadingIndicator";
 import leaderboardStore from "@/stores/leaderboardStore";
 import { LeaderboardUser } from "@/types/users";
 import userStore from "@/stores/userStore";
+import { useRouter } from "expo-router";
 
 const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -46,6 +48,8 @@ const Tab = observer(() => {
   const { setDailyTotal, setDailyTarget, setStreak } = userStore; // todo: change to user store
   const { setAvatarId } = userStore;
   const { setUsers } = leaderboardStore;
+
+  const router = useRouter();
 
   const getRecipes = async () => {
     try {
@@ -187,6 +191,21 @@ const Tab = observer(() => {
                 isRecipeOfMonth
               />
             )}
+            <Pressable
+              style={[
+                {
+                  flex: 0,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                },
+                styles.box,
+              ]}
+              onPress={() => router.push("/feedback")}
+            >
+              <Text>Lähetä palautetta</Text>
+              <Ionicons name="arrow-forward" size={20} />
+            </Pressable>
           </ScrollView>
         )}
       </View>
@@ -205,5 +224,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.overlay,
     padding: theme.spacing.medium,
+  },
+  box: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });

@@ -2,7 +2,7 @@ import { auth } from "@/firebaseConfig";
 import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { Link, router, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 export default function Tab() {
   const [username, setUsername] = useState("");
   const { avatarId, dailyTarget } = userStore;
+  const router = useRouter();
 
   const handleLogout = async () => {
     Alert.alert(
@@ -97,20 +98,21 @@ export default function Tab() {
               <Text> Syö {dailyTarget}g vihanneksia 🥬</Text>
             </View>
           </View>
-          <View
+          <Pressable
             style={[
-              styles.box,
               {
                 flex: 0,
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
               },
+              styles.box,
             ]}
+            onPress={() => router.push("/feedback")}
           >
             <Text>Lähetä palautetta</Text>
             <Ionicons name="arrow-forward" size={20} />
-          </View>
+          </Pressable>
 
           <Pressable
             style={{
