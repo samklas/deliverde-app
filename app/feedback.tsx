@@ -24,7 +24,7 @@ const Feedback = () => {
 
     try {
       // Add a new document with a generated ID
-      await addDoc(collection(db, "leaderboard"), {
+      await addDoc(collection(db, "feedback"), {
         createdAt: new Date(),
         feedback: feedback,
       });
