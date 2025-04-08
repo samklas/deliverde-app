@@ -9,7 +9,7 @@ const LeaderboardBox = observer(() => {
   const sortedUsers = users.slice(0, 3);
 
   // todo: better way to check that users is initialized
-  if (!users[0].username) return null;
+  //if (!users[0].username) return null;
 
   return (
     <TouchableOpacity onPress={() => setIsVisible(true)}>
