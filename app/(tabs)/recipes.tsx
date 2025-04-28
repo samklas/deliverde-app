@@ -3,62 +3,28 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ImageBackground,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { useEffect, useState } from "react";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  onSnapshot,
-  setDoc,
-} from "firebase/firestore";
-import { auth, db, storage } from "@/firebaseConfig";
-import { getDownloadURL, ref } from "firebase/storage";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { auth, db } from "@/firebaseConfig";
 import React from "react";
-import RecipeModal from "@/components/recipe/RecipeModal";
-import AddRecipeModal from "@/components/recipe/AddRecipeModal";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
-import RecipeBox from "@/components/recipe/RecipeBox";
 import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
 import { getImageUrl } from "@/utils/utils";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function Tab() {
   const [isLoading, setIsLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [userFavoriteRecipes, setUserFavoriteRecipes] = useState<Recipe[]>([]);
-  const [activeSection, setActiveSection] = useState("all"); // 'all' or 'favorites'
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isAddRecipeModalVisible, setIsAddRecipeModalVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState("all");
 
-  useEffect(() => {
-    const userId = auth.currentUser?.uid;
-    const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
-
-    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      let ids: string[] = [];
-      for (const doc of snapshot.docs) {
-        ids.push(doc.id);
-      }
-
-      filterFavoriteRecipes(ids);
-    });
-
-    return () => unsubscribe();
-  }, [recipes]);
-
-  useEffect(() => {
-    const initRecipes = async () => {
-      fetchRecipes();
-    };
-
-    initRecipes();
-  }, []);
+  const router = useRouter();
 
   const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
     const filteredRecipes = recipes.filter((recipe) =>
@@ -99,13 +65,29 @@ export default function Tab() {
     }
   };
 
-  const openAddRecipeModal = () => {
-    setIsAddRecipeModalVisible(true);
-  };
+  useEffect(() => {
+    const userId = auth.currentUser?.uid;
+    const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
 
-  const closeAddRecipeModal = () => {
-    setIsAddRecipeModalVisible(false);
-  };
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      let ids: string[] = [];
+      for (const doc of snapshot.docs) {
+        ids.push(doc.id);
+      }
+
+      filterFavoriteRecipes(ids);
+    });
+
+    return () => unsubscribe();
+  }, [recipes]);
+
+  useEffect(() => {
+    const initRecipes = async () => {
+      fetchRecipes();
+    };
+
+    initRecipes();
+  }, []);
 
   return (
     <ImageBackground
@@ -115,7 +97,7 @@ export default function Tab() {
     >
       <View style={styles.overlay}>
         <View style={styles.tabButtons}>
-          <TouchableOpacity
+          <Pressable
             style={[
               styles.tabButton,
               activeSection === "all" && styles.activeTab,
@@ -124,9 +106,16 @@ export default function Tab() {
               setActiveSection("all");
             }}
           >
-            <Text style={styles.tabText}>Reseptit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+            <Text
+              style={[
+                styles.tabText,
+                activeSection === "all" && styles.activeText,
+              ]}
+            >
+              Reseptit
+            </Text>
+          </Pressable>
+          <Pressable
             style={[
               styles.tabButton,
               activeSection === "favorites" && styles.activeTab,
@@ -135,8 +124,15 @@ export default function Tab() {
               setActiveSection("favorites");
             }}
           >
-            <Text style={styles.tabText}>Omat suosikit</Text>
-          </TouchableOpacity>
+            <Text
+              style={[
+                styles.tabText,
+                activeSection === "favorites" && styles.activeText,
+              ]}
+            >
+              Omat suosikit
+            </Text>
+          </Pressable>
         </View>
         <ScrollView
           style={styles.recipeList}
@@ -156,22 +152,26 @@ export default function Tab() {
             )
           )}
         </ScrollView>
-
-        <TouchableOpacity style={styles.addButton} onPress={openAddRecipeModal}>
-          <Text style={styles.addButtonText}>Lisää resepti</Text>
-        </TouchableOpacity>
+        <Pressable
+          style={[
+            {
+              flex: 0,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginHorizontal: 15,
+              marginTop: 15,
+            },
+            styles.box,
+          ]}
+          onPress={() => router.push("/recipeSuggestionV2")}
+        >
+          <Text style={{ color: "#0c4c25", fontWeight: "bold" }}>
+            Ehdota reseptiä
+          </Text>
+          <Ionicons name="arrow-forward" size={20} color="#0c4c25" />
+        </Pressable>
       </View>
-
-      <RecipeModal
-        selectedRecipe={selectedRecipe}
-        isVisible={isModalVisible}
-        setIsVisible={setIsModalVisible}
-      />
-
-      <AddRecipeModal
-        isVisible={isAddRecipeModalVisible}
-        onClose={closeAddRecipeModal}
-      />
     </ImageBackground>
   );
 }
@@ -184,38 +184,37 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
-    padding: 16,
   },
   tabButtons: {
     flexDirection: "row",
-    marginBottom: 16,
   },
   tabButton: {
     flex: 1,
-    padding: 12,
+    padding: 15,
     alignItems: "center",
-    borderRadius: 16,
-    marginHorizontal: 5,
     backgroundColor: "white",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
     elevation: 3,
+    borderBottomWidth: 2,
+    borderBottomColor: "#ccc",
+    color: "#ccc",
   },
   activeTab: {
-    backgroundColor: "#4cd964",
+    borderBottomWidth: 4,
+    borderBottomColor: "#4cd964",
+  },
+  activeText: {
+    fontWeight: "bold",
   },
   tabText: {
     fontSize: 16,
-    fontWeight: "bold",
     color: "#0c4c25",
   },
   recipeList: {
     flex: 1,
+    padding: theme.spacing.medium,
   },
   box: {
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -251,15 +250,16 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   addButton: {
-    position: "absolute",
-    bottom: 30,
-    right: 30,
+    // position: "absolute",
+    // bottom: 30,
+    // right: 30,
     backgroundColor: "#4cd964",
     padding: 15,
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
     elevation: 5,
+    marginBottom: 10,
   },
   addButtonText: {
     color: "white",

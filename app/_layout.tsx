@@ -14,7 +14,10 @@ export default function RootLayout() {
   return (
     <Stack>
       {/* <Stack.Screen name="splash" options={{ headerShown: false }} /> */}
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="index"
+        options={{ headerShown: false, headerTintColor: "#0c4c25" }}
+      />
       <Stack.Screen
         name="login"
         options={{ headerShown: false, title: "Kirjaudu" }}
@@ -25,7 +28,7 @@ export default function RootLayout() {
           headerShown: true,
           title: "",
           headerBackTitle: "takaisin",
-          headerTintColor: "green",
+          headerTintColor: "#0c4c25",
         }}
       />
       <Stack.Screen
@@ -38,7 +41,16 @@ export default function RootLayout() {
           headerShown: true,
           title: "",
           headerBackTitle: "takaisin",
-          headerTintColor: "green",
+          headerTintColor: "#0c4c25",
+        }}
+      />
+      <Stack.Screen
+        name="recipeSuggestionV2"
+        options={{
+          headerShown: true,
+          title: "",
+          headerBackTitle: "takaisin",
+          headerTintColor: "#0c4c25",
         }}
       />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
