@@ -8,8 +8,8 @@ const LeaderboardBox = observer(() => {
   const { setIsVisible, users } = leaderboardStore;
   const sortedUsers = users.slice(0, 3);
 
-  // todo: better way to check that users is initialized
-  //if (!users[0].username) return null;
+  // Only render if we have valid users with non-empty uids
+  //if (!users.length || !users[0].uid) return null;
 
   return (
     <TouchableOpacity onPress={() => setIsVisible(true)}>
@@ -17,7 +17,7 @@ const LeaderboardBox = observer(() => {
         <Text style={styles.boxTitle}>Tulostaulukko</Text>
         {sortedUsers.map((user, i) => (
           <Row
-            key={user.uid}
+            key={user.uid || i}
             name={user.username}
             totalScore={user.points}
             position={i + 1}
