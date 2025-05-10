@@ -11,9 +11,11 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
+import { auth } from "@/firebaseConfig";
 
 const LeaderboardModal = observer(() => {
   const { isVisible, setIsVisible, users } = leaderboardStore;
+  const currentUserId = auth.currentUser?.uid;
 
   const getAvatar = (avatarId: string) => {
     if (avatarId === "1") {
@@ -28,6 +30,12 @@ const LeaderboardModal = observer(() => {
   };
 
   if (!users[0].username) return null;
+
+  // Find current user's position
+  const currentUserIndex = users.findIndex(
+    (user) => user.uid === currentUserId
+  );
+  const isCurrentUserInTop10 = currentUserIndex < 10;
 
   return (
     <Modal
@@ -64,11 +72,11 @@ const LeaderboardModal = observer(() => {
                 style={[
                   {
                     width: 120,
-                    //margin: 5,
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                   },
+                  // users[1].uid === currentUserId && styles.currentUserHighlight,
                 ]}
               >
                 <Ionicons name="trophy" size={32} color="silver" />
@@ -87,14 +95,16 @@ const LeaderboardModal = observer(() => {
                 </Text>
               </View>
               <View
-                style={{
-                  width: 120,
-                  //margin: 5,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  paddingBottom: 50,
-                }}
+                style={[
+                  {
+                    width: 120,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingBottom: 50,
+                  },
+                  // users[0].uid === currentUserId && styles.currentUserHighlight,
+                ]}
               >
                 <Ionicons name="trophy" size={32} color="gold" />
                 <Image
@@ -112,13 +122,15 @@ const LeaderboardModal = observer(() => {
                 </Text>
               </View>
               <View
-                style={{
-                  width: 120,
-                  //margin: 5,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                style={[
+                  {
+                    width: 120,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  },
+                  // users[2].uid === currentUserId && styles.currentUserHighlight,
+                ]}
               >
                 <Ionicons name="trophy" size={32} color="brown" />
                 <Image
@@ -138,7 +150,13 @@ const LeaderboardModal = observer(() => {
             </View>
             {/* Map users by position between 4-10*/}
             {users.slice(3, 10).map((user, index) => (
-              <View key={index} style={styles.leaderboardRow}>
+              <View
+                key={index}
+                style={[
+                  styles.leaderboardRow,
+                  user.uid === currentUserId && styles.currentUserHighlight,
+                ]}
+              >
                 <Text style={styles.leaderboardPosition}>
                   {index + 4}. {user.username}
                 </Text>
@@ -147,6 +165,22 @@ const LeaderboardModal = observer(() => {
                 </Text>
               </View>
             ))}
+            {/* Show current user's position if outside top 10 */}
+            {!isCurrentUserInTop10 && currentUserIndex !== -1 && (
+              <View>
+                <View style={styles.divider} />
+                <View
+                  style={[styles.leaderboardRow, styles.currentUserHighlight]}
+                >
+                  <Text style={styles.leaderboardPosition}>
+                    {currentUserIndex + 1}. {users[currentUserIndex].username}
+                  </Text>
+                  <Text style={styles.leaderboardScore}>
+                    {users[currentUserIndex].points} pistettä
+                  </Text>
+                </View>
+              </View>
+            )}
           </ScrollView>
         </View>
       </View>
@@ -165,8 +199,6 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: theme.colors.background,
     width: "100%",
-    // height: "80%",
-    //borderRadius: theme.borderRadius.large,
     margin: 50,
     padding: theme.spacing.large,
   },
@@ -211,5 +243,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  currentUserHighlight: {
+    backgroundColor: "rgba(12, 76, 37, 0.1)",
+    borderRadius: theme.borderRadius.medium,
+    fontWeight: "bold",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#ddd",
+    marginVertical: theme.spacing.medium,
   },
 });
