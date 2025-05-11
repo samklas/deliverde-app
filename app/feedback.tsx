@@ -36,7 +36,10 @@ const Feedback = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback
+      style={{ backgroundColor: "#fff" }}
+      onPress={Keyboard.dismiss}
+    >
       <View style={styles.container}>
         <Text style={styles.heading}>Palautteesi on meille tärkeää!</Text>
         <Text style={{ textAlign: "center" }}>
@@ -76,6 +79,7 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 0,
     width: "100%",
+    backgroundColor: "white",
   },
   heading: {
     fontSize: 24,
@@ -102,23 +106,24 @@ const styles = StyleSheet.create({
   input: {
     marginTop: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
+    borderColor: "#ddd",
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    backgroundColor: "#f9f9f9",
     height: 100,
     width: "100%",
-    padding: 10,
     textAlignVertical: "top",
-    backgroundColor: "#fff",
   },
   submitButton: {
-    marginTop: 50,
-    backgroundColor: theme.colors.secondary,
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: theme.colors.primary,
+    padding: 18,
+    borderRadius: 12,
     alignItems: "center",
+    marginTop: 50,
     width: "100%",
   },
-  submitText: { color: "white", fontWeight: "bold", fontSize: 16 },
+  submitText: { color: "white", fontWeight: "bold", fontSize: 18 },
 });
 
 export default Feedback;

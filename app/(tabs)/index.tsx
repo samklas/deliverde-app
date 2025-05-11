@@ -203,8 +203,10 @@ const Tab = observer(() => {
               ]}
               onPress={() => router.push("/feedback")}
             >
-              <Text>Lähetä palautetta</Text>
-              <Ionicons name="arrow-forward" size={20} />
+              <Text style={{ color: "#0c4c25", fontWeight: "bold" }}>
+                Lähetä palautetta
+              </Text>
+              <Ionicons name="arrow-forward" size={20} color={"#0c4c25"} />
             </Pressable>
           </ScrollView>
         )}
