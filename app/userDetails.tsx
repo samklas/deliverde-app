@@ -112,11 +112,13 @@ export default function UserDetails() {
 
   return (
     <View style={styles.overlay}>
-      <Text style={styles.levelLabel}>
-        Tili luotu onnistuneesti! Asetetaan vielä käyttäjänimi sekä taso, niin
-        sen jälkeen olemme valmiit aloittamaan!
+      <Text style={styles.title}> Tili luotu onnistuneesti! </Text>
+      <Text style={styles.text}>
+        Laitetaan vielä muutamat asetukset kuntoon, niin sen jälkeen olemme
+        valmiit aloittamaan!
       </Text>
       {/* <Text style={styles.title}>Käyttäjätiedot</Text> */}
+      <Text style={styles.levelLabel}>Käyttäjänimi</Text>
       <TextInput
         style={styles.input}
         value={username}
@@ -124,7 +126,13 @@ export default function UserDetails() {
         placeholder="Käyttäjänimi"
       />
 
-      <Text style={styles.levelLabel}>Valitse tasosi</Text>
+      <Text style={styles.levelLabel}>Taso</Text>
+      <Text style={{ marginBottom: 10, color: "#8D8D8D" }}>
+        Valitse itsellesi sopiva taso alla olevista vaihtoehdoista. Taso
+        määrittää, kuinka paljon vihanneksia pyrit syömään päivittäin. Voit
+        muokata tasoasi myöhemmin Profiili-näkymässä, jos haluat säätää
+        tavoitteitasi.
+      </Text>
       <View style={styles.levelButtons}>
         {levels.map((lvl) => (
           <Pressable
@@ -132,19 +140,80 @@ export default function UserDetails() {
             style={[styles.levelButton, level === lvl && styles.selectedLevel]}
             onPress={() => setLevel(lvl)}
           >
-            <Text
+            {/* <Text
               style={[
                 styles.levelText,
                 level === lvl && styles.selectedLevelText,
               ]}
             >
               {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
-            </Text>
+            </Text> */}
+
+            {lvl === "beginner" && (
+              <View>
+                <Text
+                  style={[
+                    styles.levelText,
+                    level === lvl && styles.selectedLevelText,
+                  ]}
+                >
+                  Satunnainen haukkailija | 300g
+                </Text>
+                {/* <Text
+                  style={[
+                    { textAlign: "center", color: "#8D8D8D" },
+                    level === lvl && styles.selectedLevelText,
+                  ]}
+                >
+                  300g
+                </Text> */}
+              </View>
+            )}
+            {lvl === "intermediate" && (
+              <View>
+                <Text
+                  style={[
+                    styles.levelText,
+                    level === lvl && styles.selectedLevelText,
+                  ]}
+                >
+                  Vihannesmestari | 500g
+                </Text>
+                {/* <Text
+                  style={[
+                    { textAlign: "center", color: "#8D8D8D" },
+                    level === lvl && styles.selectedLevelText,
+                  ]}
+                >
+                  500g
+                </Text> */}
+              </View>
+            )}
+            {lvl === "advanced" && (
+              <View>
+                <Text
+                  style={[
+                    styles.levelText,
+                    level === lvl && styles.selectedLevelText,
+                  ]}
+                >
+                  Vihreä legenda | 800g
+                </Text>
+                {/* <Text
+                  style={[
+                    { textAlign: "center", color: "#8D8D8D" },
+                    level === lvl && styles.selectedLevelText,
+                  ]}
+                >
+                  800g
+                </Text> */}
+              </View>
+            )}
           </Pressable>
         ))}
       </View>
 
-      <Text style={styles.levelLabel}>Valitse avatarisi</Text>
+      <Text style={styles.levelLabel}>Avatar</Text>
       <View style={styles.avatarSelection}>
         {avatars.map((avatar, index) => (
           <Pressable
@@ -205,6 +274,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
+  text: {
+    fontSize: 16,
+    // fontWeight: "bold",
+    // color: "#0c4c25",
+    marginBottom: 50,
+    textAlign: "center",
+  },
   input: {
     height: 50,
     borderColor: "#ccc",
@@ -226,17 +302,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   levelButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    gap: 10,
     marginBottom: 20,
   },
   levelButton: {
-    flex: 1,
+    width: "100%",
     backgroundColor: "white",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
-    marginHorizontal: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -250,6 +325,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     fontWeight: "500",
+    textAlign: "center",
   },
   selectedLevelText: {
     color: "white",

@@ -14,7 +14,7 @@ const LeaderboardBox = observer(() => {
   return (
     <TouchableOpacity onPress={() => setIsVisible(true)}>
       <View style={[styles.box, styles.pressableBox]}>
-        <Text style={styles.boxTitle}>Tulostaulukko</Text>
+        <Text style={styles.boxTitle}>Kuukauden salaattisankarit</Text>
         {sortedUsers.map((user, i) => (
           <Row
             key={user.uid || i}

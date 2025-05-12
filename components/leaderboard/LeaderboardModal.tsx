@@ -52,7 +52,7 @@ const LeaderboardModal = observer(() => {
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </Pressable>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Tulostaulukko</Text>
+            <Text style={styles.modalTitle}>Kuukauden salaattisankarit</Text>
           </View>
           <ScrollView>
             <View
@@ -206,19 +206,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: theme.spacing.medium,
-    marginTop: 20,
+    marginTop: 15,
   },
   modalTitle: {
     fontSize: theme.fonts.title.fontSize,
     fontWeight: "bold",
     color: theme.colors.primary,
+    textAlign: "center",
   },
   leaderboardRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: theme.spacing.small,
+    marginBottom: 2,
     padding: theme.spacing.small,
   },
   leaderboardPosition: {
@@ -238,11 +238,11 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.medium,
     marginBottom: theme.spacing.medium,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 8,
+    // elevation: 3,
   },
   currentUserHighlight: {
     backgroundColor: "rgba(12, 76, 37, 0.1)",

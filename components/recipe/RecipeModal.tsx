@@ -34,67 +34,61 @@ export default function RecipeModal({
       animationType="slide"
       onRequestClose={closeModal}
     >
-      <ImageBackground
-        source={require("../../assets/images/background.jpeg")}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.overlay}>
-          <View style={styles.modalContainer}>
-            {selectedRecipe && (
-              <>
-                <ImageBackground
-                  source={{ uri: selectedRecipe.imageUrl }}
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          {selectedRecipe && (
+            <>
+              <ImageBackground
+                source={{ uri: selectedRecipe.imageUrl }}
+                style={styles.modalImage}
+              >
+                <Image
                   style={styles.modalImage}
+                  source={{ uri: selectedRecipe.imageUrl }}
+                />
+                <TouchableOpacity
+                  onPress={closeModal}
+                  style={styles.closeButtonContainer}
                 >
-                  <Image
-                    style={styles.modalImage}
-                    source={{ uri: selectedRecipe.imageUrl }}
+                  <Ionicons name="close" size={35} color="white" />
+                </TouchableOpacity>
+              </ImageBackground>
+              <Text style={styles.modalTitle}>
+                {modifyFirstLetterToUpperCase(selectedRecipe.title)}
+              </Text>
+              <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+                <View style={styles.box}>
+                  <Text style={styles.ingredientsTitle}>Ainesosat</Text>
+                  <FlatList
+                    style={{ width: "100%", paddingLeft: 20 }}
+                    data={selectedRecipe.ingredients}
+                    keyExtractor={(item, index) => index.toString()}
+                    scrollEnabled={false}
+                    renderItem={({ item }) => (
+                      <Text style={styles.ingredientsList}>{item}</Text>
+                    )}
                   />
-                  <TouchableOpacity
-                    onPress={closeModal}
-                    style={styles.closeButtonContainer}
-                  >
-                    <Ionicons name="close" size={35} color="white" />
-                  </TouchableOpacity>
-                </ImageBackground>
-                <Text style={styles.modalTitle}>
-                  {modifyFirstLetterToUpperCase(selectedRecipe.title)}
-                </Text>
-                <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-                  <View style={styles.box}>
-                    <Text style={styles.ingredientsTitle}>Ainesosat</Text>
-                    <FlatList
-                      style={{ width: "100%", paddingLeft: 20 }}
-                      data={selectedRecipe.ingredients}
-                      keyExtractor={(item, index) => index.toString()}
-                      scrollEnabled={false}
-                      renderItem={({ item }) => (
-                        <Text style={styles.ingredientsList}>{item}</Text>
-                      )}
-                    />
 
-                    <View>
-                      <Text style={styles.instructionsTitle}>Valmistus</Text>
-                      <Text
-                        style={{
-                          paddingLeft: 20,
-                          paddingRight: 20,
-                          fontSize: 16,
-                          color: "#666",
-                          marginBottom: 50,
-                        }}
-                      >
-                        {selectedRecipe.instructions}
-                      </Text>
-                    </View>
+                  <View>
+                    <Text style={styles.instructionsTitle}>Valmistus</Text>
+                    <Text
+                      style={{
+                        paddingLeft: 20,
+                        paddingRight: 20,
+                        fontSize: 16,
+                        color: "#666",
+                        marginBottom: 50,
+                      }}
+                    >
+                      {selectedRecipe.instructions}
+                    </Text>
                   </View>
-                </ScrollView>
-              </>
-            )}
-          </View>
+                </View>
+              </ScrollView>
+            </>
+          )}
         </View>
-      </ImageBackground>
+      </View>
     </Modal>
   );
 }
@@ -108,7 +102,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    //padding: 20,
   },
   modalTitle: {
     fontSize: 24,
@@ -166,17 +159,17 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    // backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
   box: {
     backgroundColor: "white",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 8,
+    // elevation: 3,
   },
 });

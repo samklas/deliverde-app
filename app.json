@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "deliverde-app",
-    "slug": "deliverde-app",
+    "name": "Deliverde",
+    "slug": "Deliverde",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
@@ -12,13 +12,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/Sipuli.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.deliverdeapp",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "package": "com.anonymous.deliverde",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",
@@ -36,7 +34,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/react-logo.png",
+          "image": "./assets/images/salad.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -51,8 +49,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "43ea7f85-1857-48de-8c74-21802c57bd68"
+        "projectId": "d5e813b3-5de7-4c04-a7a5-9b284370f1b7"
       }
-    }
+    },
+    "owner": "smabza"
   }
 }
