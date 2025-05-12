@@ -35,10 +35,13 @@ const Tab = observer(() => {
   const [hasCelebrated, setHasCelebrated] = useState(false);
   const progress = Math.min((dailyTotal / dailyTarget) * 100, 100); // Cap at 100%
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchVegetables = async () => {
+      setIsLoading(true);
       const cachedVegetables = await AsyncStorage.getItem("vegetables");
+      console.log("cachedVegetables: " + cachedVegetables);
       if (cachedVegetables !== null) {
         console.log("data haettu cachesta");
         const veggies: Vegetable[] = JSON.parse(cachedVegetables);
@@ -49,7 +52,7 @@ const Tab = observer(() => {
           const fetchedVegetables = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          }));
+          })) as Vegetable[];
 
           // Save fetched vegetables to AsyncStorage
           await AsyncStorage.setItem(
@@ -57,11 +60,12 @@ const Tab = observer(() => {
             JSON.stringify(fetchedVegetables)
           );
 
-          //setVegetables(fetchedVegetables);
+          setVegetables(fetchedVegetables);
         } catch (error) {
           console.error("Error fetching vegetables: ", error);
         }
       }
+      setIsLoading(false);
     };
 
     const getLastUsedVegetables = async () => {
@@ -75,6 +79,7 @@ const Tab = observer(() => {
 
     const getDailyTotal = async () => {
       if (Number(dailyTotal) >= dailyTarget) setHasCelebrated(true);
+      setIsLoading(false);
     };
 
     fetchVegetables();
@@ -144,7 +149,7 @@ const Tab = observer(() => {
     console.log("Playing Sound");
     await sound.playAsync();
   };
-
+  if (isLoading) return null;
   return (
     <ImageBackground
       source={require("../../assets/images/background.jpeg")}
@@ -153,24 +158,21 @@ const Tab = observer(() => {
     >
       <View style={styles.overlay}>
         {/* Today box */}
+
         <View style={styles.todayBox}>
           <Text style={styles.title}>Tänään</Text>
-          <View
-            style={{
-              margin: "auto",
-            }}
-          >
+          <View style={styles.progressWrapper}>
             <CircularProgress
-              size={150}
+              size={100}
               strokeWidth={10}
               progress={progress}
               backgroundColor="#e0e0e0"
               progressColor="#4caf50"
             />
+            <Text style={styles.progressText}>
+              {dailyTotal}g / {dailyTarget}g
+            </Text>
           </View>
-          <Text style={styles.progressText}>
-            {dailyTotal}g / {dailyTarget}g
-          </Text>
         </View>
 
         {/* Celebration Animation */}
@@ -181,33 +183,57 @@ const Tab = observer(() => {
           closeCelebration={closeCelebration}
         />
 
-        {/* Add search input */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Etsi vihanneksia..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#666"
-          />
-        </View>
+        {/* Main content container */}
+        <View style={styles.mainContent}>
+          {/* Search section */}
+          <View style={styles.searchSection}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Etsi vihanneksia..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#666"
+            />
+          </View>
 
-        {searchQuery.length > 0 && (
-          <ScrollView style={styles.scrollView}>
-            {filteredVegetables.map((veg, index) => (
-              <TouchableOpacity
-                key={veg.id}
-                style={styles.vegItem}
-                onPress={() => {
-                  setVegetable(veg);
-                  setIsVisible(true);
-                }}
-              >
-                <Text style={styles.vegName}>{veg.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
+          {/* Results container */}
+          <View style={styles.resultsContainer}>
+            {searchQuery.length > 0 ? (
+              <ScrollView style={styles.scrollView}>
+                {filteredVegetables.map((veg) => (
+                  <TouchableOpacity
+                    key={veg.id}
+                    style={styles.vegItem}
+                    onPress={() => {
+                      setVegetable(veg);
+                      setIsVisible(true);
+                    }}
+                  >
+                    <Text style={styles.vegName}>{veg.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.recentSection}>
+                <Text style={styles.sectionTitle}>Viimeksi käytetyt</Text>
+                <ScrollView style={styles.scrollView}>
+                  {lastUsedVegetables.map((veg) => (
+                    <TouchableOpacity
+                      key={veg.id}
+                      style={styles.vegItem}
+                      onPress={() => {
+                        setVegetable(veg);
+                        setIsVisible(true);
+                      }}
+                    >
+                      <Text style={styles.vegName}>{veg.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+          </View>
+        </View>
 
         <AddVegetableModal
           isVisible={isVisible}
@@ -217,22 +243,6 @@ const Tab = observer(() => {
           setLastUsed={setLastUsedVegetables}
           lastUsed={lastUsedVegetables}
         />
-
-        <Text>Viimeksi käytetyt</Text>
-        <ScrollView style={styles.scrollView}>
-          {lastUsedVegetables.map((veg, index) => (
-            <TouchableOpacity
-              key={veg.id}
-              style={styles.vegItem}
-              onPress={() => {
-                setVegetable(veg);
-                setIsVisible(true);
-              }}
-            >
-              <Text style={styles.vegName}>{veg.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
     </ImageBackground>
   );
@@ -252,7 +262,7 @@ const styles = StyleSheet.create({
   },
   todayBox: {
     backgroundColor: "white",
-    padding: 40,
+    padding: 20,
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: "#000",
@@ -263,74 +273,77 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 3,
-    flex: 1,
-    flexDirection: "column",
-    height: 400,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "700",
     color: "#1a472a",
-    marginBottom: 16,
+    marginBottom: 12,
     textAlign: "center",
     letterSpacing: 0.5,
   },
+  mainContent: {
+    flex: 1,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  searchSection: {
+    marginBottom: 16,
+  },
+  searchInput: {
+    backgroundColor: "#f5f9f7",
+    padding: 14,
+    borderRadius: 14,
+    fontSize: 16,
+    color: "#2d3436",
+  },
+  resultsContainer: {
+    flex: 1,
+  },
+  recentSection: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1a472a",
+    marginBottom: 12,
+  },
   scrollView: {
     flex: 1,
-    marginTop: 10,
-    backgroundColor: "transparent",
-    paddingHorizontal: 4,
   },
   vegItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "white",
-    marginBottom: 12,
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 2,
+    backgroundColor: "#f5f9f7",
+    marginBottom: 8,
+    borderRadius: 12,
   },
   vegName: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "500",
     color: "#2d3436",
   },
-  servings: {
-    fontSize: 15,
-    color: "#1a472a",
-    fontWeight: "600",
-  },
-  progressContainer: {
-    height: 40,
-    backgroundColor: "#f5f9f7",
-    borderRadius: 20,
-    marginBottom: 8,
-    overflow: "hidden",
-    position: "relative",
-  },
-  progressBar: {
-    position: "absolute",
-    height: "100%",
-    backgroundColor: "#4cd964",
-    borderRadius: 20,
+  progressWrapper: {
+    alignItems: "center",
+    marginVertical: 10,
   },
   progressText: {
-    // position: "absolute",
-    width: "100%",
-    textAlign: "center",
-    lineHeight: 40,
+    marginTop: 12,
     color: "#2d3436",
     fontWeight: "600",
-    fontSize: 15,
-    zIndex: 1,
+    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
@@ -362,25 +375,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     marginTop: 20,
-  },
-  searchContainer: {
-    marginVertical: 16,
-    width: "100%",
-  },
-  searchInput: {
-    backgroundColor: "white",
-    padding: 14,
-    borderRadius: 14,
-    fontSize: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 2,
-    color: "#2d3436",
   },
   closeButton: {
     marginTop: 40,
