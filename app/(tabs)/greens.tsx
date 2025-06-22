@@ -21,6 +21,7 @@ import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
 
 import userStore from "@/stores/userStore";
+import { addVegetablesToFirestore } from "@/utils/addVegetables";
 
 const Tab = observer(() => {
   const { dailyTotal, setDailyTotal, dailyTarget } = userStore;
@@ -38,10 +39,10 @@ const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // addVegetablesToFirestore();
     const fetchVegetables = async () => {
       setIsLoading(true);
       const cachedVegetables = await AsyncStorage.getItem("vegetables");
-      console.log("cachedVegetables: " + cachedVegetables);
       if (cachedVegetables !== null) {
         console.log("data haettu cachesta");
         const veggies: Vegetable[] = JSON.parse(cachedVegetables);
@@ -185,6 +186,10 @@ const Tab = observer(() => {
 
         {/* Main content container */}
         <View style={styles.mainContent}>
+          <Text>
+            Alta voit etsiä haluamasi vihanneksen ja lisätä sen. Jos et löydä
+            haluamaasi, voit lisätä sen "muu" nimikkeellä.
+          </Text>
           {/* Search section */}
           <View style={styles.searchSection}>
             <TextInput
