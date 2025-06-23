@@ -4,18 +4,22 @@
     "slug": "Deliverde",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "myapp",
+    "scheme": "deliverde",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "fi.deliverde.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Sipuli.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.deliverde",
+      "package": "fi.deliverde.app",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
@@ -35,8 +39,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/salad.jpg",
-          "imageWidth": 200,
-          "resizeMode": "contain",
+          "resizeMode": "cover",
           "backgroundColor": "#ffffff"
         }
       ]
