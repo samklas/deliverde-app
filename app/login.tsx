@@ -11,12 +11,14 @@ import {
   TextInput,
   View,
   Text,
+  Alert,
 } from "react-native";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const getUsername = async (uid: string) => {
     const docRef = doc(db, "users", uid);
@@ -31,6 +33,7 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       setIsLoading(true);
+      setErrorMessage("");
       //const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -43,8 +46,19 @@ export default function Login() {
       storeUserId(userCredential.user.uid, username);
       getUserId();
       router.push("/(tabs)");
-    } catch (error) {
-      console.error("Error logging in:", error);
+    } catch (error: any) {
+      //console.error("Error logging in:", error);
+      let message =
+        "Kirjautuminen epäonnistui. Tarkista sähköposti ja salasana.";
+
+      // if (error.code === "auth/user-not-found") {
+      //   message = "Käyttäjää ei löytynyt.";
+      // } else if (error.code === "auth/wrong-password") {
+      //   message = "Väärä salasana.";
+      // } else if (error.code === "auth/invalid-email") {
+      //   message = "Virheellinen sähköpostiosoite.";
+      // }
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
@@ -107,6 +121,14 @@ export default function Login() {
             {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
           </Text>
         </Pressable>
+
+        {errorMessage ? (
+          <Text
+            style={{ color: "#c00", textAlign: "center", marginBottom: 10 }}
+          >
+            {errorMessage}
+          </Text>
+        ) : null}
 
         <Link href="/register" style={styles.link}>
           Eikö ole tiliä? Luo tili painamalla tästä!
