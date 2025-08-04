@@ -13,11 +13,11 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "icon": "./assets/images/logo_nav_green.png"
+      "icon": "./assets/images/icon_ios.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo_nav.png",
+        "foregroundImage": "./assets/images/icon_android.png",
         "backgroundColor": "#ffffff"
       },
       "package": "fi.deliverde.app",
