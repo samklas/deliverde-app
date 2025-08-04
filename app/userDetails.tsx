@@ -112,12 +112,6 @@ export default function UserDetails() {
 
   return (
     <View style={styles.overlay}>
-      <Text style={styles.title}> Tili luotu onnistuneesti! </Text>
-      <Text style={styles.text}>
-        Laitetaan vielä muutamat asetukset kuntoon, niin sen jälkeen olemme
-        valmiit aloittamaan!
-      </Text>
-      {/* <Text style={styles.title}>Käyttäjätiedot</Text> */}
       <Text style={styles.levelLabel}>Käyttäjänimi</Text>
       <TextInput
         style={styles.input}
@@ -140,15 +134,6 @@ export default function UserDetails() {
             style={[styles.levelButton, level === lvl && styles.selectedLevel]}
             onPress={() => setLevel(lvl)}
           >
-            {/* <Text
-              style={[
-                styles.levelText,
-                level === lvl && styles.selectedLevelText,
-              ]}
-            >
-              {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
-            </Text> */}
-
             {lvl === "beginner" && (
               <View>
                 <Text
@@ -159,14 +144,6 @@ export default function UserDetails() {
                 >
                   Satunnainen haukkailija | 300g
                 </Text>
-                {/* <Text
-                  style={[
-                    { textAlign: "center", color: "#8D8D8D" },
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  300g
-                </Text> */}
               </View>
             )}
             {lvl === "intermediate" && (
@@ -179,14 +156,6 @@ export default function UserDetails() {
                 >
                   Vihannesmestari | 500g
                 </Text>
-                {/* <Text
-                  style={[
-                    { textAlign: "center", color: "#8D8D8D" },
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  500g
-                </Text> */}
               </View>
             )}
             {lvl === "advanced" && (
@@ -199,14 +168,6 @@ export default function UserDetails() {
                 >
                   Vihreä legenda | 800g
                 </Text>
-                {/* <Text
-                  style={[
-                    { textAlign: "center", color: "#8D8D8D" },
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  800g
-                </Text> */}
               </View>
             )}
           </Pressable>
@@ -263,7 +224,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    // backgroundColor: "rgba(255, 255, 255, 0.9)",
     padding: 16,
     justifyContent: "center",
   },
@@ -276,8 +236,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    // fontWeight: "bold",
-    // color: "#0c4c25",
     marginBottom: 50,
     textAlign: "center",
   },
