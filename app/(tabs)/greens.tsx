@@ -21,7 +21,6 @@ import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
 
 import userStore from "@/stores/userStore";
-import { addVegetablesToFirestore } from "@/utils/addVegetables";
 
 const Tab = observer(() => {
   const { dailyTotal, setDailyTotal, dailyTarget } = userStore;
@@ -44,7 +43,6 @@ const Tab = observer(() => {
       setIsLoading(true);
       const cachedVegetables = await AsyncStorage.getItem("vegetables");
       if (cachedVegetables !== null) {
-        console.log("data haettu cachesta");
         const veggies: Vegetable[] = JSON.parse(cachedVegetables);
         setVegetables(veggies);
       } else {
@@ -147,7 +145,6 @@ const Tab = observer(() => {
     );
     if (sound) setSound(sound);
 
-    console.log("Playing Sound");
     await sound.playAsync();
   };
   if (isLoading) return null;
@@ -186,9 +183,9 @@ const Tab = observer(() => {
 
         {/* Main content container */}
         <View style={styles.mainContent}>
-          <Text>
-            Alta voit etsiä haluamasi vihanneksen ja lisätä sen. Jos et löydä
-            haluamaasi, voit lisätä sen "muu" nimikkeellä.
+          <Text style={styles.description}>
+            Etsi haluamasi vihannes alla olevasta kentästä ja lisää se. Jos et
+            löydä etsimääsi, voit lisätä sen nimikkeellä 'muu'.
           </Text>
           {/* Search section */}
           <View style={styles.searchSection}>
@@ -292,6 +289,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 16,
     padding: 16,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -305,9 +303,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   searchInput: {
-    backgroundColor: "#f5f9f7",
-    padding: 14,
+    padding: 10,
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
     fontSize: 16,
     color: "#2d3436",
   },
@@ -318,10 +317,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#1a472a",
     marginBottom: 12,
+    marginTop: 12,
   },
   scrollView: {
     flex: 1,
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    padding: 14,
     backgroundColor: "#f5f9f7",
     marginBottom: 8,
     borderRadius: 12,
@@ -403,5 +403,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#666",
     fontWeight: "500",
+  },
+  description: {
+    marginBottom: 16,
+    //textAlign: "center",
   },
 });

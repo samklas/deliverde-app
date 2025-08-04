@@ -39,7 +39,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/salad.jpg",
-          "resizeMode": "cover",
+          "resizeMode": "native",
           "backgroundColor": "#ffffff"
         }
       ]
