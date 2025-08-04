@@ -12,11 +12,12 @@
       "bundleIdentifier": "fi.deliverde.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "icon": "./assets/images/logo_nav_green.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/Sipuli.png",
+        "foregroundImage": "./assets/images/logo_nav.png",
         "backgroundColor": "#ffffff"
       },
       "package": "fi.deliverde.app",
@@ -38,9 +39,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/salad.jpg",
+          "image": "./assets/images/logo.png",
           "resizeMode": "native",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#4caf50"
         }
       ]
     ],
