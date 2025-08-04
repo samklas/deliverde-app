@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import ImagePickerExample from "@/components/ImagePicker";
 import { useRouter } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const RecipeSuggestion = observer(() => {
   const [title, setTitle] = useState("");
@@ -82,8 +83,8 @@ const RecipeSuggestion = observer(() => {
           <View style={styles.content}>
             <Text style={styles.header}>Ehdota reseptiä</Text>
             <Text style={styles.info}>
-              Voit ehdottaa omaa suosikkireseptiäsi lisättäväksi sovellukseen –
-              erityisesti arvostamme kasvisruokareseptejä, jotka innostavat
+              Voit ehdottaa omaa suosikkireseptiäsi lisättäväksi sovellukseen.
+              Arvostamme erityisestikasvisruokareseptejä, jotka innostavat
               kokeilemaan kasvipohjaista ruokavaliota.
             </Text>
 
@@ -103,17 +104,17 @@ const RecipeSuggestion = observer(() => {
               <View style={styles.ingredientInputContainer}>
                 <TextInput
                   style={styles.ingredientInput}
-                  placeholder="Lisää ainesosa"
+                  placeholder="Lisää ainesosa ja määrä. Esim. 2 kpl porkkanaa "
                   placeholderTextColor="#999"
                   value={currentIngredient}
                   onChangeText={setCurrentIngredient}
                   onSubmitEditing={handleAddIngredient}
                 />
                 <TouchableOpacity
-                  style={styles.addButton}
+                  //style={styles.addButton}
                   onPress={handleAddIngredient}
                 >
-                  <Text style={styles.addButtonText}>+</Text>
+                  <Ionicons name="add-circle" size={32} color="#0c4c25" />
                 </TouchableOpacity>
               </View>
 
@@ -122,10 +123,10 @@ const RecipeSuggestion = observer(() => {
                   <View key={index} style={styles.ingredientItem}>
                     <Text style={styles.ingredientText}>{ingredient}</Text>
                     <TouchableOpacity
-                      style={styles.removeButton}
+                      //style={styles.removeButton}
                       onPress={() => handleRemoveIngredient(index)}
                     >
-                      <Text style={styles.removeButtonText}>×</Text>
+                      <Ionicons name="remove-circle-outline" size={28} />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -199,11 +200,11 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e0e0e0",
     borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    padding: 10,
+    fontSize: 14,
+    color: "#2d3436",
   },
   textArea: {
     minHeight: 120,
@@ -217,11 +218,12 @@ const styles = StyleSheet.create({
   ingredientInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e0e0e0",
     borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    padding: 10,
+    fontSize: 14,
+    color: "#2d3436",
+    //backgroundColor: "#f9f9f9",
     marginRight: 10,
   },
   addButton: {
@@ -244,13 +246,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#f0f0f0",
-    padding: 12,
+    //backgroundColor: "#f0f0f0",
+    paddingBottom: 2,
     borderRadius: 8,
     marginBottom: 8,
   },
   ingredientText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
   },
   removeButton: {
@@ -268,14 +270,14 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: theme.colors.primary,
-    padding: 18,
+    padding: 12,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 20,
   },
   submitButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
 });

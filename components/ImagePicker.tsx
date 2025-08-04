@@ -36,15 +36,39 @@ export default function ImagePickerExample() {
       {image ? (
         <View style={styles.imageContainer}>
           <Image source={{ uri: image }} style={styles.image} />
-          <TouchableOpacity style={styles.removeButton} onPress={removeImage}>
-            <Text style={styles.removeButtonText}>Poista kuva</Text>
+          <TouchableOpacity
+            style={{
+              alignItems: "center",
+              marginTop: 30,
+              marginBottom: 20,
+              flex: 1,
+              justifyContent: "flex-end",
+            }}
+            onPress={removeImage}
+          >
+            <Text
+              style={{
+                color: theme.colors.primary,
+                fontWeight: "500",
+                borderWidth: 2,
+                borderColor: theme.colors.primary,
+                borderRadius: 20,
+                paddingTop: 10,
+                paddingBottom: 10,
+                paddingLeft: 20,
+                paddingRight: 20,
+              }}
+            >
+              Poista
+            </Text>
           </TouchableOpacity>
         </View>
       ) : (
         <TouchableOpacity
           style={{
             alignItems: "center",
-            marginBottom: 30,
+            marginTop: 30,
+            marginBottom: 20,
             flex: 1,
             justifyContent: "flex-end",
           }}
@@ -63,7 +87,7 @@ export default function ImagePickerExample() {
               paddingRight: 20,
             }}
           >
-            Lisää reseptille kuva
+            Lisää kuva
           </Text>
         </TouchableOpacity>
       )}
@@ -100,13 +124,16 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 10,
-    backgroundColor: "#ff4444",
+
+    // backgroundColor: "#ff4444",
     borderRadius: 8,
+    borderColor: "#000",
+    borderWidth: 1,
     alignItems: "center",
     width: "100%",
   },
   removeButtonText: {
-    color: "#fff",
+    color: "#000",
     fontSize: 16,
     fontWeight: "600",
   },
