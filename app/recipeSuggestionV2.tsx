@@ -84,7 +84,7 @@ const RecipeSuggestion = observer(() => {
             <Text style={styles.header}>Ehdota reseptiä</Text>
             <Text style={styles.info}>
               Voit ehdottaa omaa suosikkireseptiäsi lisättäväksi sovellukseen.
-              Arvostamme erityisestikasvisruokareseptejä, jotka innostavat
+              Arvostamme erityisesti kasvisruokareseptejä, jotka innostavat
               kokeilemaan kasvipohjaista ruokavaliota.
             </Text>
 
@@ -154,7 +154,7 @@ const RecipeSuggestion = observer(() => {
               style={styles.submitButton}
               onPress={handleAddRecipe}
             >
-              <Text style={styles.submitButtonText}>Lähetä resepti</Text>
+              <Text style={styles.submitButtonText}>Lähetä</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     marginBottom: 30,
-    lineHeight: 24,
+    //lineHeight: 20,
   },
   inputGroup: {
     marginBottom: 20,

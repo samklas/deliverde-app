@@ -7,6 +7,8 @@ import {
   Animated,
   ImageBackground,
   TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
@@ -87,6 +89,8 @@ const Tab = observer(() => {
   }, []);
 
   useEffect(() => {
+    console.log("progress: " + progress);
+    console.log("hasCelebrated: " + hasCelebrated);
     if (progress >= 100 && !hasCelebrated) {
       triggerCelebration();
       setHasCelebrated(true);
@@ -149,77 +153,61 @@ const Tab = observer(() => {
   };
   if (isLoading) return null;
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        {/* Today box */}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <ImageBackground
+        source={require("../../assets/images/background.jpeg")}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          {/* Today box */}
 
-        <View style={styles.todayBox}>
-          <Text style={styles.title}>Tänään</Text>
-          <View style={styles.progressWrapper}>
-            <CircularProgress
-              size={100}
-              strokeWidth={10}
-              progress={progress}
-              backgroundColor="#e0e0e0"
-              progressColor="#4caf50"
-            />
-            <Text style={styles.progressText}>
-              {dailyTotal}g / {dailyTarget}g
+          <View style={styles.todayBox}>
+            <Text style={styles.title}>Tänään</Text>
+            <View style={styles.progressWrapper}>
+              <CircularProgress
+                size={100}
+                strokeWidth={10}
+                progress={progress}
+                backgroundColor="#e0e0e0"
+                progressColor="#4caf50"
+              />
+              <Text style={styles.progressText}>
+                {dailyTotal}g / {dailyTarget}g
+              </Text>
+            </View>
+          </View>
+
+          {/* Celebration Animation */}
+          <CelebrationModal
+            isCelebrationVisible={isCelebrationVisible}
+            celebrationOpacity={celebrationOpacity}
+            celebrationScale={celebrationScale}
+            closeCelebration={closeCelebration}
+          />
+
+          {/* Main content container */}
+          <View style={styles.mainContent}>
+            <Text style={styles.description}>
+              Etsi haluamasi vihannes alla olevasta kentästä ja lisää se. Jos et
+              löydä etsimääsi, voit lisätä sen nimikkeellä 'muu'.
             </Text>
-          </View>
-        </View>
+            {/* Search section */}
+            <View style={styles.searchSection}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Etsi vihanneksia..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="#666"
+              />
+            </View>
 
-        {/* Celebration Animation */}
-        <CelebrationModal
-          isCelebrationVisible={isCelebrationVisible}
-          celebrationOpacity={celebrationOpacity}
-          celebrationScale={celebrationScale}
-          closeCelebration={closeCelebration}
-        />
-
-        {/* Main content container */}
-        <View style={styles.mainContent}>
-          <Text style={styles.description}>
-            Etsi haluamasi vihannes alla olevasta kentästä ja lisää se. Jos et
-            löydä etsimääsi, voit lisätä sen nimikkeellä 'muu'.
-          </Text>
-          {/* Search section */}
-          <View style={styles.searchSection}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Etsi vihanneksia..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#666"
-            />
-          </View>
-
-          {/* Results container */}
-          <View style={styles.resultsContainer}>
-            {searchQuery.length > 0 ? (
-              <ScrollView style={styles.scrollView}>
-                {filteredVegetables.map((veg) => (
-                  <TouchableOpacity
-                    key={veg.id}
-                    style={styles.vegItem}
-                    onPress={() => {
-                      setVegetable(veg);
-                      setIsVisible(true);
-                    }}
-                  >
-                    <Text style={styles.vegName}>{veg.name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            ) : (
-              <View style={styles.recentSection}>
-                <Text style={styles.sectionTitle}>Viimeksi käytetyt</Text>
+            {/* Results container */}
+            <View style={styles.resultsContainer}>
+              {searchQuery.length > 0 ? (
                 <ScrollView style={styles.scrollView}>
-                  {lastUsedVegetables.map((veg) => (
+                  {filteredVegetables.map((veg) => (
                     <TouchableOpacity
                       key={veg.id}
                       style={styles.vegItem}
@@ -232,21 +220,41 @@ const Tab = observer(() => {
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-              </View>
-            )}
+              ) : (
+                <View style={styles.recentSection}>
+                  {lastUsedVegetables.length > 0 && (
+                    <Text style={styles.sectionTitle}>Viimeksi käytetyt</Text>
+                  )}
+                  <ScrollView style={styles.scrollView}>
+                    {lastUsedVegetables.map((veg) => (
+                      <TouchableOpacity
+                        key={veg.id}
+                        style={styles.vegItem}
+                        onPress={() => {
+                          setVegetable(veg);
+                          setIsVisible(true);
+                        }}
+                      >
+                        <Text style={styles.vegName}>{veg.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
 
-        <AddVegetableModal
-          isVisible={isVisible}
-          vegetable={vegetable}
-          onClose={closeModal}
-          setTotal={setDailyTotal}
-          setLastUsed={setLastUsedVegetables}
-          lastUsed={lastUsedVegetables}
-        />
-      </View>
-    </ImageBackground>
+          <AddVegetableModal
+            isVisible={isVisible}
+            vegetable={vegetable}
+            onClose={closeModal}
+            setTotal={setDailyTotal}
+            setLastUsed={setLastUsedVegetables}
+            lastUsed={lastUsedVegetables}
+          />
+        </View>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 });
 

@@ -106,24 +106,24 @@ const styles = StyleSheet.create({
   input: {
     marginTop: 20,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#e0e0e0",
+    color: "#2d3436",
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
     height: 100,
     width: "100%",
     textAlignVertical: "top",
   },
   submitButton: {
     backgroundColor: theme.colors.primary,
-    padding: 18,
+    padding: 12,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 50,
     width: "100%",
   },
-  submitText: { color: "white", fontWeight: "bold", fontSize: 18 },
+  submitText: { color: "white", fontWeight: "bold", fontSize: 16 },
 });
 
 export default Feedback;

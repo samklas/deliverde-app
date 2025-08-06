@@ -81,8 +81,8 @@ export default function ImagePickerExample() {
               borderWidth: 2,
               borderColor: theme.colors.primary,
               borderRadius: 20,
-              paddingTop: 10,
-              paddingBottom: 10,
+              paddingTop: 8,
+              paddingBottom: 8,
               paddingLeft: 20,
               paddingRight: 20,
             }}

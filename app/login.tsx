@@ -12,6 +12,8 @@ import {
   View,
   Text,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 export default function Login() {
@@ -87,54 +89,56 @@ export default function Login() {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <Text style={styles.title}>Tervetuloa</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <ImageBackground
+        source={require("../assets/images/background.jpeg")}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Text style={styles.title}>Tervetuloa</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Sähköposti"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Sähköposti"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Salasana"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Salasana"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        <Pressable
-          style={styles.button}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
-          </Text>
-        </Pressable>
-
-        {errorMessage ? (
-          <Text
-            style={{ color: "#c00", textAlign: "center", marginBottom: 10 }}
+          <Pressable
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={isLoading}
           >
-            {errorMessage}
-          </Text>
-        ) : null}
+            <Text style={styles.buttonText}>
+              {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
+            </Text>
+          </Pressable>
 
-        <Link href="/register" style={styles.link}>
-          Eikö ole tiliä? Luo tili painamalla tästä!
-        </Link>
-      </View>
-    </ImageBackground>
+          {errorMessage ? (
+            <Text
+              style={{ color: "#c00", textAlign: "center", marginBottom: 10 }}
+            >
+              {errorMessage}
+            </Text>
+          ) : null}
+
+          <Link href="/register" style={styles.link}>
+            Eikö ole tiliä? Luo tili painamalla tästä!
+          </Link>
+        </View>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 }
 

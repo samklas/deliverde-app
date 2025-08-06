@@ -48,7 +48,7 @@ const AddVegetableModal = observer(
           vegetable.averageWeight * parseInt(selectedInteger);
         const decimalGrams =
           vegetable.averageWeight * parseFloat(selectedDecimal);
-        return integerGrams + decimalGrams;
+        return Math.round(integerGrams + decimalGrams);
       }
 
       return 0;

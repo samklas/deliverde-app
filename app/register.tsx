@@ -7,6 +7,8 @@ import {
   ImageBackground,
   Pressable,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth"; // Make sure you have this config file
 import { auth } from "@/firebaseConfig";
@@ -59,43 +61,45 @@ export default function Register() {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <Text style={styles.title}>Luo tili</Text>
-        <TextInput
-          placeholder="Sähköposti"
-          keyboardType="email-address"
-          style={styles.input}
-          onChangeText={(input) => setEmail(input)}
-        />
-        <TextInput
-          placeholder="Salasana"
-          secureTextEntry={true}
-          style={styles.input}
-          onChangeText={(input) => setPassword(input)}
-        />
-        <TextInput
-          placeholder="Vahvista salasana"
-          secureTextEntry={true}
-          style={styles.input}
-          onChangeText={(input) => setConfirmedPassword(input)}
-        />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <ImageBackground
+        source={require("../assets/images/background.jpeg")}
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Text style={styles.title}>Luo tili</Text>
+          <TextInput
+            placeholder="Sähköposti"
+            keyboardType="email-address"
+            style={styles.input}
+            onChangeText={(input) => setEmail(input)}
+          />
+          <TextInput
+            placeholder="Salasana"
+            secureTextEntry={true}
+            style={styles.input}
+            onChangeText={(input) => setPassword(input)}
+          />
+          <TextInput
+            placeholder="Vahvista salasana"
+            secureTextEntry={true}
+            style={styles.input}
+            onChangeText={(input) => setConfirmedPassword(input)}
+          />
 
-        <Pressable
-          style={styles.button}
-          onPress={handleRegistration}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Luodaan tiliä..." : "Luo tili"}
-          </Text>
-        </Pressable>
-      </View>
-    </ImageBackground>
+          <Pressable
+            style={styles.button}
+            onPress={handleRegistration}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? "Luodaan tiliä..." : "Luo tili"}
+            </Text>
+          </Pressable>
+        </View>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 }
 
