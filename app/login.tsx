@@ -89,12 +89,12 @@ export default function Login() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ImageBackground
-        source={require("../assets/images/background.jpeg")}
-        style={styles.container}
-        resizeMode="cover"
-      >
+    <ImageBackground
+      source={require("../assets/images/background.jpeg")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.overlay}>
           <Text style={styles.title}>Tervetuloa</Text>
 
@@ -137,8 +137,8 @@ export default function Login() {
             Eikö ole tiliä? Luo tili painamalla tästä!
           </Link>
         </View>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </ImageBackground>
   );
 }
 

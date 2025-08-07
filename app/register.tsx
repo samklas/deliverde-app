@@ -61,12 +61,12 @@ export default function Register() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ImageBackground
-        source={require("../assets/images/background.jpeg")}
-        style={styles.container}
-        resizeMode="cover"
-      >
+    <ImageBackground
+      source={require("../assets/images/background.jpeg")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.overlay}>
           <Text style={styles.title}>Luo tili</Text>
           <TextInput
@@ -98,8 +98,8 @@ export default function Register() {
             </Text>
           </Pressable>
         </View>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </ImageBackground>
   );
 }
 

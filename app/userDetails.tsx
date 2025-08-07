@@ -6,6 +6,8 @@ import {
   Pressable,
   Alert,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useState } from "react";
 import { auth } from "@/firebaseConfig";
@@ -44,22 +46,22 @@ export default function UserDetails() {
   };
   const avatars = [avatar1, avatar2, avatar3];
 
-  const isUsernameAvailable = async (username: string) => {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("username", "==", username));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.empty;
-  };
+  // const isUsernameAvailable = async (username: string) => {
+  //   const usersRef = collection(db, "users");
+  //   const q = query(usersRef, where("username", "==", username));
+  //   const querySnapshot = await getDocs(q);
+  //   return querySnapshot.empty;
+  // };
 
   const isValid = async () => {
     if (!username.trim()) {
       Alert.alert("Virhe", "Käyttäjänimi on pakollinen");
       return false;
     }
-    if (!(await isUsernameAvailable(username))) {
-      Alert.alert("Virhe", "Käyttäjänimi on jo käytössä");
-      return false;
-    }
+    // if (!(await isUsernameAvailable(username))) {
+    //   Alert.alert("Virhe", "Käyttäjänimi on jo käytössä");
+    //   return false;
+    // }
 
     return true;
   };
@@ -111,94 +113,99 @@ export default function UserDetails() {
   };
 
   return (
-    <View style={styles.overlay}>
-      <Text style={styles.levelLabel}>Käyttäjänimi</Text>
-      <TextInput
-        style={styles.input}
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Käyttäjänimi"
-      />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.overlay}>
+        <Text style={styles.levelLabel}>Käyttäjänimi</Text>
+        <TextInput
+          style={styles.input}
+          value={username}
+          onChangeText={setUsername}
+          placeholder="Käyttäjänimi"
+        />
 
-      <Text style={styles.levelLabel}>Taso</Text>
-      <Text style={{ marginBottom: 10, color: "#8D8D8D" }}>
-        Valitse itsellesi sopiva taso alla olevista vaihtoehdoista. Taso
-        määrittää, kuinka paljon vihanneksia pyrit syömään päivittäin. Voit
-        muokata tasoasi myöhemmin Profiili-näkymässä, jos haluat säätää
-        tavoitteitasi.
-      </Text>
-      <View style={styles.levelButtons}>
-        {levels.map((lvl) => (
-          <Pressable
-            key={lvl}
-            style={[styles.levelButton, level === lvl && styles.selectedLevel]}
-            onPress={() => setLevel(lvl)}
-          >
-            {lvl === "beginner" && (
-              <View>
-                <Text
-                  style={[
-                    styles.levelText,
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  Satunnainen haukkailija | 300g
-                </Text>
-              </View>
-            )}
-            {lvl === "intermediate" && (
-              <View>
-                <Text
-                  style={[
-                    styles.levelText,
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  Vihannesmestari | 500g
-                </Text>
-              </View>
-            )}
-            {lvl === "advanced" && (
-              <View>
-                <Text
-                  style={[
-                    styles.levelText,
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  Vihreä legenda | 800g
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={styles.levelLabel}>Avatar</Text>
-      <View style={styles.avatarSelection}>
-        {avatars.map((avatar, index) => (
-          <Pressable
-            key={index}
-            onPress={() => setSelectedAvatar(avatar.id)}
-            style={[
-              styles.avatarButton,
-              selectedAvatar === avatar.id && styles.selectedAvatar,
-            ]}
-          >
-            <Image source={avatar.item} style={styles.avatarImage} />
-          </Pressable>
-        ))}
-      </View>
-      <Pressable
-        style={styles.continueButton}
-        onPress={addUser}
-        disabled={isLoading}
-      >
-        <Text style={styles.continueButtonText}>
-          {isLoading ? "Tallennetaan..." : "Jatka"}
+        <Text style={styles.levelLabel}>Taso</Text>
+        <Text style={{ marginBottom: 10, color: "#8D8D8D" }}>
+          Valitse itsellesi sopiva taso alla olevista vaihtoehdoista. Taso
+          määrittää, kuinka paljon vihanneksia pyrit syömään päivittäin. Voit
+          muokata tasoasi myöhemmin Profiili-näkymässä, jos haluat säätää
+          tavoitteitasi.
         </Text>
-      </Pressable>
-    </View>
+        <View style={styles.levelButtons}>
+          {levels.map((lvl) => (
+            <Pressable
+              key={lvl}
+              style={[
+                styles.levelButton,
+                level === lvl && styles.selectedLevel,
+              ]}
+              onPress={() => setLevel(lvl)}
+            >
+              {lvl === "beginner" && (
+                <View>
+                  <Text
+                    style={[
+                      styles.levelText,
+                      level === lvl && styles.selectedLevelText,
+                    ]}
+                  >
+                    Satunnainen haukkailija | 300g
+                  </Text>
+                </View>
+              )}
+              {lvl === "intermediate" && (
+                <View>
+                  <Text
+                    style={[
+                      styles.levelText,
+                      level === lvl && styles.selectedLevelText,
+                    ]}
+                  >
+                    Vihannesmestari | 500g
+                  </Text>
+                </View>
+              )}
+              {lvl === "advanced" && (
+                <View>
+                  <Text
+                    style={[
+                      styles.levelText,
+                      level === lvl && styles.selectedLevelText,
+                    ]}
+                  >
+                    Vihreä legenda | 800g
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          ))}
+        </View>
+
+        <Text style={styles.levelLabel}>Avatar</Text>
+        <View style={styles.avatarSelection}>
+          {avatars.map((avatar, index) => (
+            <Pressable
+              key={index}
+              onPress={() => setSelectedAvatar(avatar.id)}
+              style={[
+                styles.avatarButton,
+                selectedAvatar === avatar.id && styles.selectedAvatar,
+              ]}
+            >
+              <Image source={avatar.item} style={styles.avatarImage} />
+            </Pressable>
+          ))}
+        </View>
+        <Pressable
+          style={styles.continueButton}
+          onPress={addUser}
+          disabled={isLoading}
+        >
+          <Text style={styles.continueButtonText}>
+            {isLoading ? "Tallennetaan..." : "Jatka"}
+          </Text>
+        </Pressable>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

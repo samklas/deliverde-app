@@ -89,8 +89,6 @@ const Tab = observer(() => {
   }, []);
 
   useEffect(() => {
-    console.log("progress: " + progress);
-    console.log("hasCelebrated: " + hasCelebrated);
     if (progress >= 100 && !hasCelebrated) {
       triggerCelebration();
       setHasCelebrated(true);
@@ -153,12 +151,12 @@ const Tab = observer(() => {
   };
   if (isLoading) return null;
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ImageBackground
-        source={require("../../assets/images/background.jpeg")}
-        style={styles.container}
-        resizeMode="cover"
-      >
+    <ImageBackground
+      source={require("../../assets/images/background.jpeg")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.overlay}>
           {/* Today box */}
 
@@ -253,8 +251,8 @@ const Tab = observer(() => {
             lastUsed={lastUsedVegetables}
           />
         </View>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </ImageBackground>
   );
 });
 
