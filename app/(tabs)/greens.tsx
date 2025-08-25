@@ -23,6 +23,7 @@ import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
 
 import userStore from "@/stores/userStore";
+import { getDailyTotalForCurrentUser } from "@/utils/users";
 
 const Tab = observer(() => {
   const { dailyTotal, setDailyTotal, dailyTarget } = userStore;
@@ -34,13 +35,16 @@ const Tab = observer(() => {
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
   const [vegetable, setVegetable] = useState<Vegetable>();
   const [sound, setSound] = useState<Audio.Sound>();
-  const [hasCelebrated, setHasCelebrated] = useState(false);
+  const [hasCelebrated, setHasCelebrated] = useState(true);
   const progress = Math.min((dailyTotal / dailyTarget) * 100, 100); // Cap at 100%
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // addVegetablesToFirestore();
+
+    if (dailyTotal < dailyTarget) setHasCelebrated(false);
+
     const fetchVegetables = async () => {
       setIsLoading(true);
       const cachedVegetables = await AsyncStorage.getItem("vegetables");
@@ -79,8 +83,10 @@ const Tab = observer(() => {
     };
 
     const getDailyTotal = async () => {
-      if (Number(dailyTotal) >= dailyTarget) setHasCelebrated(true);
-      setIsLoading(false);
+      if (Number(await getDailyTotalForCurrentUser()) >= dailyTarget) {
+        setHasCelebrated(true);
+        setIsLoading(false);
+      }
     };
 
     fetchVegetables();
@@ -246,7 +252,6 @@ const Tab = observer(() => {
             isVisible={isVisible}
             vegetable={vegetable}
             onClose={closeModal}
-            setTotal={setDailyTotal}
             setLastUsed={setLastUsedVegetables}
             lastUsed={lastUsedVegetables}
           />

@@ -5,18 +5,19 @@ import { Vegetable } from "@/types/vegetable";
 import { Picker } from "@react-native-picker/picker";
 import { observer } from "mobx-react-lite";
 import userStore from "@/stores/userStore";
+import { setDailyTotalForCurrentUser } from "@/utils/users";
 
 type Props = {
   isVisible: boolean;
   vegetable: Vegetable | undefined;
   onClose: () => void;
-  setTotal: (dailyTotal: number) => void;
+  //setHasCelebrated: React.Dispatch<React.SetStateAction<boolean>>;
   setLastUsed: React.Dispatch<React.SetStateAction<Vegetable[]>>;
   lastUsed: Vegetable[];
 };
 
 const AddVegetableModal = observer(
-  ({ isVisible, vegetable, onClose, setTotal, setLastUsed }: Props) => {
+  ({ isVisible, vegetable, onClose, setLastUsed }: Props) => {
     const [selectedInteger, setSelectedInteger] = useState("0");
     const [selectedDecimal, setSelectedDecimal] = useState("0");
     const { dailyTotal, setDailyTotal } = userStore;
@@ -24,6 +25,7 @@ const AddVegetableModal = observer(
     const handleAddVegetable = async () => {
       //setTotal((total) => total + calculateTotalGrams());
       setDailyTotal(dailyTotal + calculateTotalGrams());
+      setDailyTotalForCurrentUser(dailyTotal + calculateTotalGrams());
 
       if (vegetable) {
         setLastUsed((lastUsed) => {
