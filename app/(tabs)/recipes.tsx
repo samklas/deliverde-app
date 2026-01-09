@@ -4,7 +4,6 @@ import {
   StyleSheet,
   ScrollView,
   ImageBackground,
-  ActivityIndicator,
   Pressable,
 } from "react-native";
 import { useState } from "react";
@@ -12,13 +11,18 @@ import { theme } from "@/theme";
 import RecipeBox from "@/components/recipe/RecipeBox";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useRecipes, useFavorites } from "@/hooks";
+import { useFavorites } from "@/hooks";
+import { observer } from "mobx-react-lite";
+import recipeStore from "@/stores/recipeStore";
 
-export default function Tab() {
+const Tab = observer(() => {
   const [activeSection, setActiveSection] = useState("all");
   const router = useRouter();
 
-  const { recipes, isLoading } = useRecipes();
+  // Get pre-loaded recipes from store
+  const { recipes } = recipeStore;
+
+  // Real-time listener for favorites
   const { favoriteRecipes } = useFavorites(recipes);
 
   return (
@@ -47,17 +51,15 @@ export default function Tab() {
           </Pressable>
         </View>
         <ScrollView style={styles.recipeList} showsVerticalScrollIndicator={false}>
-          {isLoading ? (
-            <ActivityIndicator />
-          ) : (
-            (activeSection === "all" ? recipes : favoriteRecipes).map((recipe) => (
+          {(activeSection === "all" ? recipes : favoriteRecipes)
+            .filter((recipe) => recipe.id) // Filter out empty init recipe
+            .map((recipe) => (
               <RecipeBox
                 key={recipe.id}
                 recipe={recipe}
                 userFavoriteRecipes={favoriteRecipes}
               />
-            ))
-          )}
+            ))}
         </ScrollView>
         <Pressable
           style={[styles.suggestButton, styles.box]}
@@ -69,7 +71,9 @@ export default function Tab() {
       </View>
     </ImageBackground>
   );
-}
+});
+
+export default Tab;
 
 const styles = StyleSheet.create({
   container: {

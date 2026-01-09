@@ -13,7 +13,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { storage } from "@/services";
+import { storage, loadAppData } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
 
@@ -45,7 +45,10 @@ export default function Login() {
         [STORAGE_KEYS.USERNAME, username],
       ]);
 
-      router.push("/(tabs)");
+      // Load all app data before navigating
+      await loadAppData();
+
+      router.replace("/(tabs)");
     } catch (error) {
       const message = "Kirjautuminen epäonnistui. Tarkista sähköposti ja salasana.";
       setErrorMessage(message);

@@ -3,36 +3,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import recipeStore from "@/stores/recipeStore";
-import { useEffect } from "react";
 import RecipeBox from "@/components/recipe/RecipeBox";
 import LeaderboardBox from "@/components/leaderboard/LeaderboardBox";
 import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
-import LoadingIndicator from "@/components/common/LoadingIndicator";
 import { useRouter } from "expo-router";
-import { useRecipes, useFavorites, useUserData } from "@/hooks";
-import { getRecipeOfMonth } from "@/services";
+import { useFavorites } from "@/hooks";
 
 const Tab = observer(() => {
   const router = useRouter();
-  const { recipes, recipeOfMonth, isLoading: recipesLoading } = useRecipes();
-  const { favoriteRecipes } = useFavorites(recipes);
-  const { isLoading: userLoading } = useUserData();
+  const { recipes, recipeOfMonth, favoriteRecipes } = recipeStore;
 
-  const { setRecipes, setRecipeOfMonth, setFavoriteRecipes } = recipeStore;
+  // Real-time listener for favorites (this is lightweight, keeps favorites in sync)
+  const { favoriteRecipes: liveFavorites } = useFavorites(recipes);
 
-  useEffect(() => {
-    if (recipes.length > 0) {
-      setRecipes(recipes);
-      const monthRecipe = getRecipeOfMonth(recipes);
-      if (monthRecipe) setRecipeOfMonth(monthRecipe);
-    }
-  }, [recipes]);
-
-  useEffect(() => {
-    setFavoriteRecipes(favoriteRecipes);
-  }, [favoriteRecipes]);
-
-  const isLoading = recipesLoading || userLoading;
+  // Use live favorites if available, otherwise use stored ones
+  const currentFavorites = liveFavorites.length > 0 ? liveFavorites : favoriteRecipes;
 
   return (
     <ImageBackground
@@ -41,29 +26,25 @@ const Tab = observer(() => {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        {isLoading ? (
-          <LoadingIndicator />
-        ) : (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <DailyChallengeBox />
-            <LeaderboardBox />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <DailyChallengeBox />
+          <LeaderboardBox />
 
-            {recipeOfMonth && (
-              <RecipeBox
-                recipe={recipeOfMonth}
-                userFavoriteRecipes={favoriteRecipes}
-                isRecipeOfMonth
-              />
-            )}
-            <Pressable
-              style={[styles.feedbackButton, styles.box]}
-              onPress={() => router.push("/feedback")}
-            >
-              <Text style={styles.feedbackText}>Lähetä palautetta</Text>
-              <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
-            </Pressable>
-          </ScrollView>
-        )}
+          {recipeOfMonth && recipeOfMonth.id && (
+            <RecipeBox
+              recipe={recipeOfMonth}
+              userFavoriteRecipes={currentFavorites}
+              isRecipeOfMonth
+            />
+          )}
+          <Pressable
+            style={[styles.feedbackButton, styles.box]}
+            onPress={() => router.push("/feedback")}
+          >
+            <Text style={styles.feedbackText}>Lähetä palautetta</Text>
+            <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
+          </Pressable>
+        </ScrollView>
       </View>
     </ImageBackground>
   );

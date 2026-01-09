@@ -15,3 +15,5 @@ export {
 } from "./users.service";
 
 export { storage } from "./storage.service";
+
+export { loadAppData } from "./appData.service";
