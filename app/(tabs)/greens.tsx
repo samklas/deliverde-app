@@ -23,7 +23,7 @@ import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
 
 import userStore from "@/stores/userStore";
-import { getDailyTotalForCurrentUser } from "@/utils/users";
+import { getDailyTotalForCurrentUser } from "@/services";
 
 const Tab = observer(() => {
   const { dailyTotal, setDailyTotal, dailyTarget } = userStore;

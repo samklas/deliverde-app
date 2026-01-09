@@ -3,66 +3,107 @@ import Icon from "@expo/vector-icons/Ionicons";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
 import { Image } from "expo-image";
+import RecipeModal from "./RecipeModal";
+import { useState } from "react";
+import { auth, db } from "@/firebaseConfig";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { capitalizeFirstLetter } from "@/utils/formatting";
 
 type Props = {
   recipe: Recipe;
-  openModal: (recipe: Recipe) => void;
-  toggleFavorite: (recipeId: string) => void;
-  removeFavorite: (recipeId: string) => void;
   userFavoriteRecipes: Recipe[];
+  isRecipeOfMonth?: boolean;
 };
 
 export default function RecipeBox({
   recipe,
-  openModal,
-  toggleFavorite,
-  removeFavorite,
   userFavoriteRecipes,
+  isRecipeOfMonth,
 }: Props) {
-  const modifyFirstLetterToUpperCase = (value: string) => {
-    return value.charAt(0).toUpperCase() + value.slice(1);
+  const [isRecipeModalVisible, setIsRecipeModalVisible] = useState(false);
+
+  const addToFavorites = async (recipeId: string) => {
+    const userId = auth.currentUser?.uid;
+    const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
+
+    try {
+      await setDoc(favoriteRef, { addedAt: new Date() }); // Add recipe to favorites
+      console.log("Recipe added to favorites!");
+    } catch (error) {
+      console.error("Error adding to favorites: ", error);
+    }
+  };
+
+  const removeFromFavorites = async (recipeId: string) => {
+    const userId = auth.currentUser?.uid;
+    const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
+
+    try {
+      await deleteDoc(favoriteRef); // Remove recipe from favorites
+      console.log("Recipe removed from favorites!");
+    } catch (error) {
+      console.error("Error removing from favorites: ", error);
+    }
   };
 
   let isFavorite = userFavoriteRecipes.some((fav) => fav.id === recipe.id);
 
   return (
-    <TouchableOpacity key={recipe.id} onPress={() => openModal(recipe)}>
-      <View style={styles.box}>
-        <View style={styles.recipeContent}>
-          <Image style={styles.recipeImage} source={{ uri: recipe.imageUrl }} />
-          <Text style={styles.recipeTitle}>
-            {modifyFirstLetterToUpperCase(recipe.title)}
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={styles.recipeDetails}>
-              {`${recipe.details.duration} min • ${modifyFirstLetterToUpperCase(
-                recipe.details.difficultyLevel
-              )} • ${recipe.details.portionaAmount} annosta`}
+    <View>
+      <TouchableOpacity
+        key={recipe.id}
+        onPress={() => setIsRecipeModalVisible(true)}
+      >
+        <View style={styles.box}>
+          {isRecipeOfMonth && (
+            <Text style={styles.boxTitle}>Kuukauden resepti</Text>
+          )}
+          <View style={styles.recipeContent}>
+            <Image
+              style={styles.recipeImage}
+              source={{ uri: recipe.imageUrl }}
+            />
+            <Text style={styles.recipeTitle}>
+              {capitalizeFirstLetter(recipe.title)}
             </Text>
-            <TouchableOpacity
-              style={styles.heartButton}
-              onPress={() => {
-                isFavorite
-                  ? removeFavorite(recipe.id)
-                  : toggleFavorite(recipe.id);
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Icon
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={30}
-                color={theme.colors.secondary}
-              />
-            </TouchableOpacity>
+              <Text style={styles.recipeDetails}>
+                {`${
+                  recipe.details.duration
+                } min • ${capitalizeFirstLetter(
+                  recipe.details.difficultyLevel
+                )} • ${recipe.details.portionAmount} annosta`}
+              </Text>
+              <TouchableOpacity
+                style={styles.heartButton}
+                onPress={() => {
+                  isFavorite
+                    ? removeFromFavorites(recipe.id)
+                    : addToFavorites(recipe.id);
+                }}
+              >
+                <Icon
+                  name={isFavorite ? "heart" : "heart-outline"}
+                  size={30}
+                  color={theme.colors.secondary}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <RecipeModal
+        selectedRecipe={recipe}
+        isVisible={isRecipeModalVisible}
+        setIsVisible={setIsRecipeModalVisible}
+      />
+    </View>
   );
 }
 
@@ -120,5 +161,11 @@ const styles = StyleSheet.create({
   },
   heartButton: {
     marginLeft: 30,
+  },
+  boxTitle: {
+    fontSize: theme.fonts.subtitle.fontSize,
+    fontWeight: "bold",
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.small,
   },
 });

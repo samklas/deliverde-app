@@ -5,7 +5,7 @@ import { Vegetable } from "@/types/vegetable";
 import { Picker } from "@react-native-picker/picker";
 import { observer } from "mobx-react-lite";
 import userStore from "@/stores/userStore";
-import { setDailyTotalForCurrentUser } from "@/utils/users";
+import { setDailyTotalForCurrentUser } from "@/services";
 
 type Props = {
   isVisible: boolean;

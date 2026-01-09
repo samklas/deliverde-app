@@ -1,5 +1,4 @@
 import { db, auth } from "@/firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -11,10 +10,12 @@ import {
   TextInput,
   View,
   Text,
-  Alert,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { storage } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
+import { theme } from "@/theme";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,69 +23,34 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const getUsername = async (uid: string) => {
+  const getUsername = async (uid: string): Promise<string> => {
     const docRef = doc(db, "users", uid);
     const document = await getDoc(docRef);
     if (document.exists()) {
       return document.data().username as string;
     }
-
-    throw new Error("error");
+    throw new Error("User document not found");
   };
 
   const handleLogin = async () => {
     try {
       setIsLoading(true);
       setErrorMessage("");
-      //const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
 
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const username = await getUsername(userCredential.user.uid);
 
-      storeUserId(userCredential.user.uid, username);
-      getUserId();
-      router.push("/(tabs)");
-    } catch (error: any) {
-      //console.error("Error logging in:", error);
-      let message =
-        "Kirjautuminen epäonnistui. Tarkista sähköposti ja salasana.";
+      await storage.multiSet([
+        [STORAGE_KEYS.USER_ID, userCredential.user.uid],
+        [STORAGE_KEYS.USERNAME, username],
+      ]);
 
-      // if (error.code === "auth/user-not-found") {
-      //   message = "Käyttäjää ei löytynyt.";
-      // } else if (error.code === "auth/wrong-password") {
-      //   message = "Väärä salasana.";
-      // } else if (error.code === "auth/invalid-email") {
-      //   message = "Virheellinen sähköpostiosoite.";
-      // }
+      router.push("/(tabs)");
+    } catch (error) {
+      const message = "Kirjautuminen epäonnistui. Tarkista sähköposti ja salasana.";
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const storeUserId = async (uid: string, username: string) => {
-    try {
-      await AsyncStorage.multiSet([
-        ["id", uid],
-        ["username", username],
-      ]);
-    } catch (e) {
-      console.log("error: " + e);
-    }
-  };
-
-  const getUserId = async () => {
-    try {
-      const value = await AsyncStorage.getItem("id");
-      if (value !== null) {
-        return value;
-      }
-    } catch (e) {
-      // error reading value
     }
   };
 
@@ -115,23 +81,13 @@ export default function Login() {
             secureTextEntry
           />
 
-          <Pressable
-            style={styles.button}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
+          <Pressable style={styles.button} onPress={handleLogin} disabled={isLoading}>
             <Text style={styles.buttonText}>
               {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
             </Text>
           </Pressable>
 
-          {errorMessage ? (
-            <Text
-              style={{ color: "#c00", textAlign: "center", marginBottom: 10 }}
-            >
-              {errorMessage}
-            </Text>
-          ) : null}
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <Link href="/register" style={styles.link}>
             Eikö ole tiliä? Luo tili painamalla tästä!
@@ -145,18 +101,18 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: theme.colors.background,
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 1)",
-    padding: 16,
+    backgroundColor: theme.colors.background,
+    padding: theme.spacing.medium,
     justifyContent: "center",
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#0c4c25",
+    color: theme.colors.primary,
     marginBottom: 20,
     textAlign: "center",
   },
@@ -169,19 +125,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: "#0c4c25",
+    backgroundColor: theme.colors.primary,
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
     marginBottom: 12,
   },
   buttonText: {
-    color: "white",
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: "bold",
   },
+  errorText: {
+    color: theme.colors.error,
+    textAlign: "center",
+    marginBottom: 10,
+  },
   link: {
-    color: "#0c4c25",
+    color: theme.colors.primary,
     textAlign: "center",
   },
 });

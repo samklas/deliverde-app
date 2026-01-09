@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Recipe } from "@/types/recipe";
 import { Image } from "expo-image";
+import { capitalizeFirstLetter } from "@/utils/formatting";
 
 type Props = {
   selectedRecipe: Recipe | null;
@@ -54,7 +55,7 @@ export default function RecipeModal({
                 </TouchableOpacity>
               </ImageBackground>
               <Text style={styles.modalTitle}>
-                {modifyFirstLetterToUpperCase(selectedRecipe.title)}
+                {capitalizeFirstLetter(selectedRecipe.title)}
               </Text>
               <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                 <View style={styles.box}>
@@ -92,10 +93,6 @@ export default function RecipeModal({
     </Modal>
   );
 }
-
-const modifyFirstLetterToUpperCase = (value: string) => {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-};
 
 const styles = StyleSheet.create({
   modalContainer: {

@@ -45,7 +45,7 @@ export default function RootLayout() {
         }}
       />
       <Stack.Screen
-        name="recipeSuggestionV2"
+        name="recipe-suggestion"
         options={{
           headerShown: true,
           title: "",

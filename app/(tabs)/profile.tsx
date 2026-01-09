@@ -1,8 +1,7 @@
 import { auth } from "@/firebaseConfig";
 import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -14,6 +13,8 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { storage } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
@@ -29,15 +30,7 @@ export default function Tab() {
           text: "Kyllä",
           onPress: async () => {
             try {
-              // remove all the data from async storage
-              await AsyncStorage.multiRemove([
-                "id",
-                "username",
-                "dailyTotal",
-                "vegetables",
-                "lastUsedVegetables",
-              ]);
-              // signOut triggers onAuthStateChanged in index.tsx which handles navigation
+              await storage.clearUserData();
               auth.signOut();
             } catch (error) {
               console.error("Error logging out:", error);
@@ -46,20 +39,17 @@ export default function Tab() {
         },
         {
           text: "Ei",
-          onPress: () => console.log("Logout cancelled"),
-          //style: "cancel",
+          onPress: () => {},
         },
       ],
-
       { cancelable: false }
     );
   };
 
-  const getUsername = async () => {
-    const username = await AsyncStorage.getItem("username");
-
-    if (username) {
-      setUsername(username);
+  const loadUsername = async () => {
+    const storedUsername = await storage.get(STORAGE_KEYS.USERNAME);
+    if (storedUsername) {
+      setUsername(storedUsername);
     }
   };
 
@@ -76,7 +66,7 @@ export default function Tab() {
   };
 
   useEffect(() => {
-    getUsername();
+    loadUsername();
   }, []);
 
   return (
@@ -92,52 +82,23 @@ export default function Tab() {
             <Text style={styles.username}>{username}</Text>
           </View>
 
-          <View style={[styles.box, { marginTop: 50 }]}>
+          <View style={[styles.box, styles.goalBox]}>
             <Text style={styles.sectionTitle}>Päivän tavoite</Text>
             <View style={styles.goalItem}>
-              <Text> Syö {dailyTarget}g vihanneksia 🥬</Text>
+              <Text>Syö {dailyTarget}g vihanneksia</Text>
             </View>
           </View>
+
           <Pressable
-            style={[
-              {
-                flex: 0,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              },
-              styles.box,
-            ]}
+            style={[styles.feedbackButton, styles.box]}
             onPress={() => router.push("/feedback")}
           >
             <Text>Lähetä palautetta</Text>
             <Ionicons name="arrow-forward" size={20} />
           </Pressable>
 
-          <Pressable
-            style={{
-              alignItems: "center",
-              marginBottom: 30,
-              flex: 1,
-              justifyContent: "flex-end",
-            }}
-            onPress={async () => await handleLogout()}
-          >
-            <Text
-              style={{
-                color: theme.colors.primary,
-                fontWeight: "500",
-                borderWidth: 2,
-                borderColor: theme.colors.primary,
-                borderRadius: 20,
-                paddingTop: 10,
-                paddingBottom: 10,
-                paddingLeft: 20,
-                paddingRight: 20,
-              }}
-            >
-              Kirjaudu ulos
-            </Text>
+          <Pressable style={styles.logoutContainer} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Kirjaudu ulos</Text>
           </Pressable>
         </View>
       </View>
@@ -173,10 +134,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  goalsSection: {
-    marginTop: 20,
-    backgroundColor: theme.colors.background,
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -184,6 +141,9 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
   goalItem: {},
+  goalBox: {
+    marginTop: 50,
+  },
   box: {
     backgroundColor: theme.colors.background,
     borderRadius: theme.borderRadius.large,
@@ -194,5 +154,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  feedbackButton: {
+    flex: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  logoutContainer: {
+    alignItems: "center",
+    marginBottom: 30,
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  logoutText: {
+    color: theme.colors.primary,
+    fontWeight: "500",
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
 });
