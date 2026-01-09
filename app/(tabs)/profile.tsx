@@ -29,7 +29,6 @@ export default function Tab() {
           text: "Kyllä",
           onPress: async () => {
             try {
-              auth.signOut();
               // remove all the data from async storage
               await AsyncStorage.multiRemove([
                 "id",
@@ -38,7 +37,8 @@ export default function Tab() {
                 "vegetables",
                 "lastUsedVegetables",
               ]);
-              router.push("/login");
+              // signOut triggers onAuthStateChanged in index.tsx which handles navigation
+              auth.signOut();
             } catch (error) {
               console.error("Error logging out:", error);
             }
