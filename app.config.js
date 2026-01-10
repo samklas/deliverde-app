@@ -14,6 +14,7 @@ export default {
         ITSAppUsesNonExemptEncryption: false,
       },
       icon: "./assets/images/icon_ios.png",
+      usesAppleSignIn: true,
     },
     android: {
       adaptiveIcon: {
@@ -45,6 +46,8 @@ export default {
           backgroundColor: "#4caf50",
         },
       ],
+      "expo-apple-authentication",
+      "@react-native-google-signin/google-signin",
     ],
     experiments: {
       typedRoutes: true,
@@ -65,6 +68,8 @@ export default {
         appId: process.env.FIREBASE_APP_ID,
         measurementId: process.env.FIREBASE_MEASUREMENT_ID,
       },
+      googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+      googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
     },
     owner: "smabza",
   },

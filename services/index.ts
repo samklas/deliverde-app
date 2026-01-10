@@ -17,3 +17,11 @@ export {
 export { storage } from "./storage.service";
 
 export { loadAppData } from "./appData.service";
+
+export {
+  signInWithApple,
+  signInWithGoogle,
+  checkUserExists,
+  getUsername,
+  type AuthResult,
+} from "./auth.service";
