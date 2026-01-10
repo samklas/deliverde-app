@@ -1,5 +1,5 @@
-import { Stack } from "expo-router";
-import React, { useEffect, useState, useCallback } from "react";
+import { Stack, useRouter, useSegments } from "expo-router";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
 import "../firebaseConfig";
@@ -13,6 +13,9 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const router = useRouter();
+  const segments = useSegments();
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
     async function prepare() {
@@ -39,11 +42,28 @@ export default function RootLayout() {
         setInitialRoute("login");
       } finally {
         setAppIsReady(true);
+        hasInitialized.current = true;
       }
     }
 
     prepare();
   }, []);
+
+  // Listen for auth state changes after initial load (handles logout)
+  useEffect(() => {
+    if (!hasInitialized.current) return;
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const inAuthGroup = segments[0] === "(tabs)";
+
+      if (!user && inAuthGroup) {
+        // User logged out while in authenticated area
+        router.replace("/login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [segments]);
 
   const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {

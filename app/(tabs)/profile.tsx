@@ -97,9 +97,11 @@ export default function Tab() {
             <Ionicons name="arrow-forward" size={20} />
           </Pressable>
 
-          <Pressable style={styles.logoutContainer} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Kirjaudu ulos</Text>
-          </Pressable>
+          <View style={styles.logoutContainer}>
+            <Pressable style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutText}>Kirjaudu ulos</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </ImageBackground>
@@ -167,13 +169,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
   },
-  logoutText: {
-    color: theme.colors.primary,
-    fontWeight: "500",
+  logoutButton: {
     borderWidth: 2,
     borderColor: theme.colors.primary,
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+  logoutText: {
+    color: theme.colors.primary,
+    fontWeight: "500",
   },
 });
