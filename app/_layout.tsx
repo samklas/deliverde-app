@@ -1,59 +1,125 @@
-import { Redirect, Stack } from "expo-router";
-import React from "react";
-import "../firebaseConfig"; // Import at the top of your entry file
+import { Stack, useRouter, useSegments } from "expo-router";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import { View } from "react-native";
+import "../firebaseConfig";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "@/firebaseConfig";
+import { loadAppData } from "@/services";
+
+// Prevent splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // Add a way to check authentication status
-  // const isAuthenticated = false; // Replace this with your actual auth check
+  const [appIsReady, setAppIsReady] = useState(false);
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const router = useRouter();
+  const segments = useSegments();
+  const hasInitialized = useRef(false);
 
-  // Redirect authenticated users to tabs, otherwise to index
-  // if (isAuthenticated) {
-  //   return <Redirect href="/(tabs)" />;
-  // }
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Wait for auth state to be determined
+        const user = await new Promise<User | null>((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+          });
+        });
+
+        if (user) {
+          // User is logged in - load all app data
+          await loadAppData();
+          setInitialRoute("(tabs)");
+        } else {
+          // User not logged in
+          setInitialRoute("login");
+        }
+      } catch (e) {
+        console.error("Error loading app data:", e);
+        // On error, still allow app to proceed to login
+        setInitialRoute("login");
+      } finally {
+        setAppIsReady(true);
+        hasInitialized.current = true;
+      }
+    }
+
+    prepare();
+  }, []);
+
+  // Listen for auth state changes after initial load (handles logout)
+  useEffect(() => {
+    if (!hasInitialized.current) return;
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const inAuthGroup = segments[0] === "(tabs)";
+
+      if (!user && inAuthGroup) {
+        // User logged out while in authenticated area
+        router.replace("/login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [segments]);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady || !initialRoute) {
+    return null;
+  }
 
   return (
-    <Stack>
-      {/* <Stack.Screen name="splash" options={{ headerShown: false }} /> */}
-      <Stack.Screen
-        name="index"
-        options={{ headerShown: false, headerTintColor: "#0c4c25" }}
-      />
-      <Stack.Screen
-        name="login"
-        options={{ headerShown: false, title: "Kirjaudu" }}
-      />
-      <Stack.Screen
-        name="register"
-        options={{
-          headerShown: true,
-          title: "",
-          headerBackTitle: "takaisin",
-          headerTintColor: "#0c4c25",
-        }}
-      />
-      <Stack.Screen
-        name="userDetails"
-        options={{ headerShown: false, title: "" }}
-      />
-      <Stack.Screen
-        name="feedback"
-        options={{
-          headerShown: true,
-          title: "",
-          headerBackTitle: "takaisin",
-          headerTintColor: "#0c4c25",
-        }}
-      />
-      <Stack.Screen
-        name="recipeSuggestionV2"
-        options={{
-          headerShown: true,
-          title: "",
-          headerBackTitle: "takaisin",
-          headerTintColor: "#0c4c25",
-        }}
-      />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <Stack initialRouteName={initialRoute}>
+        <Stack.Screen
+          name="index"
+          options={{ headerShown: false }}
+          redirect={true}
+        />
+        <Stack.Screen
+          name="login"
+          options={{ headerShown: false, title: "Kirjaudu" }}
+        />
+        <Stack.Screen
+          name="register"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "takaisin",
+            headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen
+          name="userDetails"
+          options={{ headerShown: false, title: "" }}
+        />
+        <Stack.Screen
+          name="feedback"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "takaisin",
+            headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen
+          name="recipe-suggestion"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "takaisin",
+            headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </View>
   );
 }

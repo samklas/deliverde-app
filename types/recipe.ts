@@ -12,5 +12,5 @@ export type Recipe = {
 type Details = {
   duration: string;
   difficultyLevel: string;
-  portionaAmount: string;
+  portionAmount: string;
 };

@@ -11,7 +11,7 @@ const initRecipe: Recipe = {
   details: {
     duration: "",
     difficultyLevel: "",
-    portionaAmount: "",
+    portionAmount: "",
   },
   recipeOfMonth: false,
 };

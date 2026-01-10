@@ -11,18 +11,11 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { auth } from "@/firebaseConfig";
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getCurrentYearMonth } from "@/utils/utils";
+import { storage, loadAppData } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
 import userStore from "@/stores/userStore";
 
 export default function UserDetails() {
@@ -86,14 +79,15 @@ export default function UserDetails() {
 
         await addUserToLeaderBoard(uid);
 
-        await AsyncStorage.multiSet([
-          ["id", uid],
-          ["username", username],
+        await storage.multiSet([
+          [STORAGE_KEYS.USER_ID, uid],
+          [STORAGE_KEYS.USERNAME, username],
         ]);
 
-        setAvatarId(selectedAvatar);
+        // Load all app data before navigating
+        await loadAppData();
 
-        router.push("/(tabs)");
+        router.replace("/(tabs)");
       } catch (error) {
         console.error("Error adding user:", error);
         Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");
