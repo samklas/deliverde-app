@@ -96,20 +96,11 @@ export default function RootLayout() {
           options={{ headerShown: false, title: "Kirjaudu" }}
         />
         <Stack.Screen
-          name="register"
-          options={{
-            headerShown: true,
-            title: "",
-            headerBackTitle: "takaisin",
-            headerTintColor: "#0c4c25",
-          }}
-        />
-        <Stack.Screen
           name="userDetails"
           options={{
-          headerTitle: '',
-          headerBackVisible: false,
-       }}
+            headerTitle: "",
+            headerBackVisible: false,
+          }}
         />
         <Stack.Screen
           name="userLevel"
