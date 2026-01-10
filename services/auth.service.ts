@@ -3,8 +3,9 @@ import {
   signInWithCredential,
   OAuthProvider,
   GoogleAuthProvider,
+  deleteUser,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
 import Constants from "expo-constants";
@@ -131,4 +132,25 @@ export const signInWithGoogle = async (): Promise<AuthResult> => {
   }
 
   return { uid, isNewUser: true };
+};
+
+/**
+ * Delete user account and associated data
+ */
+export const deleteAccount = async (): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("No authenticated user");
+  }
+
+  // Delete user document from Firestore
+  const userRef = doc(db, "users", user.uid);
+  await deleteDoc(userRef);
+
+  // Delete from leaderboard if exists
+  const leaderboardRef = doc(db, "leaderboard", user.uid);
+  await deleteDoc(leaderboardRef);
+
+  // Delete Firebase Auth account
+  await deleteUser(user);
 };

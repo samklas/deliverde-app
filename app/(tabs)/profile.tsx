@@ -13,7 +13,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { storage } from "@/services";
+import { storage, deleteAccount } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 
 export default function Tab() {
@@ -43,6 +43,34 @@ export default function Tab() {
         },
       ],
       { cancelable: false }
+    );
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      "Poista tili",
+      "Oletko varma, että haluat poistaa tilisi? Tätä toimintoa ei voi perua.",
+      [
+        {
+          text: "Poista",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount();
+              await storage.clearUserData();
+              router.replace("/login");
+            } catch (error) {
+              console.error("Error deleting account:", error);
+              Alert.alert("Virhe", "Tilin poistaminen epäonnistui. Yritä uudelleen.");
+            }
+          },
+        },
+        {
+          text: "Peruuta",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
     );
   };
 
@@ -100,6 +128,9 @@ export default function Tab() {
           <View style={styles.logoutContainer}>
             <Pressable style={styles.logoutButton} onPress={handleLogout}>
               <Text style={styles.logoutText}>Kirjaudu ulos</Text>
+            </Pressable>
+            <Pressable style={styles.deleteButton} onPress={handleDeleteAccount}>
+              <Text style={styles.deleteText}>Poista tili</Text>
             </Pressable>
           </View>
         </View>
@@ -178,6 +209,18 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: theme.colors.primary,
+    fontWeight: "500",
+  },
+  deleteButton: {
+    borderWidth: 2,
+    borderColor: theme.colors.error,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 15,
+  },
+  deleteText: {
+    color: theme.colors.error,
     fontWeight: "500",
   },
 });

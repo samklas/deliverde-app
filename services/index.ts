@@ -23,5 +23,6 @@ export {
   signInWithGoogle,
   checkUserExists,
   getUsername,
+  deleteAccount,
   type AuthResult,
 } from "./auth.service";
