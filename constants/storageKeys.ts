@@ -4,6 +4,8 @@ export const STORAGE_KEYS = {
   DAILY_TOTAL: "dailyTotal",
   VEGETABLES: "vegetables",
   LAST_USED_VEGETABLES: "lastUsedVegetables",
+  ONBOARDING_USERNAME: "onboarding_username",
+  ONBOARDING_AVATAR: "onboarding_avatar",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

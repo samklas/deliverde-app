@@ -5,7 +5,7 @@ import { View } from "react-native";
 import "../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { loadAppData } from "@/services";
+import { loadAppData, checkUserExists } from "@/services";
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -29,9 +29,17 @@ export default function RootLayout() {
         });
 
         if (user) {
-          // User is logged in - load all app data
-          await loadAppData();
-          setInitialRoute("(tabs)");
+          // Check if user has completed profile setup
+          const profileExists = await checkUserExists(user.uid);
+
+          if (profileExists) {
+            // User has completed profile - load all app data
+            await loadAppData();
+            setInitialRoute("(tabs)");
+          } else {
+            // User is authenticated but hasn't completed profile
+            setInitialRoute("userDetails");
+          }
         } else {
           // User not logged in
           setInitialRoute("login");
@@ -98,7 +106,19 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="userDetails"
-          options={{ headerShown: false, title: "" }}
+          options={{
+          headerTitle: '',
+          headerBackVisible: false,
+       }}
+        />
+        <Stack.Screen
+          name="userLevel"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "takaisin",
+            headerTintColor: "#0c4c25",
+          }}
         />
         <Stack.Screen
           name="feedback"
