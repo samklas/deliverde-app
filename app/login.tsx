@@ -58,11 +58,14 @@ export default function Login() {
       const result = await signInWithApple();
       await handleSocialAuthResult(result);
     } catch (error: any) {
+      console.error("Apple Sign-In error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
       if (error.code === "ERR_REQUEST_CANCELED") {
         // User canceled - don't show error
         return;
       }
-      setErrorMessage("Apple-kirjautuminen epäonnistui");
+      setErrorMessage(`Apple-kirjautuminen epäonnistui: ${error.message || error.code || 'Unknown error'}`);
     } finally {
       setIsAppleLoading(false);
     }
@@ -75,11 +78,14 @@ export default function Login() {
       const result = await signInWithGoogle();
       await handleSocialAuthResult(result);
     } catch (error: any) {
+      console.error("Google Sign-In error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
       if (error.code === "SIGN_IN_CANCELLED") {
         // User canceled - don't show error
         return;
       }
-      setErrorMessage("Google-kirjautuminen epäonnistui");
+      setErrorMessage(`Google-kirjautuminen epäonnistui: ${error.message || error.code || 'Unknown error'}`);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -163,16 +169,18 @@ export default function Login() {
             />
           )}
 
-          {/* Google Sign-In */}
-          <Pressable
-            style={styles.googleButton}
-            onPress={handleGoogleSignIn}
-            disabled={isGoogleLoading}
-          >
-            <Text style={styles.googleButtonText}>
-              {isGoogleLoading ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
-            </Text>
-          </Pressable>
+          {/* Google Sign-In - Android only */}
+          {Platform.OS === "android" && (
+            <Pressable
+              style={styles.googleButton}
+              onPress={handleGoogleSignIn}
+              disabled={isGoogleLoading}
+            >
+              <Text style={styles.googleButtonText}>
+                {isGoogleLoading ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
+              </Text>
+            </Pressable>
+          )}
 
           <Link href="/register" style={styles.link}>
             Eikö ole tiliä? Luo tili painamalla tästä!
