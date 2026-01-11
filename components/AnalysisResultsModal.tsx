@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Vegetable } from "@/types/vegetable";
+import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { VegetableAnalysisResult, MatchedVegetable } from "@/types/vision";
 import { matchVegetableToDatabase } from "@/utils/vegetableMatcher";
 import { observer } from "mobx-react-lite";
@@ -23,10 +23,11 @@ type Props = {
   vegetables: Vegetable[];
   onClose: () => void;
   setLastUsed: React.Dispatch<React.SetStateAction<Vegetable[]>>;
+  onVegetablesAdded: (vegetable: TodayVegetable) => void;
 };
 
 const AnalysisResultsModal = observer(
-  ({ isVisible, analysisResults, vegetables, onClose, setLastUsed }: Props) => {
+  ({ isVisible, analysisResults, vegetables, onClose, setLastUsed, onVegetablesAdded }: Props) => {
     const [matchedVegetables, setMatchedVegetables] = useState<
       MatchedVegetable[]
     >([]);
@@ -81,10 +82,26 @@ const AnalysisResultsModal = observer(
       setDailyTotal(newDailyTotal);
       setDailyTotalForCurrentUser(newDailyTotal);
 
-      // Update last used vegetables
-      const selectedVegetables = matchedVegetables
-        .filter((item) => item.selected && item.matchedVegetable)
-        .map((item) => item.matchedVegetable as Vegetable);
+      // Add to today's vegetables and update last used
+      const selectedItems = matchedVegetables.filter(
+        (item) => item.selected && item.matchedVegetable
+      );
+
+      for (const item of selectedItems) {
+        const veg = item.matchedVegetable as Vegetable;
+        const todayVegetable: TodayVegetable = {
+          id: `${veg.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          vegetableId: veg.id,
+          name: veg.name,
+          grams: item.editedGrams,
+          addedAt: Date.now(),
+        };
+        onVegetablesAdded(todayVegetable);
+      }
+
+      const selectedVegetables = selectedItems.map(
+        (item) => item.matchedVegetable as Vegetable
+      );
 
       setLastUsed((prev) => {
         let updated = [...prev];

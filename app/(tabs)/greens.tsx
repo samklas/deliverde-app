@@ -4,13 +4,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  ScrollView,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
-import { Vegetable } from "@/types/vegetable";
+import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { Audio } from "expo-av";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
@@ -19,12 +20,13 @@ import { observer } from "mobx-react-lite";
 import { Ionicons } from "@expo/vector-icons";
 
 import userStore from "@/stores/userStore";
-import { getDailyTotalForCurrentUser } from "@/services";
+import { getDailyTotalForCurrentUser, setDailyTotalForCurrentUser } from "@/services";
 
 const Tab = observer(() => {
-  const { dailyTotal, dailyTarget } = userStore;
+  const { dailyTotal, dailyTarget, setDailyTotal } = userStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
+  const [todayVegetables, setTodayVegetables] = useState<TodayVegetable[]>([]);
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
   const [sound, setSound] = useState<Audio.Sound>();
@@ -77,9 +79,26 @@ const Tab = observer(() => {
       }
     };
 
+    const getTodayVegetables = async () => {
+      const today = new Date().toDateString();
+      const storedDate = await AsyncStorage.getItem("todayVegetablesDate");
+      if (storedDate === today) {
+        const stored = await AsyncStorage.getItem("todayVegetables");
+        if (stored) {
+          setTodayVegetables(JSON.parse(stored) as TodayVegetable[]);
+        }
+      } else {
+        // New day, clear today's vegetables
+        await AsyncStorage.setItem("todayVegetablesDate", today);
+        await AsyncStorage.setItem("todayVegetables", JSON.stringify([]));
+        setTodayVegetables([]);
+      }
+    };
+
     fetchVegetables();
     getLastUsedVegetables();
     getDailyTotal();
+    getTodayVegetables();
   }, []);
 
   useEffect(() => {
@@ -100,6 +119,31 @@ const Tab = observer(() => {
 
     saveLastUsed();
   }, [lastUsedVegetables]);
+
+  useEffect(() => {
+    const saveTodayVegetables = async () => {
+      await AsyncStorage.setItem(
+        "todayVegetables",
+        JSON.stringify(todayVegetables)
+      );
+    };
+
+    saveTodayVegetables();
+  }, [todayVegetables]);
+
+  const handleAddVegetable = (vegetable: TodayVegetable) => {
+    setTodayVegetables((prev) => [...prev, vegetable]);
+  };
+
+  const handleDeleteVegetable = (id: string) => {
+    const vegetableToDelete = todayVegetables.find((v) => v.id === id);
+    if (vegetableToDelete) {
+      const newDailyTotal = Math.max(0, dailyTotal - vegetableToDelete.grams);
+      setDailyTotal(newDailyTotal);
+      setDailyTotalForCurrentUser(newDailyTotal);
+      setTodayVegetables((prev) => prev.filter((v) => v.id !== id));
+    }
+  };
 
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
@@ -156,6 +200,37 @@ const Tab = observer(() => {
         </View>
       </View>
 
+      {/* Today's vegetables section */}
+      <View style={styles.todayVegetablesSection}>
+        
+        {todayVegetables.length === 0 ? (
+          <Text style={styles.emptyText}>
+            Ei lisättyjä vihanneksia tälle päivälle
+          </Text>
+        ) : (
+          <ScrollView style={styles.todayScrollView}>
+            {todayVegetables.map((veg) => (
+              <View key={veg.id} style={styles.todayVegItem}>
+                <View style={styles.todayVegInfo}>
+                  <Text style={styles.vegName}>{veg.name}</Text>
+                  <Text style={styles.gramsText}>{veg.grams}g</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeleteVegetable(veg.id)}
+                >
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={theme.colors.error}
+                  />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
       {/* Add vegetables button */}
       <TouchableOpacity
         style={styles.addButton}
@@ -180,6 +255,7 @@ const Tab = observer(() => {
         vegetables={vegetables}
         lastUsedVegetables={lastUsedVegetables}
         setLastUsedVegetables={setLastUsedVegetables}
+        onAddVegetable={handleAddVegetable}
       />
     </View>
   );
@@ -247,5 +323,63 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "600",
+  },
+  todayVegetablesSection: {
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1a472a",
+    marginBottom: 12,
+  },
+  todayScrollView: {
+    maxHeight: 200,
+  },
+  todayVegItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#f5f9f7",
+    marginBottom: 8,
+    borderRadius: 10,
+  },
+  todayVegInfo: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  vegName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#2d3436",
+  },
+  gramsText: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  emptyText: {
+    color: "#999",
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 16,
+  },
+  deleteButton: {
+    padding: 8,
   },
 });

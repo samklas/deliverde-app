@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, Button, StyleSheet } from "react-native";
 import { theme } from "@/theme";
-import { Vegetable } from "@/types/vegetable";
+import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { Picker } from "@react-native-picker/picker";
 import { observer } from "mobx-react-lite";
 import userStore from "@/stores/userStore";
@@ -11,23 +11,35 @@ type Props = {
   isVisible: boolean;
   vegetable: Vegetable | undefined;
   onClose: () => void;
-  //setHasCelebrated: React.Dispatch<React.SetStateAction<boolean>>;
   setLastUsed: React.Dispatch<React.SetStateAction<Vegetable[]>>;
   lastUsed: Vegetable[];
+  onVegetableAdded: (vegetable: TodayVegetable) => void;
 };
 
 const AddVegetableModal = observer(
-  ({ isVisible, vegetable, onClose, setLastUsed }: Props) => {
+  ({ isVisible, vegetable, onClose, setLastUsed, onVegetableAdded }: Props) => {
     const [selectedInteger, setSelectedInteger] = useState("0");
     const [selectedDecimal, setSelectedDecimal] = useState("0");
     const { dailyTotal, setDailyTotal } = userStore;
 
     const handleAddVegetable = async () => {
-      //setTotal((total) => total + calculateTotalGrams());
-      setDailyTotal(dailyTotal + calculateTotalGrams());
-      setDailyTotalForCurrentUser(dailyTotal + calculateTotalGrams());
+      const grams = calculateTotalGrams();
+      if (grams === 0) return;
+
+      setDailyTotal(dailyTotal + grams);
+      setDailyTotalForCurrentUser(dailyTotal + grams);
 
       if (vegetable) {
+        // Add to today's vegetables
+        const todayVegetable: TodayVegetable = {
+          id: `${vegetable.id}-${Date.now()}`,
+          vegetableId: vegetable.id,
+          name: vegetable.name,
+          grams: grams,
+          addedAt: Date.now(),
+        };
+        onVegetableAdded(todayVegetable);
+
         setLastUsed((lastUsed) => {
           const exists = lastUsed.find((item) => item.id === vegetable.id);
           if (!exists) {

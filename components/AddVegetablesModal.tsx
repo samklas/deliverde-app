@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Vegetable } from "@/types/vegetable";
+import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { VegetableAnalysisResult } from "@/types/vision";
 import AddVegetableModal from "@/components/AddVegetableModal";
 import ImageAnalysisModal from "@/components/ImageAnalysisModal";
@@ -25,6 +25,7 @@ type Props = {
   vegetables: Vegetable[];
   lastUsedVegetables: Vegetable[];
   setLastUsedVegetables: React.Dispatch<React.SetStateAction<Vegetable[]>>;
+  onAddVegetable: (vegetable: TodayVegetable) => void;
 };
 
 const AddVegetablesModal = ({
@@ -33,6 +34,7 @@ const AddVegetablesModal = ({
   vegetables,
   lastUsedVegetables,
   setLastUsedVegetables,
+  onAddVegetable,
 }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVegetable, setSelectedVegetable] = useState<Vegetable>();
@@ -154,6 +156,7 @@ const AddVegetablesModal = ({
               onClose={closeAddModal}
               setLastUsed={setLastUsedVegetables}
               lastUsed={lastUsedVegetables}
+              onVegetableAdded={onAddVegetable}
             />
 
             <ImageAnalysisModal
@@ -168,6 +171,7 @@ const AddVegetablesModal = ({
               vegetables={vegetables}
               onClose={closeResultsModal}
               setLastUsed={setLastUsedVegetables}
+              onVegetablesAdded={onAddVegetable}
             />
           </View>
         </View>

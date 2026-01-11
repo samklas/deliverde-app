@@ -3,3 +3,11 @@ export type Vegetable = {
   name: string;
   averageWeight: number;
 };
+
+export type TodayVegetable = {
+  id: string;
+  vegetableId: string;
+  name: string;
+  grams: number;
+  addedAt: number;
+};
