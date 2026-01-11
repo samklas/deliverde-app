@@ -41,8 +41,15 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/Deliverde_splash1.jpeg",
-          resizeMode: "cover",
+          ios: {
+            image: "./assets/images/Deliverde_splash1.jpeg",
+            resizeMode: "cover",
+            enableFullScreenImage_legacy: true,
+          },
+          android: {
+            image: "./assets/images/Deliverde_splash1.jpeg",
+            resizeMode: "cover",
+          },
         },
       ],
       "expo-apple-authentication",
