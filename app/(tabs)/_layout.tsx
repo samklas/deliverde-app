@@ -8,14 +8,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "#0c4c25",
-        headerTitle: "DeliVerde",
+        headerTitle: "",
         headerTitleStyle: {
           color: "white",
         },
         headerBackground: () => {
           return (
             <Image
-              source={require("../../assets/images/header-background.png")} // Adjust the path to your image
+              source={require("../../assets/images/Deliverde_header.jpg")} // Adjust the path to your image
               style={{
                 height: "100%",
                 width: "100%",

@@ -98,11 +98,6 @@ export default function Tab() {
   }, []);
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.profileHeader}>
@@ -135,7 +130,6 @@ export default function Tab() {
           </View>
         </View>
       </View>
-    </ImageBackground>
   );
 }
 

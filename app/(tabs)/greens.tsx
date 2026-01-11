@@ -157,11 +157,7 @@ const Tab = observer(() => {
   };
   if (isLoading) return null;
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
+  
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.overlay}>
           {/* Today box */}
@@ -257,7 +253,7 @@ const Tab = observer(() => {
           />
         </View>
       </TouchableWithoutFeedback>
-    </ImageBackground>
+
   );
 });
 
