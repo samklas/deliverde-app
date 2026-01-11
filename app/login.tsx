@@ -1,57 +1,70 @@
-import { db, auth } from "@/firebaseConfig";
-import { Link, router } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ImageBackground,
   Pressable,
   StyleSheet,
-  TextInput,
   View,
   Text,
-  TouchableWithoutFeedback,
-  Keyboard,
+  Platform,
 } from "react-native";
-import { storage, loadAppData } from "@/services";
+import * as AppleAuthentication from "expo-apple-authentication";
+import {
+  storage,
+  loadAppData,
+  signInWithApple,
+  signInWithGoogle,
+  type AuthResult,
+} from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const getUsername = async (uid: string): Promise<string> => {
-    const docRef = doc(db, "users", uid);
-    const document = await getDoc(docRef);
-    if (document.exists()) {
-      return document.data().username as string;
+  const handleAuthResult = async (result: AuthResult) => {
+    if (result.isNewUser) {
+      router.navigate("/userDetails");
+    } else {
+      await storage.multiSet([
+        [STORAGE_KEYS.USER_ID, result.uid],
+        [STORAGE_KEYS.USERNAME, result.username || ""],
+      ]);
+      await loadAppData();
+      router.replace("/(tabs)");
     }
-    throw new Error("User document not found");
   };
 
-  const handleLogin = async () => {
+  const handleAppleSignIn = async () => {
     try {
       setIsLoading(true);
       setErrorMessage("");
+      const result = await signInWithApple();
+      await handleAuthResult(result);
+    } catch (error: any) {
+      console.error("Apple Sign-In error:", error);
+      if (error.code === "ERR_REQUEST_CANCELED") {
+        return;
+      }
+      setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const username = await getUsername(userCredential.user.uid);
-
-      await storage.multiSet([
-        [STORAGE_KEYS.USER_ID, userCredential.user.uid],
-        [STORAGE_KEYS.USERNAME, username],
-      ]);
-
-      // Load all app data before navigating
-      await loadAppData();
-
-      router.replace("/(tabs)");
-    } catch (error) {
-      const message = "Kirjautuminen epäonnistui. Tarkista sähköposti ja salasana.";
-      setErrorMessage(message);
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+      const result = await signInWithGoogle();
+      await handleAuthResult(result);
+    } catch (error: any) {
+      console.error("Google Sign-In error:", error);
+      if (error.code === "SIGN_IN_CANCELLED") {
+        return;
+      }
+      setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
     } finally {
       setIsLoading(false);
     }
@@ -59,44 +72,44 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("../assets/images/background.jpeg")}
+      source={require("../assets/images/Deliverde_tervetuloa2.jpeg")}
       style={styles.container}
       resizeMode="cover"
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.overlay}>
+      <View style={styles.overlay}>
+        <View style={styles.content}>
           <Text style={styles.title}>Tervetuloa</Text>
+          <Text style={styles.subtitle}>Kirjaudu sisään jatkaaksesi</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Sähköposti"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
+          {/* Apple Sign-In - iOS only */}
+          {Platform.OS === "ios" && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
+              cornerRadius={8}
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            />
+          )}
 
-          <TextInput
-            style={styles.input}
-            placeholder="Salasana"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          {/* Google Sign-In - Android only */}
+          {Platform.OS === "android" && (
+            <Pressable
+              style={styles.googleButton}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}
+            >
+              <Text style={styles.googleButtonText}>
+                {isLoading ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
+              </Text>
+            </Pressable>
+          )}
 
-          <Pressable style={styles.button} onPress={handleLogin} disabled={isLoading}>
-            <Text style={styles.buttonText}>
-              {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
-            </Text>
-          </Pressable>
-
-          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-
-          <Link href="/register" style={styles.link}>
-            Eikö ole tiliä? Luo tili painamalla tästä!
-          </Link>
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </ImageBackground>
   );
 }
@@ -108,44 +121,49 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    padding: theme.spacing.medium,
+   // backgroundColor: theme.colors.overlay,
     justifyContent: "center",
+    padding: theme.spacing.medium,
+  },
+  content: {
+    alignItems: "center",
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "bold",
-    color: theme.colors.primary,
-    marginBottom: 20,
+    color: "#fff",
+    marginBottom: 8,
     textAlign: "center",
   },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 12,
-    paddingHorizontal: 10,
+  subtitle: {
+    fontSize: 18,
+    color: "#fff",
+    marginBottom: 40,
+    textAlign: "center",
   },
-  button: {
-    backgroundColor: theme.colors.primary,
-    padding: 15,
-    borderRadius: 5,
+  appleButton: {
+    height: 48,
+    width: "100%",
+    marginBottom: 16,
+  },
+  googleButton: {
+    backgroundColor: "#4285F4",
+    //padding: ,
+    borderRadius: 8,
     alignItems: "center",
-    marginBottom: 12,
+    width: "100%",
+    height: 48,
+    justifyContent: "center",
+    marginBottom: 16,
   },
-  buttonText: {
-    color: theme.colors.background,
-    fontSize: 16,
-    fontWeight: "bold",
+  googleButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
   },
   errorText: {
     color: theme.colors.error,
     textAlign: "center",
-    marginBottom: 10,
-  },
-  link: {
-    color: theme.colors.primary,
-    textAlign: "center",
+    marginTop: 16,
   },
 });

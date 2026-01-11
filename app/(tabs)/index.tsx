@@ -20,11 +20,6 @@ const Tab = observer(() => {
   const currentFavorites = liveFavorites.length > 0 ? liveFavorites : favoriteRecipes;
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
       <View style={styles.overlay}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <DailyChallengeBox />
@@ -46,7 +41,6 @@ const Tab = observer(() => {
           </Pressable>
         </ScrollView>
       </View>
-    </ImageBackground>
   );
 });
 

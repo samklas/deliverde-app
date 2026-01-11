@@ -26,11 +26,6 @@ const Tab = observer(() => {
   const { favoriteRecipes } = useFavorites(recipes);
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
       <View style={styles.overlay}>
         <View style={styles.tabButtons}>
           <Pressable
@@ -69,7 +64,6 @@ const Tab = observer(() => {
           <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
         </Pressable>
       </View>
-    </ImageBackground>
   );
 });
 

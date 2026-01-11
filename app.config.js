@@ -14,6 +14,7 @@ export default {
         ITSAppUsesNonExemptEncryption: false,
       },
       icon: "./assets/images/icon_ios.png",
+      usesAppleSignIn: true,
     },
     android: {
       adaptiveIcon: {
@@ -40,11 +41,19 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/logo.png",
-          resizeMode: "native",
-          backgroundColor: "#4caf50",
+          ios: {
+            image: "./assets/images/Deliverde_splash1.jpeg",
+            resizeMode: "cover",
+            enableFullScreenImage_legacy: true,
+          },
+          android: {
+            image: "./assets/images/Deliverde_splash1.jpeg",
+            resizeMode: "cover",
+          },
         },
       ],
+      "expo-apple-authentication",
+      "@react-native-google-signin/google-signin",
     ],
     experiments: {
       typedRoutes: true,
@@ -65,6 +74,8 @@ export default {
         appId: process.env.FIREBASE_APP_ID,
         measurementId: process.env.FIREBASE_MEASUREMENT_ID,
       },
+      googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+      googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
     },
     owner: "smabza",
   },
