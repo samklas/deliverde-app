@@ -13,7 +13,7 @@ export default {
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
-      icon: "./assets/images/icon_ios.png",
+      icon: "./assets/images/icon.jpeg",
       usesAppleSignIn: true,
     },
     android: {

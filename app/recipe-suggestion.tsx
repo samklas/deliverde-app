@@ -15,113 +15,60 @@ import {
   StyleSheet,
   Alert,
   Keyboard,
-  Image,
-  Linking,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import ImagePickerExample from "@/components/ImagePicker";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import React from "react";
 
 const RecipeSuggestion = observer(() => {
-  const [recipeLink, setRecipeLink] = useState("");
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [currentIngredient, setCurrentIngredient] = useState("");
 
   const router = useRouter();
 
-  const handlePickImage = async (useCamera: boolean) => {
+  const handleAddRecipe = async () => {
     try {
-      const permissionResult = useCamera
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (!permissionResult.granted) {
-        if (!permissionResult.canAskAgain) {
-          Alert.alert(
-            "Käyttöoikeus vaaditaan",
-            useCamera
-              ? "Salli kameran käyttöoikeus asetuksista."
-              : "Salli gallerian käyttöoikeus asetuksista.",
-            [
-              { text: "Peruuta", style: "cancel" },
-              { text: "Avaa asetukset", onPress: () => Linking.openSettings() },
-            ]
-          );
-        }
+      if (!title.trim() || ingredients.length === 0 || !instructions.trim()) {
+        Alert.alert("Virhe", "Täytä kaikki kentät!");
         return;
       }
 
-      const result = useCamera
-        ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ["images"],
-            allowsEditing: true,
-            quality: 0.8,
-          })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ["images"],
-            allowsEditing: true,
-            quality: 0.8,
-          });
+      const recipeData = {
+        title: title.trim(),
+        ingredients,
+        instructions: instructions.trim(),
+        createdAt: new Date(),
+        status: "pending",
+      };
 
-      if (!result.canceled && result.assets[0]) {
-        setImageUri(result.assets[0].uri);
-      }
+      await addDoc(collection(db, "recipeSuggestions"), recipeData);
+
+      // Reset form
+      setTitle("");
+      setIngredients([]);
+      setInstructions("");
+      setCurrentIngredient("");
+
+      Alert.alert("Onnistui", "Resepti lähetetty onnistuneesti!");
+      router.back();
     } catch (error) {
-      console.error("Error picking image:", error);
+      console.error("Error adding recipe:", error);
+      Alert.alert("Virhe", "Virhe reseptin lisäämisessä. Yritä uudelleen.");
     }
   };
 
-  const handleSubmitLink = async () => {
-    if (!recipeLink.trim()) {
-      Alert.alert("Virhe", "Lisää linkki reseptiin");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await addDoc(collection(db, "recipeSuggestions"), {
-        type: "link",
-        link: recipeLink.trim(),
-        createdAt: new Date(),
-        status: "pending",
-      });
-
-      setRecipeLink("");
-      Alert.alert("Kiitos!", "Reseptiehdotus lähetetty onnistuneesti!");
-      router.back();
-    } catch (error) {
-      console.error("Error submitting recipe:", error);
-      Alert.alert("Virhe", "Lähetys epäonnistui. Yritä uudelleen.");
-    } finally {
-      setIsSubmitting(false);
+  const handleAddIngredient = () => {
+    if (currentIngredient.trim()) {
+      setIngredients([...ingredients, currentIngredient.trim()]);
+      setCurrentIngredient("");
     }
   };
 
-  const handleSubmitImage = async () => {
-    if (!imageUri) {
-      Alert.alert("Virhe", "Valitse kuva ensin");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      // For now, just save a reference - image upload would need storage setup
-      await addDoc(collection(db, "recipeSuggestions"), {
-        type: "image",
-        imageUri: imageUri,
-        createdAt: new Date(),
-        status: "pending",
-      });
-
-      setImageUri(null);
-      Alert.alert("Kiitos!", "Reseptiehdotus lähetetty onnistuneesti!");
-      router.back();
-    } catch (error) {
-      console.error("Error submitting recipe:", error);
-      Alert.alert("Virhe", "Lähetys epäonnistui. Yritä uudelleen.");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleRemoveIngredient = (index: number) => {
+    setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
   return (
@@ -137,91 +84,79 @@ const RecipeSuggestion = observer(() => {
           <View style={styles.content}>
             <Text style={styles.header}>Ehdota reseptiä</Text>
             <Text style={styles.info}>
-              Löysitkö hyvän kasvisreseptin? Jaa se meille linkkinä tai kuvana!
+              Voit ehdottaa omaa suosikkireseptiäsi lisättäväksi sovellukseen.
+              Arvostamme erityisesti kasvisruokareseptejä, jotka innostavat
+              kokeilemaan kasvipohjaista ruokavaliota.
             </Text>
 
-            {/* Option 1: Link */}
-            <View style={styles.optionCard}>
-              <View style={styles.optionHeader}>
-                <Ionicons name="link" size={24} color={theme.colors.primary} />
-                <Text style={styles.optionTitle}>Jaa linkki</Text>
-              </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Reseptin nimi</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Liitä reseptin linkki tähän..."
+                placeholder="Kirjoita reseptin nimi"
                 placeholderTextColor="#999"
-                value={recipeLink}
-                onChangeText={setRecipeLink}
-                autoCapitalize="none"
-                keyboardType="url"
+                value={title}
+                onChangeText={setTitle}
               />
-              <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  (!recipeLink.trim() || isSubmitting) && styles.disabledButton,
-                ]}
-                onPress={handleSubmitLink}
-                disabled={!recipeLink.trim() || isSubmitting}
-              >
-                <Text style={styles.submitButtonText}>Lähetä linkki</Text>
-              </TouchableOpacity>
             </View>
 
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>tai</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Option 2: Image */}
-            <View style={styles.optionCard}>
-              <View style={styles.optionHeader}>
-                <Ionicons name="image" size={24} color={theme.colors.primary} />
-                <Text style={styles.optionTitle}>Jaa kuva</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Ainesosat</Text>
+              <View style={styles.ingredientInputContainer}>
+                <TextInput
+                  style={styles.ingredientInput}
+                  placeholder="Lisää ainesosa ja määrä. Esim. 2 kpl porkkanaa "
+                  placeholderTextColor="#999"
+                  value={currentIngredient}
+                  onChangeText={setCurrentIngredient}
+                  onSubmitEditing={handleAddIngredient}
+                />
+                <TouchableOpacity
+                  //style={styles.addButton}
+                  onPress={handleAddIngredient}
+                >
+                  <Ionicons name="add-circle" size={32} color="#0c4c25" />
+                </TouchableOpacity>
               </View>
 
-              {imageUri ? (
-                <View style={styles.imagePreviewContainer}>
-                  <Image source={{ uri: imageUri }} style={styles.imagePreview} />
-                  <TouchableOpacity
-                    style={styles.removeImageButton}
-                    onPress={() => setImageUri(null)}
-                  >
-                    <Ionicons name="close-circle" size={28} color="#ff4444" />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.imageButtons}>
-                  <TouchableOpacity
-                    style={styles.imageOptionButton}
-                    onPress={() => handlePickImage(true)}
-                  >
-                    <Ionicons name="camera" size={28} color={theme.colors.primary} />
-                    <Text style={styles.imageOptionText}>Ota kuva</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.imageOptionButton}
-                    onPress={() => handlePickImage(false)}
-                  >
-                    <Ionicons name="images" size={28} color={theme.colors.primary} />
-                    <Text style={styles.imageOptionText}>Galleria</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {imageUri && (
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    isSubmitting && styles.disabledButton,
-                  ]}
-                  onPress={handleSubmitImage}
-                  disabled={isSubmitting}
-                >
-                  <Text style={styles.submitButtonText}>Lähetä kuva</Text>
-                </TouchableOpacity>
-              )}
+              <View style={styles.ingredientsList}>
+                {ingredients.map((ingredient, index) => (
+                  <View key={index} style={styles.ingredientItem}>
+                    <Text style={styles.ingredientText}>{ingredient}</Text>
+                    <TouchableOpacity
+                      //style={styles.removeButton}
+                      onPress={() => handleRemoveIngredient(index)}
+                    >
+                      <Ionicons name="remove-circle-outline" size={28} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
             </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Valmistusohjeet</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Kirjoita valmistusohjeet"
+                placeholderTextColor="#999"
+                multiline
+                value={instructions}
+                onChangeText={setInstructions}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              {/* <Text style={styles.label}>Reseptin kuva</Text> */}
+              <ImagePickerExample />
+            </View>
+
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleAddRecipe}
+            >
+              <Text style={styles.submitButtonText}>Lähetä</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
@@ -232,7 +167,8 @@ const RecipeSuggestion = observer(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
+    paddingTop: 20,
   },
   scrollContent: {
     flexGrow: 1,
@@ -244,7 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: theme.colors.primary,
-    marginBottom: 10,
+    marginBottom: 15,
     textAlign: "center",
   },
   info: {
@@ -252,102 +188,98 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     marginBottom: 30,
+    //lineHeight: 20,
   },
-  optionCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+  inputGroup: {
+    marginBottom: 20,
   },
-  optionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 10,
-  },
-  optionTitle: {
-    fontSize: 18,
+  label: {
+    fontSize: 16,
     fontWeight: "600",
     color: "#333",
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
     borderColor: "#e0e0e0",
     borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
+    padding: 10,
+    fontSize: 14,
     color: "#2d3436",
-    backgroundColor: "#f9f9f9",
-    marginBottom: 16,
+  },
+  textArea: {
+    minHeight: 120,
+    textAlignVertical: "top",
+  },
+  ingredientInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  ingredientInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 12,
+    padding: 10,
+    fontSize: 14,
+    color: "#2d3436",
+    //backgroundColor: "#f9f9f9",
+    marginRight: 10,
+  },
+  addButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addButtonText: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  ingredientsList: {
+    marginTop: 10,
+  },
+  ingredientItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    //backgroundColor: "#f0f0f0",
+    paddingBottom: 2,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  ingredientText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  removeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#ff4444",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  removeButtonText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   submitButton: {
     backgroundColor: theme.colors.primary,
-    padding: 14,
+    padding: 12,
     borderRadius: 12,
     alignItems: "center",
+    marginTop: 20,
   },
   submitButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e0e0e0",
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: "#999",
-    fontSize: 14,
-  },
-  imageButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  imageOptionButton: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
-    borderRadius: 12,
-    borderStyle: "dashed",
-    gap: 8,
-  },
-  imageOptionText: {
-    color: theme.colors.primary,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  imagePreviewContainer: {
-    position: "relative",
-    marginBottom: 16,
-  },
-  imagePreview: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
-  },
-  removeImageButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "white",
-    borderRadius: 14,
+    fontWeight: "bold",
   },
 });
 
