@@ -9,7 +9,6 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-  Pressable,
 } from "react-native";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -185,6 +184,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    paddingTop: 60,
   },
   modalContent: {
     flex: 1,
@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
   description: {
     marginBottom: theme.spacing.medium,
     color: theme.colors.text,
+    textAlign: "center",
   },
   searchSection: {
     marginBottom: theme.spacing.medium,
@@ -230,12 +231,8 @@ const styles = StyleSheet.create({
     borderColor: "#4caf50",
     backgroundColor: "white",
   },
-  resultsContainer: {
-    flex: 1,
-  },
-  recentSection: {
-    flex: 1,
-  },
+  resultsContainer: {},
+  recentSection: {},
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
@@ -243,7 +240,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   scrollView: {
-    flex: 1,
+    maxHeight: 300,
   },
   vegItem: {
     flexDirection: "row",

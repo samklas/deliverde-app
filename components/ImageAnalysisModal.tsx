@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { theme } from "@/theme";
@@ -30,9 +31,36 @@ const ImageAnalysisModal = ({
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [analysisState, setAnalysisState] = useState<AnalysisState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showSettingsPrompt, setShowSettingsPrompt] = useState(false);
 
   const handlePickImage = async (useCamera: boolean) => {
     try {
+      const permissionResult = useCamera
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        // Check if permission was denied (not just undetermined)
+        if (!permissionResult.canAskAgain) {
+          setShowSettingsPrompt(true);
+          setErrorMessage(
+            useCamera
+              ? "Kameran käyttöoikeus on estetty. Salli käyttöoikeus asetuksista."
+              : "Gallerian käyttöoikeus on estetty. Salli käyttöoikeus asetuksista."
+          );
+        } else {
+          setErrorMessage(
+            useCamera
+              ? "Kameran käyttöoikeus vaaditaan kuvan ottamiseen."
+              : "Gallerian käyttöoikeus vaaditaan kuvan valitsemiseen."
+          );
+        }
+        setAnalysisState("error");
+        return;
+      }
+
+      setShowSettingsPrompt(false);
+
       const options: ImagePicker.ImagePickerOptions = {
         mediaTypes: ["images"],
         allowsEditing: true,
@@ -64,7 +92,6 @@ const ImageAnalysisModal = ({
 
     try {
       const results = await analyzeVegetableImage(imageUri);
-      console.log("Analysis results:", results);
 
       if (results.length === 0) {
         setErrorMessage("Kuvasta ei tunnistettu vihanneksia.");
@@ -95,7 +122,12 @@ const ImageAnalysisModal = ({
     setImageUri(null);
     setAnalysisState("idle");
     setErrorMessage("");
+    setShowSettingsPrompt(false);
     onClose();
+  };
+
+  const openSettings = () => {
+    Linking.openSettings();
   };
 
   return (
@@ -105,30 +137,35 @@ const ImageAnalysisModal = ({
           <Text style={styles.modalTitle}>Tunnista kuvasta</Text>
 
           {!imageUri ? (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.optionButton}
-                onPress={() => handlePickImage(true)}
-              >
-                <Ionicons
-                  name="camera"
-                  size={32}
-                  color={theme.colors.primary}
-                />
-                <Text style={styles.optionText}>Ota kuva</Text>
-              </TouchableOpacity>
+            <View>
+              {analysisState === "error" && (
+                <View style={styles.permissionError}>
+                  <Text style={styles.permissionErrorText}>{errorMessage}</Text>
+                  {showSettingsPrompt && (
+                    <TouchableOpacity style={styles.settingsButton} onPress={openSettings}>
+                      <Text style={styles.settingsButtonText}>Avaa asetukset</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
 
-              <TouchableOpacity
-                style={styles.optionButton}
-                onPress={() => handlePickImage(false)}
-              >
-                <Ionicons
-                  name="images"
-                  size={32}
-                  color={theme.colors.primary}
-                />
-                <Text style={styles.optionText}>Valitse galleriasta</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.optionButton}
+                  onPress={() => handlePickImage(true)}
+                >
+                  <Ionicons name="camera" size={32} color="#4caf50" />
+                  <Text style={styles.optionText}>Ota kuva</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.optionButton}
+                  onPress={() => handlePickImage(false)}
+                >
+                  <Ionicons name="images" size={32} color="#4caf50" />
+                  <Text style={styles.optionText}>Valitse galleriasta</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ) : (
             <View style={styles.previewContainer}>
@@ -218,13 +255,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: theme.spacing.medium,
     borderWidth: 1,
-    borderColor: theme.colors.primary,
+    borderColor: "#4caf50",
     borderRadius: theme.borderRadius.medium,
     width: "45%",
   },
   optionText: {
     marginTop: theme.spacing.small,
-    color: theme.colors.primary,
+    color: "#4caf50",
     fontWeight: "500",
   },
   previewContainer: {
@@ -298,6 +335,29 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: theme.colors.error,
     fontWeight: "500",
+  },
+  permissionError: {
+    backgroundColor: "#fff3e0",
+    padding: theme.spacing.medium,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.medium,
+    alignItems: "center",
+  },
+  permissionErrorText: {
+    color: "#e65100",
+    textAlign: "center",
+    marginBottom: theme.spacing.small,
+  },
+  settingsButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: theme.borderRadius.medium,
+    marginTop: theme.spacing.small,
+  },
+  settingsButtonText: {
+    color: "white",
+    fontWeight: "600",
   },
 });
 
