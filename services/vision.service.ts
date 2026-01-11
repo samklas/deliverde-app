@@ -37,9 +37,20 @@ export const analyzeVegetableImage = async (
           content: [
             {
               type: "text",
-              text: `Analyze this image and identify all vegetables visible.
+              text: `Analyze this image and identify all vegetables visible. Estimate the weight in grams based on the visual size of each vegetable.
+
 Return a JSON array with the following format:
-[{"name": "vegetable name in Finnish", "confidence": 0.0-1.0, "estimatedQuantity": number}]
+[{"name": "vegetable name in Finnish", "confidence": 0.0-1.0, "estimatedGrams": number}]
+
+Guidelines for gram estimation:
+- Small tomato: ~80g, medium: ~120g, large: ~180g
+- Cucumber: ~200-300g
+- Carrot: small ~50g, medium ~80g, large ~120g
+- Onion: small ~70g, medium ~150g, large ~250g
+- Bell pepper: ~150-200g
+- Broccoli floret: ~30-50g, whole head: ~300-500g
+- Potato: small ~100g, medium ~170g, large ~280g
+- Lettuce leaf: ~10-20g, whole head: ~300-500g
 
 Common Finnish vegetable names:
 - tomato = tomaatti
@@ -89,6 +100,7 @@ Return ONLY the JSON array, no other text.`,
   }
 
   const data = await response.json();
+  console.log("OpenAI response data:", data);
   const content = data.choices[0]?.message?.content;
 
   if (!content) {

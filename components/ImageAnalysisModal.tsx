@@ -64,6 +64,7 @@ const ImageAnalysisModal = ({
 
     try {
       const results = await analyzeVegetableImage(imageUri);
+      console.log("Analysis results:", results);
 
       if (results.length === 0) {
         setErrorMessage("Kuvasta ei tunnistettu vihanneksia.");

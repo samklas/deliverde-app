@@ -41,7 +41,7 @@ const AnalysisResultsModal = observer(
             matchedVegetable: match.vegetable,
             matchConfidence: match.matchConfidence,
             selected: match.vegetable !== null,
-            editedQuantity: result.estimatedQuantity,
+            editedGrams: result.estimatedGrams,
           };
         });
         setMatchedVegetables(matched);
@@ -56,11 +56,11 @@ const AnalysisResultsModal = observer(
       );
     };
 
-    const updateQuantity = (index: number, quantity: string) => {
-      const numQuantity = parseFloat(quantity) || 0;
+    const updateGrams = (index: number, grams: string) => {
+      const numGrams = parseInt(grams) || 0;
       setMatchedVegetables((prev) =>
         prev.map((item, i) =>
-          i === index ? { ...item, editedQuantity: numQuantity } : item
+          i === index ? { ...item, editedGrams: numGrams } : item
         )
       );
     };
@@ -68,9 +68,7 @@ const AnalysisResultsModal = observer(
     const calculateTotalGrams = (): number => {
       return matchedVegetables.reduce((total, item) => {
         if (item.selected && item.matchedVegetable) {
-          return (
-            total + item.matchedVegetable.averageWeight * item.editedQuantity
-          );
+          return total + item.editedGrams;
         }
         return total;
       }, 0);
@@ -156,15 +154,15 @@ const AnalysisResultsModal = observer(
                   </View>
 
                   {item.matchedVegetable && (
-                    <View style={styles.quantityContainer}>
+                    <View style={styles.gramsContainer}>
                       <TextInput
-                        style={styles.quantityInput}
-                        value={String(item.editedQuantity)}
-                        onChangeText={(text) => updateQuantity(index, text)}
+                        style={styles.gramsInput}
+                        value={String(item.editedGrams)}
+                        onChangeText={(text) => updateGrams(index, text)}
                         keyboardType="numeric"
                         selectTextOnFocus
                       />
-                      <Text style={styles.unitText}>kpl</Text>
+                      <Text style={styles.unitText}>g</Text>
                     </View>
                   )}
                 </View>
@@ -264,12 +262,12 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 2,
   },
-  quantityContainer: {
+  gramsContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-  quantityInput: {
-    width: 50,
+  gramsInput: {
+    width: 60,
     height: 36,
     borderWidth: 1,
     borderColor: "#ccc",

@@ -3,7 +3,7 @@ import { Vegetable } from "./vegetable";
 export interface VegetableAnalysisResult {
   name: string;
   confidence: number;
-  estimatedQuantity: number;
+  estimatedGrams: number;
 }
 
 export interface MatchedVegetable {
@@ -11,7 +11,7 @@ export interface MatchedVegetable {
   matchedVegetable: Vegetable | null;
   matchConfidence: number;
   selected: boolean;
-  editedQuantity: number;
+  editedGrams: number;
 }
 
 export type AnalysisState =
