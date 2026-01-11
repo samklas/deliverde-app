@@ -41,9 +41,9 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/logo.png",
+          image: "./assets/images/Deliverde_splash1.jpeg",
           resizeMode: "native",
-          backgroundColor: "#4caf50",
+         // backgroundColor: "#4caf50",
         },
       ],
       "expo-apple-authentication",

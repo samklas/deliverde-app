@@ -72,7 +72,7 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("../assets/images/background.jpeg")}
+      source={require("../assets/images/Deliverde_tervetuloa2.jpeg")}
       style={styles.container}
       resizeMode="cover"
     >
@@ -85,7 +85,7 @@ export default function Login() {
           {Platform.OS === "ios" && (
             <AppleAuthentication.AppleAuthenticationButton
               buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
               cornerRadius={8}
               style={styles.appleButton}
               onPress={handleAppleSignIn}
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: theme.colors.overlay,
+   // backgroundColor: theme.colors.overlay,
     justifyContent: "center",
     padding: theme.spacing.medium,
   },
@@ -131,28 +131,28 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    color: theme.colors.primary,
+    color: "#fff",
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 18,
-    color: "#666",
+    color: "#fff",
     marginBottom: 40,
     textAlign: "center",
   },
   appleButton: {
-    height: 56,
+    height: 48,
     width: "100%",
     marginBottom: 16,
   },
   googleButton: {
     backgroundColor: "#4285F4",
-    padding: 16,
+    //padding: ,
     borderRadius: 8,
     alignItems: "center",
     width: "100%",
-    height: 56,
+    height: 48,
     justifyContent: "center",
     marginBottom: 16,
   },
