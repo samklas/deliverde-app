@@ -2,23 +2,15 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Animated,
-  ImageBackground,
-  TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AddVegetableModal from "@/components/AddVegetableModal";
-import ImageAnalysisModal from "@/components/ImageAnalysisModal";
-import AnalysisResultsModal from "@/components/AnalysisResultsModal";
+import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable } from "@/types/vegetable";
-import { VegetableAnalysisResult } from "@/types/vision";
 import { Audio } from "expo-av";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
@@ -30,26 +22,19 @@ import userStore from "@/stores/userStore";
 import { getDailyTotalForCurrentUser } from "@/services";
 
 const Tab = observer(() => {
-  const { dailyTotal, setDailyTotal, dailyTarget } = userStore;
+  const { dailyTotal, dailyTarget } = userStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isVisible, setIsVisible] = useState(false);
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.3)).current;
-  const [vegetable, setVegetable] = useState<Vegetable>();
   const [sound, setSound] = useState<Audio.Sound>();
   const [hasCelebrated, setHasCelebrated] = useState(true);
-  const progress = Math.min((dailyTotal / dailyTarget) * 100, 100); // Cap at 100%
+  const progress = Math.min((dailyTotal / dailyTarget) * 100, 100);
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isImageAnalysisVisible, setIsImageAnalysisVisible] = useState(false);
-  const [isResultsVisible, setIsResultsVisible] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<VegetableAnalysisResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
   useEffect(() => {
-    // addVegetablesToFirestore();
-
     if (dailyTotal < dailyTarget) setHasCelebrated(false);
 
     const fetchVegetables = async () => {
@@ -66,7 +51,6 @@ const Tab = observer(() => {
             ...doc.data(),
           })) as Vegetable[];
 
-          // Save fetched vegetables to AsyncStorage
           await AsyncStorage.setItem(
             "vegetables",
             JSON.stringify(fetchedVegetables)
@@ -81,18 +65,15 @@ const Tab = observer(() => {
     };
 
     const getLastUsedVegetables = async () => {
-      const lastUsedVegetables = await AsyncStorage.getItem(
-        "lastUsedVegetables"
-      );
-      if (lastUsedVegetables) {
-        setLastUsedVegetables(JSON.parse(lastUsedVegetables) as Vegetable[]);
+      const lastUsed = await AsyncStorage.getItem("lastUsedVegetables");
+      if (lastUsed) {
+        setLastUsedVegetables(JSON.parse(lastUsed) as Vegetable[]);
       }
     };
 
     const getDailyTotal = async () => {
       if (Number(await getDailyTotalForCurrentUser()) >= dailyTarget) {
         setHasCelebrated(true);
-        setIsLoading(false);
       }
     };
 
@@ -110,14 +91,14 @@ const Tab = observer(() => {
   }, [progress, hasCelebrated]);
 
   useEffect(() => {
-    const setLastUsedVegetables = async () => {
+    const saveLastUsed = async () => {
       await AsyncStorage.setItem(
         "lastUsedVegetables",
         JSON.stringify(lastUsedVegetables)
       );
     };
 
-    setLastUsedVegetables();
+    saveLastUsed();
   }, [lastUsedVegetables]);
 
   const triggerCelebration = () => {
@@ -145,26 +126,6 @@ const Tab = observer(() => {
     setIsCelebrationVisible(false);
   };
 
-  const filteredVegetables = vegetables.filter((veg) =>
-    veg.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const closeModal = () => {
-    setIsVisible(false);
-    setSearchQuery("");
-  };
-
-  const handleAnalysisComplete = (results: VegetableAnalysisResult[]) => {
-    setAnalysisResults(results);
-    setIsImageAnalysisVisible(false);
-    setIsResultsVisible(true);
-  };
-
-  const closeResultsModal = () => {
-    setIsResultsVisible(false);
-    setAnalysisResults([]);
-  };
-
   const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
       require("../../assets/sounds/Hello.mp3")
@@ -173,127 +134,54 @@ const Tab = observer(() => {
 
     await sound.playAsync();
   };
+
   if (isLoading) return null;
+
   return (
-  
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.overlay}>
-          {/* Today box */}
-
-          <View style={styles.todayBox}>
-            <Text style={styles.title}>Tänään</Text>
-            <View style={styles.progressWrapper}>
-              <CircularProgress
-                size={100}
-                strokeWidth={10}
-                progress={progress}
-                backgroundColor="#e0e0e0"
-                progressColor="#4caf50"
-              />
-              <Text style={styles.progressText}>
-                {dailyTotal}g / {dailyTarget}g
-              </Text>
-            </View>
-          </View>
-
-          {/* Celebration Animation */}
-          <CelebrationModal
-            isCelebrationVisible={isCelebrationVisible}
-            celebrationOpacity={celebrationOpacity}
-            celebrationScale={celebrationScale}
-            closeCelebration={closeCelebration}
+    <View style={styles.container}>
+      {/* Today box */}
+      <View style={styles.todayBox}>
+        <Text style={styles.title}>Tänään</Text>
+        <View style={styles.progressWrapper}>
+          <CircularProgress
+            size={120}
+            strokeWidth={12}
+            progress={progress}
+            backgroundColor="#e0e0e0"
+            progressColor="#4caf50"
           />
-
-          {/* Main content container */}
-          <View style={styles.mainContent}>
-            <Text style={styles.description}>
-              Etsi haluamasi vihannes alla olevasta kentästä ja lisää se. Jos et
-              löydä etsimääsi, voit lisätä sen nimikkeellä 'muu'.
-            </Text>
-            {/* Search section */}
-            <View style={styles.searchSection}>
-              <View style={styles.searchRow}>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Etsi vihanneksia..."
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholderTextColor="#666"
-                />
-                <TouchableOpacity
-                  style={styles.cameraButton}
-                  onPress={() => setIsImageAnalysisVisible(true)}
-                >
-                  <Ionicons name="camera" size={24} color={theme.colors.primary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Results container */}
-            <View style={styles.resultsContainer}>
-              {searchQuery.length > 0 ? (
-                <ScrollView style={styles.scrollView}>
-                  {filteredVegetables.map((veg) => (
-                    <TouchableOpacity
-                      key={veg.id}
-                      style={styles.vegItem}
-                      onPress={() => {
-                        setVegetable(veg);
-                        setIsVisible(true);
-                      }}
-                    >
-                      <Text style={styles.vegName}>{veg.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              ) : (
-                <View style={styles.recentSection}>
-                  {lastUsedVegetables.length > 0 && (
-                    <Text style={styles.sectionTitle}>Viimeksi käytetyt</Text>
-                  )}
-                  <ScrollView style={styles.scrollView}>
-                    {lastUsedVegetables.map((veg) => (
-                      <TouchableOpacity
-                        key={veg.id}
-                        style={styles.vegItem}
-                        onPress={() => {
-                          setVegetable(veg);
-                          setIsVisible(true);
-                        }}
-                      >
-                        <Text style={styles.vegName}>{veg.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-            </View>
-          </View>
-
-          <AddVegetableModal
-            isVisible={isVisible}
-            vegetable={vegetable}
-            onClose={closeModal}
-            setLastUsed={setLastUsedVegetables}
-            lastUsed={lastUsedVegetables}
-          />
-
-          <ImageAnalysisModal
-            isVisible={isImageAnalysisVisible}
-            onClose={() => setIsImageAnalysisVisible(false)}
-            onAnalysisComplete={handleAnalysisComplete}
-          />
-
-          <AnalysisResultsModal
-            isVisible={isResultsVisible}
-            analysisResults={analysisResults}
-            vegetables={vegetables}
-            onClose={closeResultsModal}
-            setLastUsed={setLastUsedVegetables}
-          />
+          <Text style={styles.progressText}>
+            {dailyTotal}g / {dailyTarget}g
+          </Text>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
 
+      {/* Add vegetables button */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setIsAddModalVisible(true)}
+      >
+        <Ionicons name="add-circle" size={24} color="white" />
+        <Text style={styles.addButtonText}>Lisää vihanneksia</Text>
+      </TouchableOpacity>
+
+      {/* Celebration Animation */}
+      <CelebrationModal
+        isCelebrationVisible={isCelebrationVisible}
+        celebrationOpacity={celebrationOpacity}
+        celebrationScale={celebrationScale}
+        closeCelebration={closeCelebration}
+      />
+
+      {/* Add Vegetables Modal */}
+      <AddVegetablesModal
+        isVisible={isAddModalVisible}
+        onClose={() => setIsAddModalVisible(false)}
+        vegetables={vegetables}
+        lastUsedVegetables={lastUsedVegetables}
+        setLastUsedVegetables={setLastUsedVegetables}
+      />
+    </View>
   );
 });
 
@@ -302,170 +190,62 @@ export default Tab;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  overlay: {
-    flex: 1,
     backgroundColor: "rgba(255, 255, 255, 0.95)",
     paddingHorizontal: 16,
     paddingTop: 20,
   },
   todayBox: {
     backgroundColor: "white",
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "700",
     color: "#1a472a",
-    marginBottom: 12,
+    marginBottom: 16,
     textAlign: "center",
     letterSpacing: 0.5,
   },
-  mainContent: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  searchSection: {
-    marginBottom: 16,
-  },
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    padding: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    fontSize: 16,
-    color: "#2d3436",
-  },
-  cameraButton: {
-    padding: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    backgroundColor: "white",
-  },
-  resultsContainer: {
-    flex: 1,
-  },
-  recentSection: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1a472a",
-    marginBottom: 12,
-    marginTop: 12,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  vegItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 14,
-    backgroundColor: "#f5f9f7",
-    marginBottom: 8,
-    borderRadius: 12,
-  },
-  vegName: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#2d3436",
-  },
   progressWrapper: {
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 12,
   },
   progressText: {
-    marginTop: 12,
+    marginTop: 16,
     color: "#2d3436",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 18,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.98)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  celebrationContainer: {
+  addButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
-  },
-  celebrationText: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1a472a",
-    backgroundColor: "white",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    backgroundColor: theme.colors.primary,
+    padding: 16,
     borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
+    gap: 8,
+    shadowColor: theme.colors.primary,
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    textAlign: "center",
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 5,
-    marginTop: 20,
+    elevation: 4,
   },
-  closeButton: {
-    marginTop: 40,
-    padding: 15,
-    backgroundColor: theme.colors.secondary,
-    borderRadius: 8,
-  },
-  closeButtonText: {
+  addButtonText: {
     color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  closeIconButton: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    padding: 16,
-    zIndex: 1,
-  },
-  closeIconText: {
-    fontSize: 24,
-    color: "#666",
-    fontWeight: "500",
-  },
-  description: {
-    marginBottom: 16,
-    //textAlign: "center",
+    fontSize: 18,
+    fontWeight: "600",
   },
 });
