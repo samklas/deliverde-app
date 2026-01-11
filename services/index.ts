@@ -26,3 +26,5 @@ export {
   deleteAccount,
   type AuthResult,
 } from "./auth.service";
+
+export { analyzeVegetableImage } from "./vision.service";

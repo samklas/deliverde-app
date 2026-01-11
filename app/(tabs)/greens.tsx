@@ -15,12 +15,16 @@ import { db } from "@/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetableModal from "@/components/AddVegetableModal";
+import ImageAnalysisModal from "@/components/ImageAnalysisModal";
+import AnalysisResultsModal from "@/components/AnalysisResultsModal";
 import { Vegetable } from "@/types/vegetable";
+import { VegetableAnalysisResult } from "@/types/vision";
 import { Audio } from "expo-av";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
 import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
+import { Ionicons } from "@expo/vector-icons";
 
 import userStore from "@/stores/userStore";
 import { getDailyTotalForCurrentUser } from "@/services";
@@ -39,6 +43,9 @@ const Tab = observer(() => {
   const progress = Math.min((dailyTotal / dailyTarget) * 100, 100); // Cap at 100%
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageAnalysisVisible, setIsImageAnalysisVisible] = useState(false);
+  const [isResultsVisible, setIsResultsVisible] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<VegetableAnalysisResult[]>([]);
 
   useEffect(() => {
     // addVegetablesToFirestore();
@@ -147,6 +154,17 @@ const Tab = observer(() => {
     setSearchQuery("");
   };
 
+  const handleAnalysisComplete = (results: VegetableAnalysisResult[]) => {
+    setAnalysisResults(results);
+    setIsImageAnalysisVisible(false);
+    setIsResultsVisible(true);
+  };
+
+  const closeResultsModal = () => {
+    setIsResultsVisible(false);
+    setAnalysisResults([]);
+  };
+
   const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
       require("../../assets/sounds/Hello.mp3")
@@ -194,13 +212,21 @@ const Tab = observer(() => {
             </Text>
             {/* Search section */}
             <View style={styles.searchSection}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Etsi vihanneksia..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholderTextColor="#666"
-              />
+              <View style={styles.searchRow}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Etsi vihanneksia..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholderTextColor="#666"
+                />
+                <TouchableOpacity
+                  style={styles.cameraButton}
+                  onPress={() => setIsImageAnalysisVisible(true)}
+                >
+                  <Ionicons name="camera" size={24} color={theme.colors.primary} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Results container */}
@@ -250,6 +276,20 @@ const Tab = observer(() => {
             onClose={closeModal}
             setLastUsed={setLastUsedVegetables}
             lastUsed={lastUsedVegetables}
+          />
+
+          <ImageAnalysisModal
+            isVisible={isImageAnalysisVisible}
+            onClose={() => setIsImageAnalysisVisible(false)}
+            onAnalysisComplete={handleAnalysisComplete}
+          />
+
+          <AnalysisResultsModal
+            isVisible={isResultsVisible}
+            analysisResults={analysisResults}
+            vegetables={vegetables}
+            onClose={closeResultsModal}
+            setLastUsed={setLastUsedVegetables}
           />
         </View>
       </TouchableWithoutFeedback>
@@ -309,13 +349,26 @@ const styles = StyleSheet.create({
   searchSection: {
     marginBottom: 16,
   },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   searchInput: {
+    flex: 1,
     padding: 10,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#e0e0e0",
     fontSize: 16,
     color: "#2d3436",
+  },
+  cameraButton: {
+    padding: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    backgroundColor: "white",
   },
   resultsContainer: {
     flex: 1,

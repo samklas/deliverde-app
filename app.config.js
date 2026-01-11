@@ -36,6 +36,8 @@ export default {
         {
           photosPermission:
             "The app accesses your photos to let you share them with your friends.",
+          cameraPermission:
+            "The app needs camera access to identify vegetables from photos.",
         },
       ],
       [
@@ -76,6 +78,7 @@ export default {
       },
       googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+      openaiApiKey: process.env.OPENAI_API_KEY,
     },
     owner: "smabza",
   },
