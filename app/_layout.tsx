@@ -107,7 +107,7 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: "",
-            headerBackTitle: "takaisin",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />
@@ -116,7 +116,7 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: "",
-            headerBackTitle: "takaisin",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />
@@ -125,7 +125,7 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: "",
-            headerBackTitle: "takaisin",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />
