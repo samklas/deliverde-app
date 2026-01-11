@@ -105,7 +105,7 @@ const AddVegetablesModal = ({
                   <Ionicons
                     name="camera"
                     size={24}
-                    color={theme.colors.primary}
+                    color={"#4caf50"}
                   />
                 </TouchableOpacity>
               </View>
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: theme.colors.primary,
+    borderColor: "#4caf50",
     backgroundColor: "white",
   },
   resultsContainer: {
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     color: "#2d3436",
   },
   doneButton: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#4caf50",
     padding: 16,
     borderRadius: 14,
     alignItems: "center",

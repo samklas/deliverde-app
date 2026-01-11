@@ -50,7 +50,7 @@ const FallingEmoji = ({ index }: { index: number }) => {
 
 const LettuceRainBackground = () => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} pointerEvents="none">
       {[...Array(NUM_EMOJIS)].map((_, i) => (
         <FallingEmoji key={i} index={i} />
       ))}

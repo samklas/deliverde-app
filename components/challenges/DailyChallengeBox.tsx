@@ -2,6 +2,7 @@ import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { observer } from "mobx-react-lite";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 const DailyChallengeBox = observer(() => {
@@ -11,7 +12,7 @@ const DailyChallengeBox = observer(() => {
       {streak > 1 && (
         <View>
           <View style={styles.streakHeader}>
-            <Ionicons name="leaf" size={24} color="#4cd964" />
+            <Ionicons name="leaf" size={24} color="#37891C" />
             <Text style={styles.streakCount}>{streak} päivän putki!</Text>
           </View>
           <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>

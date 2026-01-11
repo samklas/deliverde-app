@@ -1,6 +1,6 @@
 export const theme = {
   colors: {
-    primary: "#0c4c25", // Original primary color
+    primary: "#184B10", // Original primary color
     secondary: "#4cd964", // Original secondary color
     background: "white", // Original background color
     overlay: "rgba(255, 255, 255, 0.9)",

@@ -1,13 +1,14 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import React from "react";
 import { Image } from "react-native";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#0c4c25",
+        tabBarActiveTintColor: "#37891C",
         headerTitle: "",
         headerTitleStyle: {
           color: "white",
@@ -40,7 +41,7 @@ export default function TabLayout() {
         options={{
           title: "Tavoitteet",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="leaf" color={color} />
+            <FontAwesome size={28} name="leaf" color={color} />
           ),
         }}
       />
@@ -49,7 +50,7 @@ export default function TabLayout() {
         options={{
           title: "Reseptit",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="receipt" color={color} />
+            <FontAwesome size={28} name="book" color={color} />
           ),
         }}
       />
@@ -58,7 +59,7 @@ export default function TabLayout() {
         options={{
           title: "Profiili",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="person" color={color} />
+            <FontAwesome size={28} name="user" color={color} />
           ),
         }}
       />

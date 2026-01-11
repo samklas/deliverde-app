@@ -101,13 +101,14 @@ const Tab = observer(() => {
     getTodayVegetables();
   }, []);
 
-  useEffect(() => {
-    if (progress >= 100 && !hasCelebrated) {
-      triggerCelebration();
-      setHasCelebrated(true);
-      setIsCelebrationVisible(true);
-    }
-  }, [progress, hasCelebrated]);
+  // Celebration modal disabled for now
+  // useEffect(() => {
+  //   if (progress >= 100 && !hasCelebrated) {
+  //     triggerCelebration();
+  //     setHasCelebrated(true);
+  //     setIsCelebrationVisible(true);
+  //   }
+  // }, [progress, hasCelebrated]);
 
   useEffect(() => {
     const saveLastUsed = async () => {
@@ -145,6 +146,7 @@ const Tab = observer(() => {
     }
   };
 
+  /*
   const triggerCelebration = () => {
     celebrationOpacity.setValue(0);
     celebrationScale.setValue(0.3);
@@ -165,6 +167,7 @@ const Tab = observer(() => {
       }),
     ]).start();
   };
+  */
 
   const closeCelebration = () => {
     setIsCelebrationVisible(false);
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#1a472a",
+    color: "#184B10",
     marginBottom: 16,
     textAlign: "center",
     letterSpacing: 0.5,
@@ -306,11 +309,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.primary,
-    padding: 16,
+    backgroundColor: "#37891C",
+    padding: 14,
     borderRadius: 16,
     gap: 8,
-    shadowColor: theme.colors.primary,
+    shadowColor: "#37891C",
     shadowOffset: {
       width: 0,
       height: 4,
