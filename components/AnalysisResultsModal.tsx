@@ -146,7 +146,7 @@ const AnalysisResultsModal = observer(
                       size={24}
                       color={
                         item.matchedVegetable
-                          ? theme.colors.primary
+                          ? "#37891C"
                           : theme.colors.text
                       }
                       style={{ opacity: item.matchedVegetable ? 1 : 0.3 }}
@@ -318,18 +318,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: theme.spacing.medium,
     borderWidth: 1,
-    borderColor: theme.colors.error,
+    borderColor: "#666",
     borderRadius: theme.borderRadius.medium,
     alignItems: "center",
   },
   cancelButtonText: {
-    color: theme.colors.error,
+    color: "#666",
     fontWeight: "500",
   },
   addButton: {
     flex: 1,
     padding: theme.spacing.medium,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
     borderRadius: theme.borderRadius.medium,
     alignItems: "center",
   },
