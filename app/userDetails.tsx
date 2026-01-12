@@ -132,13 +132,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
     marginBottom: 24,
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: 12,
   },
@@ -188,6 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     paddingHorizontal: 16,
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     backgroundColor: "#fafafa",
   },
   avatarSelection: {
@@ -224,6 +226,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

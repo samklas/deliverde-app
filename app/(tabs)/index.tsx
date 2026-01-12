@@ -76,6 +76,6 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     color: theme.colors.primary,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

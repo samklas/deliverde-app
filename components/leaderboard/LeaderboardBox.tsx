@@ -3,6 +3,7 @@ import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import LeaderboardModal from "./LeaderboardModal";
+import React from "react";
 
 const LeaderboardBox = observer(() => {
   const { setIsVisible, users } = leaderboardStore;
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
   },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
   },
@@ -76,14 +77,16 @@ const styles = StyleSheet.create({
   },
   leaderboardPosition: {
     fontSize: theme.fonts.regular.fontSize,
-    // color: theme.colors.primary,
+    fontFamily: theme.fontFamily.medium,
   },
   leaderboardName: {
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
     color: theme.colors.text,
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
   },
 });

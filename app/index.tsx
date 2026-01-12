@@ -1,5 +1,6 @@
 import { Redirect } from "expo-router";
 import { auth } from "@/firebaseConfig";
+import React from "react";
 
 export default function Index() {
   // Auth state is already checked in _layout.tsx during splash

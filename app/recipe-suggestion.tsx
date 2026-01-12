@@ -178,24 +178,25 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     marginBottom: 15,
     textAlign: "center",
   },
   info: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
     marginBottom: 30,
-    //lineHeight: 20,
+    lineHeight: 24,
   },
   inputGroup: {
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
     color: "#333",
     marginBottom: 8,
   },
@@ -205,6 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     color: "#2d3436",
   },
   textArea: {
@@ -223,8 +225,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     color: "#2d3436",
-    //backgroundColor: "#f9f9f9",
     marginRight: 10,
   },
   addButton: {
@@ -238,7 +240,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "#fff",
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
   },
   ingredientsList: {
     marginTop: 10,
@@ -254,6 +256,7 @@ const styles = StyleSheet.create({
   },
   ingredientText: {
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     color: "#333",
   },
   removeButton: {
@@ -267,7 +270,7 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: "#fff",
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
   },
   submitButton: {
     backgroundColor: theme.colors.primary,
@@ -279,7 +282,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });
 

@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "700",
+    fontFamily: theme.fontFamily.bold,
     color: "#184B10",
     marginBottom: 16,
     textAlign: "center",
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   progressText: {
     marginTop: 16,
     color: "#2d3436",
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
     fontSize: 18,
   },
   addButton: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
   },
   todayVegetablesSection: {
     backgroundColor: "white",
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
     color: "#1a472a",
     marginBottom: 12,
   },
@@ -368,16 +368,17 @@ const styles = StyleSheet.create({
   },
   vegName: {
     fontSize: 16,
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
     color: "#2d3436",
   },
   gramsText: {
     fontSize: 14,
     color: "#666",
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
   },
   emptyText: {
     color: "#999",
+    fontFamily: theme.fontFamily.regular,
     fontStyle: "italic",
     textAlign: "center",
     paddingVertical: 16,

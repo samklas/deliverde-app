@@ -12,6 +12,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { auth } from "@/firebaseConfig";
+import React from "react";
 
 const LeaderboardModal = observer(() => {
   const { isVisible, setIsVisible, users } = leaderboardStore;
@@ -85,12 +86,10 @@ const LeaderboardModal = observer(() => {
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
-                <Text
-                  style={{ fontWeight: "bold", color: theme.colors.primary }}
-                >
+                <Text style={styles.podiumUsername}>
                   {users[1].username}
                 </Text>
-                <Text style={{ color: "#666" }}>
+                <Text style={styles.podiumPoints}>
                   {users[1].points} pistettä
                 </Text>
               </View>
@@ -112,12 +111,10 @@ const LeaderboardModal = observer(() => {
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
-                <Text
-                  style={{ fontWeight: "bold", color: theme.colors.primary }}
-                >
+                <Text style={styles.podiumUsername}>
                   {users[0].username}
                 </Text>
-                <Text style={{ color: "#666" }}>
+                <Text style={styles.podiumPoints}>
                   {users[0].points} pistettä
                 </Text>
               </View>
@@ -138,12 +135,10 @@ const LeaderboardModal = observer(() => {
                   style={{ height: 100, width: "100%" }}
                   contentFit="contain"
                 />
-                <Text
-                  style={{ fontWeight: "bold", color: theme.colors.primary }}
-                >
+                <Text style={styles.podiumUsername}>
                   {users[2].username}
                 </Text>
-                <Text style={{ color: "#666" }}>
+                <Text style={styles.podiumPoints}>
                   {users[2].points} pistettä
                 </Text>
               </View>
@@ -210,7 +205,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: theme.fonts.title.fontSize,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
   },
@@ -223,14 +218,25 @@ const styles = StyleSheet.create({
   },
   leaderboardPosition: {
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.medium,
     color: theme.colors.primary,
   },
   leaderboardName: {
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
     color: theme.colors.text,
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+  },
+  podiumUsername: {
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+  },
+  podiumPoints: {
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
   },
   box: {

@@ -198,11 +198,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: "700",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
   },
   description: {
     marginBottom: theme.spacing.medium,
+    fontFamily: theme.fontFamily.regular,
     color: theme.colors.text,
     textAlign: "center",
   },
@@ -221,6 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#2d3436",
     backgroundColor: "#f5f9f7",
   },
@@ -235,7 +237,7 @@ const styles = StyleSheet.create({
   recentSection: {},
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
     color: "#1a472a",
     marginBottom: 12,
   },
@@ -253,7 +255,7 @@ const styles = StyleSheet.create({
   },
   vegName: {
     fontSize: 16,
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
     color: "#2d3436",
   },
   doneButton: {
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
   doneButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });
 

@@ -109,7 +109,7 @@ export default function Tab() {
           <View style={[styles.box, styles.goalBox]}>
             <Text style={styles.sectionTitle}>Päivän tavoite</Text>
             <View style={styles.goalItem}>
-              <Text>Syö {dailyTarget}g vihanneksia</Text>
+              <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
             </View>
           </View>
 
@@ -117,7 +117,7 @@ export default function Tab() {
             style={[styles.feedbackButton, styles.box]}
             onPress={() => router.push("/feedback")}
           >
-            <Text>Lähetä palautetta</Text>
+            <Text style={styles.feedbackText}>Lähetä palautetta</Text>
             <Ionicons name="arrow-forward" size={20} />
           </Pressable>
 
@@ -159,16 +159,20 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     marginBottom: 15,
     color: theme.colors.primary,
   },
   goalItem: {},
+  goalText: {
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 16,
+  },
   goalBox: {
     marginTop: 50,
   },
@@ -189,6 +193,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  feedbackText: {
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 16,
+  },
   logoutContainer: {
     alignItems: "center",
     marginBottom: 30,
@@ -204,7 +212,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: theme.colors.primary,
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
   },
   deleteButton: {
     borderWidth: 2,
@@ -216,6 +224,6 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: theme.colors.error,
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
   },
 });

@@ -185,13 +185,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
     marginBottom: 24,
@@ -236,6 +237,7 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     marginBottom: 16,
     lineHeight: 20,
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
   },
   levelName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.text,
   },
   selectedLevelText: {
@@ -281,7 +283,7 @@ const styles = StyleSheet.create({
   },
   targetText: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
   },
   selectedTargetText: {
@@ -303,7 +305,7 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: theme.colors.primary,
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
   continueButton: {
     flex: 2,
@@ -323,6 +325,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

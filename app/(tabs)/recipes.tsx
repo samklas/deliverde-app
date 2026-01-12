@@ -95,10 +95,11 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.secondary,
   },
   activeText: {
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
   tabText: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: theme.colors.primary,
   },
   recipeList: {
@@ -126,6 +127,6 @@ const styles = StyleSheet.create({
   },
   suggestText: {
     color: theme.colors.primary,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

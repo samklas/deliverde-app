@@ -42,12 +42,12 @@ const Feedback = () => {
     >
       <View style={styles.container}>
         <Text style={styles.heading}>Palautteesi on meille tärkeää!</Text>
-        <Text style={{ textAlign: "center" }}>
+        <Text style={styles.bodyText}>
           Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin
           paremman. Siksi arvostamme suuresti jokaista kommenttia, risua ja
           ruusua.
         </Text>
-        <Text style={{ textAlign: "center", marginTop: 10 }}>
+        <Text style={[styles.bodyText, { marginTop: 10 }]}>
           Kiitos, että autat meitä parantamaan! 💚
         </Text>
 
@@ -83,12 +83,19 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginBottom: 30,
     textAlign: "center",
     color: theme.colors.primary,
   },
-  label: { fontSize: 16, marginVertical: 10 },
+  bodyText: {
+    textAlign: "center",
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 15,
+    color: theme.colors.text,
+    lineHeight: 22,
+  },
+  label: { fontSize: 16, marginVertical: 10, fontFamily: theme.fontFamily.regular },
   ratingRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -102,7 +109,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selected: { backgroundColor: "#5cb85c" },
-  ratingText: { fontSize: 16 },
+  ratingText: { fontSize: 16, fontFamily: theme.fontFamily.regular },
   input: {
     marginTop: 20,
     borderWidth: 1,
@@ -111,6 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     height: 100,
     width: "100%",
     textAlignVertical: "top",
@@ -123,7 +131,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
     width: "100%",
   },
-  submitText: { color: "white", fontWeight: "bold", fontSize: 16 },
+  submitText: { color: "white", fontFamily: theme.fontFamily.semiBold, fontSize: 16 },
 });
 
 export default Feedback;

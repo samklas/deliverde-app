@@ -58,13 +58,14 @@ const styles = StyleSheet.create({
   },
   streakCount: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginLeft: theme.spacing.small,
     color: theme.colors.primary,
   },
   streakSubtext: {
     color: "#666",
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     marginBottom: 4,
   },
   goalsDivider: {
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
   },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
   },
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
   goalText: {
     marginLeft: theme.spacing.small,
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
     color: theme.colors.text,
   },
 });

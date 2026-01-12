@@ -135,12 +135,13 @@ const styles = StyleSheet.create({
   },
   recipeTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: "#333",
     marginBottom: 4,
   },
   recipeDetails: {
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
   },
   addButton: {
@@ -157,14 +158,14 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
   heartButton: {
     marginLeft: 30,
   },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
   },

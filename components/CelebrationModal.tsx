@@ -63,7 +63,7 @@ export default function CelebrationModal({
 const styles = StyleSheet.create({
   celebrationText: {
     fontSize: 22,
-    fontWeight: "700",
+    fontFamily: theme.fontFamily.bold,
     color: "#1a472a",
     backgroundColor: "white",
     paddingHorizontal: 24,
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: "white",
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     textAlign: "center",
   },
   modalOverlay: {
