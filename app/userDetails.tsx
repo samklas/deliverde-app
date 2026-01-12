@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { theme } from "@/theme";
 import { storage } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import React from "react";
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
   },
   progressDotActive: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   progressLine: {
     width: 40,
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   selectedAvatar: {
-    borderColor: theme.colors.primary,
+    borderColor: "#37891C",
   },
   avatarImage: {
     width: 80,
@@ -209,8 +210,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
   continueButton: {
-    backgroundColor: theme.colors.primary,
-    padding: 18,
+    backgroundColor: "#37891C",
+    padding: 14,
     borderRadius: theme.borderRadius.large,
     alignItems: "center",
     marginTop: 8,

@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { storage, loadAppData } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
+import React from "react";
 
 export default function UserLevel() {
   const [username, setUsername] = useState("");
@@ -208,10 +209,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
   },
   progressDotActive: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   progressDotCompleted: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   progressLine: {
     width: 40,
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   progressLineActive: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   card: {
     backgroundColor: theme.colors.background,
@@ -250,8 +251,8 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
   },
   selectedLevel: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    backgroundColor: "#37891C",
+    borderColor: "#37891C",
   },
   levelContent: {
     flexDirection: "column",
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     flex: 2,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
     padding: 18,
     borderRadius: theme.borderRadius.large,
     alignItems: "center",
