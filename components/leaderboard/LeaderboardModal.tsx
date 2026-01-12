@@ -51,13 +51,15 @@ const LeaderboardModal = observer(() => {
             <Text style={styles.modalTitle}>Kuukauden salaattisankarit</Text>
           </View>
           {/* Highlight current user's position */}
-          <View style={[styles.box, styles.currentUserPosition]}>
-            <View style={{ alignItems: "center", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={styles.leaderboardPosition}>Oma sijoitus</Text>
-              <Text style={styles.leaderboardScore}>{users[currentUserIndex]?.points} pistettä</Text>
+          <View style={styles.currentUserCard}>
+            <View style={styles.rankBadge}>
+              <Text style={styles.rankNumber}>#{currentUserIndex + 1}</Text>
             </View>
-            <Text>{currentUserIndex + 1}.</Text>
-            
+            <View style={styles.currentUserInfo}>
+              <Text style={styles.currentUserLabel}>Oma sijoitus</Text>
+              <Text style={styles.currentUserPoints}>{users[currentUserIndex]?.points} pistettä</Text>
+            </View>
+            <Ionicons name="trophy-outline" size={24} color="#37891C" />
           </View>
           <View style={styles.divider} />
           <ScrollView> 
@@ -178,12 +180,43 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     fontWeight: "bold",
   },
-  currentUserPosition: {
-    //backgroundColor: "rgba(12, 76, 37, 0.1)",
-    borderRadius: theme.borderRadius.medium,
-    fontWeight: "bold",
-    borderWidth: 2,
-    borderColor: "#37891C",
+  currentUserCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(55, 137, 28, 0.08)",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: theme.spacing.medium,
+    borderLeftWidth: 4,
+    borderLeftColor: "#37891C",
+  },
+  rankBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#37891C",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  rankNumber: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.bold,
+  },
+  currentUserInfo: {
+    flex: 1,
+  },
+  currentUserLabel: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.medium,
+    color: "#666",
+    marginBottom: 2,
+  },
+  currentUserPoints: {
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
   },
   divider: {
     height: 1,
