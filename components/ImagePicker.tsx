@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { theme } from "@/theme";
+import React from "react";
 
 export default function ImagePickerExample() {
   const [image, setImage] = useState<string | null>(null);

@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { storage, deleteAccount } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import React from "react";
 
 export default function Tab() {
   const [username, setUsername] = useState("");

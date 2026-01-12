@@ -225,7 +225,7 @@ const Tab = observer(() => {
                   <Ionicons
                     name="trash-outline"
                     size={20}
-                    color={theme.colors.error}
+                    color={"#666"}
                   />
                 </TouchableOpacity>
               </View>

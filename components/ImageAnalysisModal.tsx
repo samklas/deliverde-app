@@ -154,7 +154,7 @@ const ImageAnalysisModal = ({
                   style={styles.optionButton}
                   onPress={() => handlePickImage(true)}
                 >
-                  <Ionicons name="camera" size={32} color="#4caf50" />
+                  <Ionicons name="camera" size={32} color="#37891C" />
                   <Text style={styles.optionText}>Ota kuva</Text>
                 </TouchableOpacity>
 
@@ -162,7 +162,7 @@ const ImageAnalysisModal = ({
                   style={styles.optionButton}
                   onPress={() => handlePickImage(false)}
                 >
-                  <Ionicons name="images" size={32} color="#4caf50" />
+                  <Ionicons name="images" size={32} color="#37891C" />
                   <Text style={styles.optionText}>Valitse galleriasta</Text>
                 </TouchableOpacity>
               </View>
@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.small,
     color: "#4caf50",
     fontWeight: "500",
+    textAlign: "center",
   },
   previewContainer: {
     alignItems: "center",
@@ -305,18 +306,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: theme.spacing.medium,
     borderWidth: 1,
-    borderColor: theme.colors.primary,
+    borderColor: "#37891C",
     borderRadius: theme.borderRadius.medium,
     alignItems: "center",
   },
   changeButtonText: {
-    color: theme.colors.primary,
+    color: "#37891C",
     fontWeight: "500",
   },
   analyzeButton: {
     flex: 1,
     padding: theme.spacing.medium,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
     borderRadius: theme.borderRadius.medium,
     alignItems: "center",
   },
@@ -333,7 +334,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.small,
   },
   closeButtonText: {
-    color: theme.colors.error,
+    color: "#666",
     fontWeight: "500",
   },
   permissionError: {
