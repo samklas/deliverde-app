@@ -6,6 +6,13 @@ import "../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import { loadAppData, checkUserExists } from "@/services";
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +23,13 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const hasInitialized = useRef(false);
+
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
 
   useEffect(() => {
     async function prepare() {
@@ -79,7 +93,7 @@ export default function RootLayout() {
     }
   }, [appIsReady]);
 
-  if (!appIsReady || !initialRoute) {
+  if (!appIsReady || !initialRoute || !fontsLoaded) {
     return null;
   }
 

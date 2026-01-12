@@ -184,13 +184,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: "#fff",
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#fff",
     marginBottom: 40,
     textAlign: "center",
@@ -213,16 +214,17 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
   },
   errorText: {
     color: theme.colors.error,
     textAlign: "center",
     marginTop: 16,
+    fontFamily: theme.fontFamily.regular,
   },
   link: {
     textDecorationLine: "underline",
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
   },
   modalOverlay: {
     flex: 1,
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.text,
     marginBottom: theme.spacing.medium,
     textAlign: "center",
@@ -272,7 +274,7 @@ const styles = StyleSheet.create({
   },
   modalCloseButtonText: {
     color: "white",
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
     fontSize: 16,
   },
 });

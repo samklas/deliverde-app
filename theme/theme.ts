@@ -12,18 +12,27 @@ export const theme = {
     onSurface: "#333", // Original text color
     onError: "white", // Assuming white text on error
   },
+  fontFamily: {
+    regular: "Poppins_400Regular",
+    medium: "Poppins_500Medium",
+    semiBold: "Poppins_600SemiBold",
+    bold: "Poppins_700Bold",
+  },
   fonts: {
     regular: {
       fontSize: 16, // Original body font size
-      fontWeight: "normal",
+      fontWeight: "normal" as const,
+      fontFamily: "Poppins_400Regular",
     },
     subtitle: {
       fontSize: 18, // Original subtitle font size
-      fontWeight: "500",
+      fontWeight: "500" as const,
+      fontFamily: "Poppins_500Medium",
     },
     title: {
       fontSize: 32, // Original title font size
-      fontWeight: "bold",
+      fontWeight: "bold" as const,
+      fontFamily: "Poppins_700Bold",
     },
   },
   spacing: {
