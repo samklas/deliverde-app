@@ -99,7 +99,17 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <Stack initialRouteName={initialRoute}>
+      <Stack
+        initialRouteName={initialRoute}
+        screenOptions={{
+          headerBackTitleStyle: {
+            fontFamily: "Poppins_400Regular",
+          },
+          headerTitleStyle: {
+            fontFamily: "Poppins_600SemiBold",
+          },
+        }}
+      >
         <Stack.Screen
           name="index"
           options={{ headerShown: false }}
