@@ -46,105 +46,23 @@ const LeaderboardModal = observer(() => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Pressable
-            onPress={() => setIsVisible(false)}
-            style={{ position: "absolute", right: 20 }}
-          >
-            <Ionicons name="close" size={24} color={theme.colors.text} />
-          </Pressable>
+          
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Kuukauden salaattisankarit</Text>
           </View>
-          <ScrollView>
-            <View
-              style={[
-                {
-                  height: 300,
-                  marginTop: 20,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  flexDirection: "row",
-                },
-                styles.box,
-              ]}
-            >
-              <View
-                style={[
-                  {
-                    width: 120,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  },
-                  // users[1].uid === currentUserId && styles.currentUserHighlight,
-                ]}
-              >
-                <Ionicons name="trophy" size={32} color="silver" />
-                <Image
-                  source={getAvatar(users[1].avatarId)}
-                  style={{ height: 100, width: "100%" }}
-                  contentFit="contain"
-                />
-                <Text style={styles.podiumUsername}>
-                  {users[1].username}
-                </Text>
-                <Text style={styles.podiumPoints}>
-                  {users[1].points} pistettä
-                </Text>
-              </View>
-              <View
-                style={[
-                  {
-                    width: 120,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingBottom: 50,
-                  },
-                  // users[0].uid === currentUserId && styles.currentUserHighlight,
-                ]}
-              >
-                <Ionicons name="trophy" size={32} color="gold" />
-                <Image
-                  source={getAvatar(users[0].avatarId)}
-                  style={{ height: 100, width: "100%" }}
-                  contentFit="contain"
-                />
-                <Text style={styles.podiumUsername}>
-                  {users[0].username}
-                </Text>
-                <Text style={styles.podiumPoints}>
-                  {users[0].points} pistettä
-                </Text>
-              </View>
-              <View
-                style={[
-                  {
-                    width: 120,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  },
-                  // users[2].uid === currentUserId && styles.currentUserHighlight,
-                ]}
-              >
-                <Ionicons name="trophy" size={32} color="brown" />
-                <Image
-                  source={getAvatar(users[2].avatarId)}
-                  style={{ height: 100, width: "100%" }}
-                  contentFit="contain"
-                />
-                <Text style={styles.podiumUsername}>
-                  {users[2].username}
-                </Text>
-                <Text style={styles.podiumPoints}>
-                  {users[2].points} pistettä
-                </Text>
-              </View>
+          {/* Highlight current user's position */}
+          <View style={[styles.box, styles.currentUserPosition]}>
+            <View style={{ alignItems: "center", marginBottom: 10, flexDirection: "row", justifyContent: "space-between" }}>
+              <Text style={styles.leaderboardPosition}>Oma sijoitus</Text>
+              <Text style={styles.leaderboardScore}>{users[currentUserIndex]?.points} pistettä</Text>
             </View>
-            {/* Map users by position between 4-10*/}
-            {users.slice(3, 10).map((user, index) => (
+            <Text>{currentUserIndex + 1}.</Text>
+            
+          </View>
+          <View style={styles.divider} />
+          <ScrollView> 
+            {/* Map users by position between 1-10*/}
+            {users.slice(0, 10).map((user, index) => (
               <View
                 key={index}
                 style={[
@@ -153,7 +71,7 @@ const LeaderboardModal = observer(() => {
                 ]}
               >
                 <Text style={styles.leaderboardPosition}>
-                  {index + 4}. {user.username}
+                  {index + 1}. {user.username}
                 </Text>
                 <Text style={styles.leaderboardScore}>
                   {user.points} pistettä
@@ -177,7 +95,11 @@ const LeaderboardModal = observer(() => {
               </View>
             )}
           </ScrollView>
+          <Pressable onPress={() => setIsVisible(false)} style={styles.doneButton}>
+          <Text style={styles.doneButtonText}>Sulje</Text>
+        </Pressable>
         </View>
+       
       </View>
     </Modal>
   );
@@ -187,9 +109,10 @@ export default LeaderboardModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    flex: 1,
+    //flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 60,
   },
   modalContent: {
     backgroundColor: theme.colors.background,
@@ -201,7 +124,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 15,
+    marginBottom: 30,
   },
   modalTitle: {
     fontSize: theme.fonts.title.fontSize,
@@ -255,9 +178,30 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     fontWeight: "bold",
   },
+  currentUserPosition: {
+    //backgroundColor: "rgba(12, 76, 37, 0.1)",
+    borderRadius: theme.borderRadius.medium,
+    fontWeight: "bold",
+    borderWidth: 2,
+    borderColor: "#37891C",
+  },
   divider: {
     height: 1,
     backgroundColor: "#ddd",
     marginVertical: theme.spacing.medium,
+  },
+  doneButton: {
+    backgroundColor: "#37891C",
+    padding: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginBottom: theme.spacing.medium,
+    marginTop: 60,
+    width: "100%",
+  },
+  doneButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });
