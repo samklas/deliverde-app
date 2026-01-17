@@ -136,6 +136,12 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="info"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="feedback"
           options={{
             headerShown: true,

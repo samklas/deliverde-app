@@ -1,6 +1,7 @@
 import { auth, db } from "@/firebaseConfig";
 import {
   signInWithCredential,
+  reauthenticateWithCredential,
   OAuthProvider,
   GoogleAuthProvider,
   deleteUser,
@@ -132,6 +133,72 @@ export const signInWithGoogle = async (): Promise<AuthResult> => {
   }
 
   return { uid, isNewUser: true };
+};
+
+/**
+ * Re-authenticate with Apple
+ */
+export const reauthenticateWithApple = async (): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("No authenticated user");
+  }
+
+  // Generate nonce for security
+  const nonce = Math.random().toString(36).substring(2, 10);
+  const hashedNonce = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    nonce
+  );
+
+  // Request Apple authentication
+  const appleCredential = await AppleAuthentication.signInAsync({
+    requestedScopes: [
+      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+    ],
+    nonce: hashedNonce,
+  });
+
+  // Create Firebase credential
+  const provider = new OAuthProvider("apple.com");
+  const credential = provider.credential({
+    idToken: appleCredential.identityToken!,
+    rawNonce: nonce,
+  });
+
+  // Re-authenticate
+  await reauthenticateWithCredential(user, credential);
+};
+
+/**
+ * Re-authenticate with Google
+ */
+export const reauthenticateWithGoogle = async (): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("No authenticated user");
+  }
+
+  const googleSignin = await getGoogleSignin();
+
+  // Check if device supports Google Play Services (Android)
+  await googleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+  // Sign in with Google
+  const signInResult = await googleSignin.signIn();
+
+  // Get ID token
+  const idToken = signInResult.data?.idToken;
+  if (!idToken) {
+    throw new Error("No ID token received from Google");
+  }
+
+  // Create Firebase credential
+  const credential = GoogleAuthProvider.credential(idToken);
+
+  // Re-authenticate
+  await reauthenticateWithCredential(user, credential);
 };
 
 /**

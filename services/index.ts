@@ -21,6 +21,8 @@ export { loadAppData } from "./appData.service";
 export {
   signInWithApple,
   signInWithGoogle,
+  reauthenticateWithApple,
+  reauthenticateWithGoogle,
   checkUserExists,
   getUsername,
   deleteAccount,

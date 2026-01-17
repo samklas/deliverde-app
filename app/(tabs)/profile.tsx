@@ -9,16 +9,17 @@ import {
   StyleSheet,
   Image,
   Alert,
-  ImageBackground,
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { storage, deleteAccount } from "@/services";
+import { storage } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 import React from "react";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const { avatarId, dailyTarget } = userStore;
   const router = useRouter();
 
@@ -47,32 +48,13 @@ export default function Tab() {
     );
   };
 
-  const handleDeleteAccount = async () => {
-    Alert.alert(
-      "Poista tili",
-      "Oletko varma, että haluat poistaa tilisi? Tätä toimintoa ei voi perua.",
-      [
-        {
-          text: "Poista",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteAccount();
-              await storage.clearUserData();
-              router.replace("/login");
-            } catch (error) {
-              console.error("Error deleting account:", error);
-              Alert.alert("Virhe", "Tilin poistaminen epäonnistui. Yritä uudelleen.");
-            }
-          },
-        },
-        {
-          text: "Peruuta",
-          style: "cancel",
-        },
-      ],
-      { cancelable: true }
-    );
+  const handleDeleteAccount = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleAccountDeleted = () => {
+    setDeleteModalVisible(false);
+    router.replace("/login");
   };
 
   const loadUsername = async () => {
@@ -130,6 +112,12 @@ export default function Tab() {
             </Pressable>
           </View>
         </View>
+
+        <DeleteAccountModal
+          visible={deleteModalVisible}
+          onClose={() => setDeleteModalVisible(false)}
+          onDeleted={handleAccountDeleted}
+        />
       </View>
   );
 }

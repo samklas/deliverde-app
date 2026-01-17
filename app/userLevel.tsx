@@ -85,7 +85,7 @@ export default function UserLevel() {
 
       await loadAppData();
 
-      router.replace("/(tabs)");
+      router.replace("/info");
     } catch (error) {
       console.error("Error adding user:", error);
       Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");
