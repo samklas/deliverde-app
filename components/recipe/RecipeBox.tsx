@@ -8,6 +8,7 @@ import { useState } from "react";
 import { auth, db } from "@/firebaseConfig";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { capitalizeFirstLetter } from "@/utils/formatting";
+import React from "react";
 
 type Props = {
   recipe: Recipe;
@@ -91,7 +92,7 @@ export default function RecipeBox({
                 <Icon
                   name={isFavorite ? "heart" : "heart-outline"}
                   size={30}
-                  color={theme.colors.secondary}
+                  color={"#37891C"}
                 />
               </TouchableOpacity>
             </View>

@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useFavorites } from "@/hooks";
 import { observer } from "mobx-react-lite";
 import recipeStore from "@/stores/recipeStore";
+import React from "react";
 
 const Tab = observer(() => {
   const [activeSection, setActiveSection] = useState("all");
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 4,
-    borderBottomColor: theme.colors.secondary,
+    borderBottomColor: "#37891C",
   },
   activeText: {
     fontFamily: theme.fontFamily.semiBold,

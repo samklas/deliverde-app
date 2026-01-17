@@ -27,7 +27,7 @@ const DailyChallengeBox = observer(() => {
             dailyTotal >= dailyTarget ? "checkmark-circle" : "radio-button-off"
           }
           size={24}
-          color="#4cd964"
+          color="#37891C"
         />
         <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
       </View>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.secondary,
+    borderLeftColor: "#37891C",
   },
   streakHeader: {
     flexDirection: "row",
