@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { storage, loadAppData } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
+import LevelSelector from "@/components/LevelSelector";
 import React from "react";
 
 export default function UserLevel() {
@@ -32,12 +33,6 @@ export default function UserLevel() {
     };
     loadOnboardingData();
   }, []);
-
-  const levels = [
-    { id: "beginner", name: "Aloittelija", target: "300g", description: "Satunnainen haukkailija" },
-    { id: "intermediate", name: "Mestari", target: "500g", description: "Vihannesmestari" },
-    { id: "advanced", name: "Legenda", target: "800g", description: "Vihreä legenda" },
-  ];
 
   const addUser = async () => {
     const uid = auth.currentUser?.uid;
@@ -112,45 +107,11 @@ export default function UserLevel() {
 
           {/* Level Selection */}
           <View style={styles.card}>
-            <Text style={styles.helperText}>
-              Taso määrittää päivittäisen vihannestauvoitteesi. Voit muuttaa tätä myöhemmin profiilissasi.
-            </Text>
-            <View style={styles.levelButtons}>
-              {levels.map((lvl) => (
-                <Pressable
-                  key={lvl.id}
-                  style={[
-                    styles.levelButton,
-                    level === lvl.id && styles.selectedLevel,
-                  ]}
-                  onPress={() => setLevel(lvl.id)}
-                >
-                  <View style={styles.levelContent}>
-                    <View style={styles.levelHeader}>
-                      <Text
-                        style={[
-                          styles.levelName,
-                          level === lvl.id && styles.selectedLevelText,
-                        ]}
-                      >
-                        {lvl.description}
-                      </Text>
-                      <View style={[
-                        styles.targetBadge,
-                        level === lvl.id && styles.selectedTargetBadge,
-                      ]}>
-                        <Text style={[
-                          styles.targetText,
-                          level === lvl.id && styles.selectedTargetText,
-                        ]}>
-                          {lvl.target}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
+            <LevelSelector
+              selectedLevel={level}
+              onSelectLevel={setLevel}
+              showHelperText={true}
+            />
           </View>
 
           {/* Buttons */}
@@ -234,60 +195,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-  },
-  helperText: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: "#666",
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  levelButtons: {
-    gap: 12,
-  },
-  levelButton: {
-    backgroundColor: "#fafafa",
-    padding: 16,
-    borderRadius: theme.borderRadius.medium,
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
-  },
-  selectedLevel: {
-    backgroundColor: "#37891C",
-    borderColor: "#37891C",
-  },
-  levelContent: {
-    flexDirection: "column",
-  },
-  levelHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  levelName: {
-    fontSize: 16,
-    fontFamily: theme.fontFamily.semiBold,
-    color: theme.colors.text,
-  },
-  selectedLevelText: {
-    color: "white",
-  },
-  targetBadge: {
-    backgroundColor: "#e8f5e9",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  selectedTargetBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
-  targetText: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.semiBold,
-    color: theme.colors.primary,
-  },
-  selectedTargetText: {
-    color: "white",
   },
   buttonContainer: {
     flexDirection: "row",

@@ -11,6 +11,7 @@ export {
   getDailyTotalForCurrentUser,
   getUserDetails,
   getLeaderboardUsers,
+  setLevelForCurrentUser,
   type UserDetails,
 } from "./users.service";
 
