@@ -8,7 +8,7 @@ import { View, Text, StyleSheet } from "react-native";
 const DailyChallengeBox = observer(() => {
   const { dailyTotal, dailyTarget, streak } = userStore;
   return (
-    <View style={styles.combinedBox}>
+    <View style={styles.box}>
       {streak > 1 && (
         <View>
           <View style={styles.streakHeader}>
@@ -38,16 +38,19 @@ const DailyChallengeBox = observer(() => {
 export default DailyChallengeBox;
 
 const styles = StyleSheet.create({
-  combinedBox: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: 20,
-    marginBottom: theme.spacing.medium,
+  box: {
+    backgroundColor: "white",
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
     borderLeftWidth: 4,
     borderLeftColor: "#37891C",
   },

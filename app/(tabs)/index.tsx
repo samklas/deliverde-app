@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ImageBackground, ScrollView, Pressable } from "react-native";
+import { Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
@@ -14,34 +14,31 @@ const Tab = observer(() => {
   const router = useRouter();
   const { recipes, recipeOfMonth, favoriteRecipes } = recipeStore;
 
-  // Real-time listener for favorites (this is lightweight, keeps favorites in sync)
+  // Real-time listener for favorites (keeps favorites in sync)
   const { favoriteRecipes: liveFavorites } = useFavorites(recipes);
 
   // Use live favorites if available, otherwise use stored ones
   const currentFavorites = liveFavorites.length > 0 ? liveFavorites : favoriteRecipes;
 
   return (
-      <View style={styles.overlay}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <DailyChallengeBox />
-          <LeaderboardBox />
-
-          {recipeOfMonth && recipeOfMonth.id && (
-            <RecipeBox
-              recipe={recipeOfMonth}
-              userFavoriteRecipes={currentFavorites}
-              isRecipeOfMonth
-            />
-          )}
-          <Pressable
-            style={[styles.feedbackButton, styles.box]}
-            onPress={() => router.push("/feedback")}
-          >
-            <Text style={styles.feedbackText}>Lähetä palautetta</Text>
-            <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
-          </Pressable>
-        </ScrollView>
-      </View>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      <DailyChallengeBox />
+      <LeaderboardBox />
+      {recipeOfMonth && recipeOfMonth.id && (
+        <RecipeBox
+          recipe={recipeOfMonth}
+          userFavoriteRecipes={currentFavorites}
+          isRecipeOfMonth
+        />
+      )}
+      <Pressable
+        style={[styles.feedbackButton, styles.box]}
+        onPress={() => router.push("/feedback")}
+      >
+        <Text style={styles.feedbackText}>Lähetä palautetta</Text>
+        <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
+      </Pressable>
+    </ScrollView>
   );
 });
 
@@ -50,12 +47,12 @@ export default Tab;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: theme.colors.overlay,
-    padding: theme.spacing.medium,
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   box: {
     backgroundColor: theme.colors.background,
