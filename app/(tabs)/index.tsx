@@ -8,6 +8,7 @@ import LeaderboardBox from "@/components/leaderboard/LeaderboardBox";
 import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
 import { useRouter } from "expo-router";
 import { useFavorites } from "@/hooks";
+import React from "react";
 
 const Tab = observer(() => {
   const router = useRouter();
@@ -75,6 +76,6 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     color: theme.colors.primary,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

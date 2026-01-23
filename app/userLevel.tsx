@@ -14,6 +14,8 @@ import { router } from "expo-router";
 import { storage, loadAppData } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
+import LevelSelector from "@/components/LevelSelector";
+import React from "react";
 
 export default function UserLevel() {
   const [username, setUsername] = useState("");
@@ -31,12 +33,6 @@ export default function UserLevel() {
     };
     loadOnboardingData();
   }, []);
-
-  const levels = [
-    { id: "beginner", name: "Aloittelija", target: "300g", description: "Satunnainen haukkailija" },
-    { id: "intermediate", name: "Mestari", target: "500g", description: "Vihannesmestari" },
-    { id: "advanced", name: "Legenda", target: "800g", description: "Vihreä legenda" },
-  ];
 
   const addUser = async () => {
     const uid = auth.currentUser?.uid;
@@ -84,7 +80,7 @@ export default function UserLevel() {
 
       await loadAppData();
 
-      router.replace("/(tabs)");
+      router.replace("/info");
     } catch (error) {
       console.error("Error adding user:", error);
       Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");
@@ -111,45 +107,11 @@ export default function UserLevel() {
 
           {/* Level Selection */}
           <View style={styles.card}>
-            <Text style={styles.helperText}>
-              Taso määrittää päivittäisen vihannestauvoitteesi. Voit muuttaa tätä myöhemmin profiilissasi.
-            </Text>
-            <View style={styles.levelButtons}>
-              {levels.map((lvl) => (
-                <Pressable
-                  key={lvl.id}
-                  style={[
-                    styles.levelButton,
-                    level === lvl.id && styles.selectedLevel,
-                  ]}
-                  onPress={() => setLevel(lvl.id)}
-                >
-                  <View style={styles.levelContent}>
-                    <View style={styles.levelHeader}>
-                      <Text
-                        style={[
-                          styles.levelName,
-                          level === lvl.id && styles.selectedLevelText,
-                        ]}
-                      >
-                        {lvl.description}
-                      </Text>
-                      <View style={[
-                        styles.targetBadge,
-                        level === lvl.id && styles.selectedTargetBadge,
-                      ]}>
-                        <Text style={[
-                          styles.targetText,
-                          level === lvl.id && styles.selectedTargetText,
-                        ]}>
-                          {lvl.target}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
+            <LevelSelector
+              selectedLevel={level}
+              onSelectLevel={setLevel}
+              showHelperText={true}
+            />
           </View>
 
           {/* Buttons */}
@@ -184,13 +146,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
     marginBottom: 24,
@@ -208,10 +171,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
   },
   progressDotActive: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   progressDotCompleted: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   progressLine: {
     width: 40,
@@ -220,7 +183,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   progressLineActive: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   card: {
     backgroundColor: theme.colors.background,
@@ -232,59 +195,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-  },
-  helperText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  levelButtons: {
-    gap: 12,
-  },
-  levelButton: {
-    backgroundColor: "#fafafa",
-    padding: 16,
-    borderRadius: theme.borderRadius.medium,
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
-  },
-  selectedLevel: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-  },
-  levelContent: {
-    flexDirection: "column",
-  },
-  levelHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  levelName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  selectedLevelText: {
-    color: "white",
-  },
-  targetBadge: {
-    backgroundColor: "#e8f5e9",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  selectedTargetBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
-  targetText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: theme.colors.primary,
-  },
-  selectedTargetText: {
-    color: "white",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -302,11 +212,11 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: theme.colors.primary,
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
   continueButton: {
     flex: 2,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
     padding: 18,
     borderRadius: theme.borderRadius.large,
     alignItems: "center",
@@ -322,6 +232,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

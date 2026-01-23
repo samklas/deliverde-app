@@ -2,47 +2,36 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
-  Animated,
-  ImageBackground,
-  TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
+  ScrollView,
 } from "react-native";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AddVegetableModal from "@/components/AddVegetableModal";
-import { Vegetable } from "@/types/vegetable";
-import { Audio } from "expo-av";
+import AddVegetablesModal from "@/components/AddVegetablesModal";
+import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
 import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
+import { Ionicons } from "@expo/vector-icons";
 
 import userStore from "@/stores/userStore";
-import { getDailyTotalForCurrentUser } from "@/services";
+import { getDailyTotalForCurrentUser, setDailyTotalForCurrentUser } from "@/services";
 
 const Tab = observer(() => {
-  const { dailyTotal, setDailyTotal, dailyTarget } = userStore;
+  const { dailyTotal, dailyTarget, setDailyTotal } = userStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isVisible, setIsVisible] = useState(false);
-  const celebrationOpacity = useRef(new Animated.Value(0)).current;
-  const celebrationScale = useRef(new Animated.Value(0.3)).current;
-  const [vegetable, setVegetable] = useState<Vegetable>();
-  const [sound, setSound] = useState<Audio.Sound>();
+  const [todayVegetables, setTodayVegetables] = useState<TodayVegetable[]>([]);
   const [hasCelebrated, setHasCelebrated] = useState(true);
-  const progress = Math.min((dailyTotal / dailyTarget) * 100, 100); // Cap at 100%
+  const progress = Math.min((dailyTotal / dailyTarget) * 100, 100);
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
   useEffect(() => {
-    // addVegetablesToFirestore();
-
     if (dailyTotal < dailyTarget) setHasCelebrated(false);
 
     const fetchVegetables = async () => {
@@ -59,7 +48,6 @@ const Tab = observer(() => {
             ...doc.data(),
           })) as Vegetable[];
 
-          // Save fetched vegetables to AsyncStorage
           await AsyncStorage.setItem(
             "vegetables",
             JSON.stringify(fetchedVegetables)
@@ -74,186 +62,166 @@ const Tab = observer(() => {
     };
 
     const getLastUsedVegetables = async () => {
-      const lastUsedVegetables = await AsyncStorage.getItem(
-        "lastUsedVegetables"
-      );
-      if (lastUsedVegetables) {
-        setLastUsedVegetables(JSON.parse(lastUsedVegetables) as Vegetable[]);
+      const lastUsed = await AsyncStorage.getItem("lastUsedVegetables");
+      if (lastUsed) {
+        setLastUsedVegetables(JSON.parse(lastUsed) as Vegetable[]);
       }
     };
 
     const getDailyTotal = async () => {
       if (Number(await getDailyTotalForCurrentUser()) >= dailyTarget) {
         setHasCelebrated(true);
-        setIsLoading(false);
+      }
+    };
+
+    const getTodayVegetables = async () => {
+      const today = new Date().toDateString();
+      const storedDate = await AsyncStorage.getItem("todayVegetablesDate");
+      if (storedDate === today) {
+        const stored = await AsyncStorage.getItem("todayVegetables");
+        if (stored) {
+          setTodayVegetables(JSON.parse(stored) as TodayVegetable[]);
+        }
+      } else {
+        // New day, clear today's vegetables
+        await AsyncStorage.setItem("todayVegetablesDate", today);
+        await AsyncStorage.setItem("todayVegetables", JSON.stringify([]));
+        setTodayVegetables([]);
       }
     };
 
     fetchVegetables();
     getLastUsedVegetables();
     getDailyTotal();
+    getTodayVegetables();
   }, []);
 
+  // Trigger celebration when daily goal is reached and modal is closed
   useEffect(() => {
-    if (progress >= 100 && !hasCelebrated) {
-      triggerCelebration();
+    if (progress >= 100 && !hasCelebrated && !isAddModalVisible) {
       setHasCelebrated(true);
       setIsCelebrationVisible(true);
     }
-  }, [progress, hasCelebrated]);
+  }, [progress, hasCelebrated, isAddModalVisible]);
 
   useEffect(() => {
-    const setLastUsedVegetables = async () => {
+    const saveLastUsed = async () => {
       await AsyncStorage.setItem(
         "lastUsedVegetables",
         JSON.stringify(lastUsedVegetables)
       );
     };
 
-    setLastUsedVegetables();
+    saveLastUsed();
   }, [lastUsedVegetables]);
 
-  const triggerCelebration = () => {
-    celebrationOpacity.setValue(0);
-    celebrationScale.setValue(0.3);
+  useEffect(() => {
+    const saveTodayVegetables = async () => {
+      await AsyncStorage.setItem(
+        "todayVegetables",
+        JSON.stringify(todayVegetables)
+      );
+    };
 
-    playSound();
+    saveTodayVegetables();
+  }, [todayVegetables]);
 
-    Animated.parallel([
-      Animated.timing(celebrationOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.spring(celebrationScale, {
-        toValue: 1,
-        friction: 8,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  const handleAddVegetable = (vegetable: TodayVegetable) => {
+    setTodayVegetables((prev) => [...prev, vegetable]);
+  };
+
+  const handleDeleteVegetable = (id: string) => {
+    const vegetableToDelete = todayVegetables.find((v) => v.id === id);
+    if (vegetableToDelete) {
+      const newDailyTotal = Math.max(0, dailyTotal - vegetableToDelete.grams);
+      setDailyTotal(newDailyTotal);
+      setDailyTotalForCurrentUser(newDailyTotal);
+      setTodayVegetables((prev) => prev.filter((v) => v.id !== id));
+    }
   };
 
   const closeCelebration = () => {
     setIsCelebrationVisible(false);
   };
 
-  const filteredVegetables = vegetables.filter((veg) =>
-    veg.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const closeModal = () => {
-    setIsVisible(false);
-    setSearchQuery("");
-  };
-
-  const playSound = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require("../../assets/sounds/Hello.mp3")
-    );
-    if (sound) setSound(sound);
-
-    await sound.playAsync();
-  };
   if (isLoading) return null;
+
   return (
-  
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.overlay}>
-          {/* Today box */}
-
-          <View style={styles.todayBox}>
-            <Text style={styles.title}>Tänään</Text>
-            <View style={styles.progressWrapper}>
-              <CircularProgress
-                size={100}
-                strokeWidth={10}
-                progress={progress}
-                backgroundColor="#e0e0e0"
-                progressColor="#4caf50"
-              />
-              <Text style={styles.progressText}>
-                {dailyTotal}g / {dailyTarget}g
-              </Text>
-            </View>
-          </View>
-
-          {/* Celebration Animation */}
-          <CelebrationModal
-            isCelebrationVisible={isCelebrationVisible}
-            celebrationOpacity={celebrationOpacity}
-            celebrationScale={celebrationScale}
-            closeCelebration={closeCelebration}
+    <View style={styles.container}>
+      {/* Today box */}
+      <View style={styles.todayBox}>
+        <Text style={styles.title}>Tänään</Text>
+        <View style={styles.progressWrapper}>
+          <CircularProgress
+            size={120}
+            strokeWidth={12}
+            progress={progress}
+            backgroundColor="#e0e0e0"
+            progressColor="#4caf50"
           />
-
-          {/* Main content container */}
-          <View style={styles.mainContent}>
-            <Text style={styles.description}>
-              Etsi haluamasi vihannes alla olevasta kentästä ja lisää se. Jos et
-              löydä etsimääsi, voit lisätä sen nimikkeellä 'muu'.
-            </Text>
-            {/* Search section */}
-            <View style={styles.searchSection}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Etsi vihanneksia..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholderTextColor="#666"
-              />
-            </View>
-
-            {/* Results container */}
-            <View style={styles.resultsContainer}>
-              {searchQuery.length > 0 ? (
-                <ScrollView style={styles.scrollView}>
-                  {filteredVegetables.map((veg) => (
-                    <TouchableOpacity
-                      key={veg.id}
-                      style={styles.vegItem}
-                      onPress={() => {
-                        setVegetable(veg);
-                        setIsVisible(true);
-                      }}
-                    >
-                      <Text style={styles.vegName}>{veg.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              ) : (
-                <View style={styles.recentSection}>
-                  {lastUsedVegetables.length > 0 && (
-                    <Text style={styles.sectionTitle}>Viimeksi käytetyt</Text>
-                  )}
-                  <ScrollView style={styles.scrollView}>
-                    {lastUsedVegetables.map((veg) => (
-                      <TouchableOpacity
-                        key={veg.id}
-                        style={styles.vegItem}
-                        onPress={() => {
-                          setVegetable(veg);
-                          setIsVisible(true);
-                        }}
-                      >
-                        <Text style={styles.vegName}>{veg.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-            </View>
-          </View>
-
-          <AddVegetableModal
-            isVisible={isVisible}
-            vegetable={vegetable}
-            onClose={closeModal}
-            setLastUsed={setLastUsedVegetables}
-            lastUsed={lastUsedVegetables}
-          />
+          <Text style={styles.progressText}>
+            {dailyTotal}g / {dailyTarget}g
+          </Text>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
 
+      {/* Today's vegetables section */}
+      <View style={styles.todayVegetablesSection}>
+        
+        {todayVegetables.length === 0 ? (
+          <Text style={styles.emptyText}>
+            Ei lisättyjä vihanneksia tälle päivälle
+          </Text>
+        ) : (
+          <ScrollView style={styles.todayScrollView}>
+            {todayVegetables.map((veg) => (
+              <View key={veg.id} style={styles.todayVegItem}>
+                <View style={styles.todayVegInfo}>
+                  <Text style={styles.vegName}>{veg.name}</Text>
+                  <Text style={styles.gramsText}>{veg.grams}g</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeleteVegetable(veg.id)}
+                >
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={"#666"}
+                  />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
+      {/* Add vegetables button */}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setIsAddModalVisible(true)}
+      >
+        <Ionicons name="add-circle" size={24} color="white" />
+        <Text style={styles.addButtonText}>Lisää vihanneksia</Text>
+      </TouchableOpacity>
+
+      {/* Celebration Animation */}
+      <CelebrationModal
+        visible={isCelebrationVisible}
+        dailyTarget={dailyTarget}
+        onClose={closeCelebration}
+      />
+
+      {/* Add Vegetables Modal */}
+      <AddVegetablesModal
+        isVisible={isAddModalVisible}
+        onClose={() => setIsAddModalVisible(false)}
+        vegetables={vegetables}
+        lastUsedVegetables={lastUsedVegetables}
+        setLastUsedVegetables={setLastUsedVegetables}
+        onAddVegetable={handleAddVegetable}
+      />
+    </View>
   );
 });
 
@@ -262,157 +230,121 @@ export default Tab;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  overlay: {
-    flex: 1,
     backgroundColor: "rgba(255, 255, 255, 0.95)",
     paddingHorizontal: 16,
     paddingTop: 20,
   },
   todayBox: {
     backgroundColor: "white",
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1a472a",
-    marginBottom: 12,
+    fontSize: 28,
+    fontFamily: theme.fontFamily.bold,
+    color: "#184B10",
+    marginBottom: 16,
     textAlign: "center",
     letterSpacing: 0.5,
   },
-  mainContent: {
-    flex: 1,
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  searchSection: {
-    marginBottom: 16,
-  },
-  searchInput: {
-    padding: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    fontSize: 16,
-    color: "#2d3436",
-  },
-  resultsContainer: {
-    flex: 1,
-  },
-  recentSection: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1a472a",
-    marginBottom: 12,
-    marginTop: 12,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  vegItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 14,
-    backgroundColor: "#f5f9f7",
-    marginBottom: 8,
-    borderRadius: 12,
-  },
-  vegName: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#2d3436",
-  },
   progressWrapper: {
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 12,
   },
   progressText: {
-    marginTop: 12,
+    marginTop: 16,
     color: "#2d3436",
-    fontWeight: "600",
-    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 18,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.98)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  celebrationContainer: {
+  addButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
-  },
-  celebrationText: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1a472a",
-    backgroundColor: "white",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    backgroundColor: "#37891C",
+    padding: 14,
     borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
+    gap: 8,
+    shadowColor: "#37891C",
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    textAlign: "center",
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 5,
-    marginTop: 20,
+    elevation: 4,
   },
-  closeButton: {
-    marginTop: 40,
-    padding: 15,
-    backgroundColor: theme.colors.secondary,
-    borderRadius: 8,
-  },
-  closeButtonText: {
+  addButtonText: {
     color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
   },
-  closeIconButton: {
-    position: "absolute",
-    top: 0,
-    right: 0,
+  todayVegetablesSection: {
+    backgroundColor: "white",
     padding: 16,
-    zIndex: 1,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  closeIconText: {
-    fontSize: 24,
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+    color: "#1a472a",
+    marginBottom: 12,
+  },
+  todayScrollView: {
+    maxHeight: 200,
+  },
+  todayVegItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#f5f9f7",
+    marginBottom: 8,
+    borderRadius: 10,
+  },
+  todayVegInfo: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  vegName: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.medium,
+    color: "#2d3436",
+  },
+  gramsText: {
+    fontSize: 14,
     color: "#666",
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
   },
-  description: {
-    marginBottom: 16,
-    //textAlign: "center",
+  emptyText: {
+    color: "#999",
+    fontFamily: theme.fontFamily.regular,
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 16,
+  },
+  deleteButton: {
+    padding: 8,
   },
 });

@@ -70,3 +70,12 @@ export const getLeaderboardUsers = async (): Promise<LeaderboardUser[]> => {
     points: doc.data().points,
   }));
 };
+
+export const setLevelForCurrentUser = async (level: string): Promise<void> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) {
+    throw new Error("User is not authenticated");
+  }
+  const userRef = doc(db, "users", uid);
+  await updateDoc(userRef, { level });
+};

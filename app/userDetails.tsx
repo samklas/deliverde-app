@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { theme } from "@/theme";
 import { storage } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import React from "react";
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
@@ -131,13 +132,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
     marginBottom: 24,
@@ -155,7 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0e0e0",
   },
   progressDotActive: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
   },
   progressLine: {
     width: 40,
@@ -176,7 +178,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: 12,
   },
@@ -187,6 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     paddingHorizontal: 16,
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     backgroundColor: "#fafafa",
   },
   avatarSelection: {
@@ -201,7 +204,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   selectedAvatar: {
-    borderColor: theme.colors.primary,
+    borderColor: "#37891C",
   },
   avatarImage: {
     width: 80,
@@ -209,8 +212,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
   continueButton: {
-    backgroundColor: theme.colors.primary,
-    padding: 18,
+    backgroundColor: "#37891C",
+    padding: 14,
     borderRadius: theme.borderRadius.large,
     alignItems: "center",
     marginTop: 8,
@@ -223,6 +226,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

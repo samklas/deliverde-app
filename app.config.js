@@ -13,7 +13,7 @@ export default {
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
-      icon: "./assets/images/icon_ios.png",
+      icon: "./assets/images/icon.jpeg",
       usesAppleSignIn: true,
     },
     android: {
@@ -31,11 +31,14 @@ export default {
     },
     plugins: [
       "expo-router",
+      "expo-font",
       [
         "expo-image-picker",
         {
           photosPermission:
             "The app accesses your photos to let you share them with your friends.",
+          cameraPermission:
+            "The app needs camera access to identify vegetables from photos.",
         },
       ],
       [
@@ -76,6 +79,7 @@ export default {
       },
       googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+      openaiApiKey: process.env.OPENAI_API_KEY,
     },
     owner: "smabza",
   },

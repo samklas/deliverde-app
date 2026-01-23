@@ -6,6 +6,13 @@ import "../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import { loadAppData, checkUserExists } from "@/services";
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +23,13 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const hasInitialized = useRef(false);
+
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
 
   useEffect(() => {
     async function prepare() {
@@ -79,13 +93,23 @@ export default function RootLayout() {
     }
   }, [appIsReady]);
 
-  if (!appIsReady || !initialRoute) {
+  if (!appIsReady || !initialRoute || !fontsLoaded) {
     return null;
   }
 
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <Stack initialRouteName={initialRoute}>
+      <Stack
+        initialRouteName={initialRoute}
+        screenOptions={{
+          headerBackTitleStyle: {
+            fontFamily: "Poppins_400Regular",
+          },
+          headerTitleStyle: {
+            fontFamily: "Poppins_600SemiBold",
+          },
+        }}
+      >
         <Stack.Screen
           name="index"
           options={{ headerShown: false }}
@@ -107,8 +131,14 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: "",
-            headerBackTitle: "takaisin",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen
+          name="info"
+          options={{
+            headerShown: false,
           }}
         />
         <Stack.Screen
@@ -116,7 +146,7 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: "",
-            headerBackTitle: "takaisin",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />
@@ -125,7 +155,7 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: "",
-            headerBackTitle: "takaisin",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />

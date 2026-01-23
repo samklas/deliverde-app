@@ -7,7 +7,11 @@ import {
   View,
   Text,
   Platform,
+  Modal,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import { WebView } from "react-native-webview";
 import * as AppleAuthentication from "expo-apple-authentication";
 import {
   storage,
@@ -18,10 +22,16 @@ import {
 } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
+import React from "react";
+
+const PRIVACY_POLICY_URL =
+  "https://deliverde-shop.myshopify.com/policies/privacy-policy";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [webViewLoading, setWebViewLoading] = useState(true);
 
   const handleAuthResult = async (result: AuthResult) => {
     if (result.isNewUser) {
@@ -43,7 +53,6 @@ export default function Login() {
       const result = await signInWithApple();
       await handleAuthResult(result);
     } catch (error: any) {
-      console.error("Apple Sign-In error:", error);
       if (error.code === "ERR_REQUEST_CANCELED") {
         return;
       }
@@ -79,7 +88,17 @@ export default function Login() {
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.title}>Tervetuloa</Text>
-          <Text style={styles.subtitle}>Kirjaudu sisään jatkaaksesi</Text>
+          <Text style={styles.subtitle}>
+            Kirjaudu sisään jatkaaksesi. Kirjautumalla hyväksyt{" "}
+          
+            <Text
+              style={styles.link}
+              onPress={() => setPrivacyModalVisible(true)}
+            >
+              tietosuojakäytännön
+            </Text>
+            .
+          </Text>
 
           {/* Apple Sign-In - iOS only */}
           {Platform.OS === "ios" && (
@@ -110,6 +129,41 @@ export default function Login() {
           ) : null}
         </View>
       </View>
+
+      <Modal
+        visible={privacyModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPrivacyModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Tietosuojakäytänne</Text>
+            <View style={styles.webViewContainer}>
+              <WebView
+                source={{ uri: PRIVACY_POLICY_URL }}
+                style={styles.webView}
+                onLoadStart={() => setWebViewLoading(true)}
+                onLoadEnd={() => setWebViewLoading(false)}
+              />
+              {webViewLoading && (
+                <View style={styles.webViewLoading}>
+                  <ActivityIndicator
+                    size="large"
+                    color={theme.colors.primary}
+                  />
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setPrivacyModalVisible(false)}
+            >
+              <Text style={styles.modalCloseButtonText}>Sulje</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -130,13 +184,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     color: "#fff",
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#fff",
     marginBottom: 40,
     textAlign: "center",
@@ -159,11 +214,67 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: theme.fontFamily.semiBold,
   },
   errorText: {
     color: theme.colors.error,
     textAlign: "center",
     marginTop: 16,
+    fontFamily: theme.fontFamily.regular,
+  },
+  link: {
+    textDecorationLine: "underline",
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.medium,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    width: "100%",
+    height: "80%",
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.medium,
+    textAlign: "center",
+  },
+  webViewContainer: {
+    flex: 1,
+    borderRadius: theme.borderRadius.medium,
+    overflow: "hidden",
+  },
+  webView: {
+    flex: 1,
+  },
+  webViewLoading: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  modalCloseButton: {
+    marginTop: theme.spacing.medium,
+    padding: theme.spacing.small,
+    backgroundColor: "#37891C",
+    borderRadius: theme.borderRadius.medium,
+    alignItems: "center",
+  },
+  modalCloseButtonText: {
+    color: "white",
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 16,
   },
 });

@@ -9,15 +9,19 @@ import {
   StyleSheet,
   Image,
   Alert,
-  ImageBackground,
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { storage, deleteAccount } from "@/services";
+import { storage, setLevelForCurrentUser } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
+import DailyGoalModal from "@/components/DailyGoalModal";
+import React from "react";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [goalModalVisible, setGoalModalVisible] = useState(false);
   const { avatarId, dailyTarget } = userStore;
   const router = useRouter();
 
@@ -46,32 +50,18 @@ export default function Tab() {
     );
   };
 
-  const handleDeleteAccount = async () => {
-    Alert.alert(
-      "Poista tili",
-      "Oletko varma, että haluat poistaa tilisi? Tätä toimintoa ei voi perua.",
-      [
-        {
-          text: "Poista",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteAccount();
-              await storage.clearUserData();
-              router.replace("/login");
-            } catch (error) {
-              console.error("Error deleting account:", error);
-              Alert.alert("Virhe", "Tilin poistaminen epäonnistui. Yritä uudelleen.");
-            }
-          },
-        },
-        {
-          text: "Peruuta",
-          style: "cancel",
-        },
-      ],
-      { cancelable: true }
-    );
+  const handleDeleteAccount = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleAccountDeleted = () => {
+    setDeleteModalVisible(false);
+    router.replace("/login");
+  };
+
+  const handleSaveGoal = async (level: string, target: number) => {
+    await setLevelForCurrentUser(level);
+    userStore.setDailyTarget(target);
   };
 
   const loadUsername = async () => {
@@ -105,18 +95,21 @@ export default function Tab() {
             <Text style={styles.username}>{username}</Text>
           </View>
 
-          <View style={[styles.box, styles.goalBox]}>
+          <Pressable
+            style={[styles.box, styles.goalBox]}
+            onPress={() => setGoalModalVisible(true)}
+          >
             <Text style={styles.sectionTitle}>Päivän tavoite</Text>
             <View style={styles.goalItem}>
-              <Text>Syö {dailyTarget}g vihanneksia</Text>
+              <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
             </View>
-          </View>
+          </Pressable>
 
           <Pressable
             style={[styles.feedbackButton, styles.box]}
             onPress={() => router.push("/feedback")}
           >
-            <Text>Lähetä palautetta</Text>
+            <Text style={styles.feedbackText}>Lähetä palautetta</Text>
             <Ionicons name="arrow-forward" size={20} />
           </Pressable>
 
@@ -129,6 +122,19 @@ export default function Tab() {
             </Pressable>
           </View>
         </View>
+
+        <DeleteAccountModal
+          visible={deleteModalVisible}
+          onClose={() => setDeleteModalVisible(false)}
+          onDeleted={handleAccountDeleted}
+        />
+
+        <DailyGoalModal
+          visible={goalModalVisible}
+          currentTarget={dailyTarget}
+          onClose={() => setGoalModalVisible(false)}
+          onSave={handleSaveGoal}
+        />
       </View>
   );
 }
@@ -158,16 +164,24 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     marginBottom: 15,
     color: theme.colors.primary,
   },
-  goalItem: {},
+  goalItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  goalText: {
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 16,
+  },
   goalBox: {
     marginTop: 50,
   },
@@ -188,6 +202,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  feedbackText: {
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 16,
+  },
   logoutContainer: {
     alignItems: "center",
     marginBottom: 30,
@@ -203,7 +221,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: theme.colors.primary,
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
   },
   deleteButton: {
     borderWidth: 2,
@@ -215,6 +233,6 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: theme.colors.error,
-    fontWeight: "500",
+    fontFamily: theme.fontFamily.medium,
   },
 });

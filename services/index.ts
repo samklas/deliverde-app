@@ -11,6 +11,7 @@ export {
   getDailyTotalForCurrentUser,
   getUserDetails,
   getLeaderboardUsers,
+  setLevelForCurrentUser,
   type UserDetails,
 } from "./users.service";
 
@@ -21,8 +22,12 @@ export { loadAppData } from "./appData.service";
 export {
   signInWithApple,
   signInWithGoogle,
+  reauthenticateWithApple,
+  reauthenticateWithGoogle,
   checkUserExists,
   getUsername,
   deleteAccount,
   type AuthResult,
 } from "./auth.service";
+
+export { analyzeVegetableImage } from "./vision.service";
