@@ -1,50 +1,15 @@
 import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
-import React, { useRef } from "react";
+import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
 
 const DailyChallengeBox = observer(() => {
-  const router = useRouter();
-  const { dailyTotal, dailyTarget, streak } = userStore;
-  const slideAnim = useRef(new Animated.Value(0)).current;
-
-  const animatedStyle = {
-    transform: [
-      {
-        translateX: slideAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 4],
-        }),
-      },
-      {
-        scale: slideAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, 0.98],
-        }),
-      },
-    ],
-  };
+  const { dailyTotal, dailyTarget} = userStore;
 
   return (
-    <TouchableOpacity
-      onPress={() => router.push("/(tabs)/greens")}
-      activeOpacity={1}
-    >
-      <Animated.View style={[styles.box, animatedStyle]}>
-      {streak > 1 && (
-        <View>
-          <View style={styles.streakHeader}>
-            <Ionicons name="leaf" size={24} color="#37891C" />
-            <Text style={styles.streakCount}>{streak} päivän putki!</Text>
-          </View>
-          <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
-
-          <View style={styles.goalsDivider} />
-        </View>
-      )}
+      <View style={styles.box}>
       <Text style={styles.boxTitle}>Päivän tavoite</Text>
       <View style={styles.goalRow}>
         <Ionicons
@@ -56,8 +21,7 @@ const DailyChallengeBox = observer(() => {
         />
         <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
       </View>
-      </Animated.View>
-    </TouchableOpacity>
+      </View>
   );
 });
 

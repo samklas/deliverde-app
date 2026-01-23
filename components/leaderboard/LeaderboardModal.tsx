@@ -1,7 +1,6 @@
 import leaderboardStore from "@/stores/leaderboardStore";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { observer } from "mobx-react-lite";
 import {
   Modal,
@@ -12,23 +11,12 @@ import {
   StyleSheet,
 } from "react-native";
 import { auth } from "@/firebaseConfig";
-import React from "react";
+import React, { useState } from "react";
 
 const LeaderboardModal = observer(() => {
   const { isVisible, setIsVisible, users } = leaderboardStore;
   const currentUserId = auth.currentUser?.uid;
-
-  const getAvatar = (avatarId: string) => {
-    if (avatarId === "1") {
-      return require("../../assets/images/avatar2.jpg");
-    }
-    if (avatarId === "2") {
-      return require("../../assets/images/avatar3.jpg");
-    }
-    if (avatarId === "3") {
-      return require("../../assets/images/avatar4.jpg");
-    }
-  };
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   if (!users[0].username) return null;
 
@@ -60,8 +48,12 @@ const LeaderboardModal = observer(() => {
               <Text style={styles.currentUserPoints}>{users[currentUserIndex]?.points} pistettä</Text>
             </View>
           </View>
-          <View style={styles.divider} />
-          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}> 
+          <Pressable onPress={() => setShowInfoModal(true)} style={styles.infoLink}>
+            <Ionicons name="help-circle-outline" size={18} color="#37891C" />
+            <Text style={styles.infoLinkText}>Mistä voin saada pisteitä?</Text>
+          </Pressable>
+
+          <ScrollView style={{ flex: 1, marginTop: 10 }} showsVerticalScrollIndicator={false}> 
             {/* Map users by position between 1-10*/}
             {users.slice(0, 10).map((user, index) => (
               <View
@@ -97,11 +89,53 @@ const LeaderboardModal = observer(() => {
             )}
           </ScrollView>
           <Pressable onPress={() => setIsVisible(false)} style={styles.doneButton}>
-          <Text style={styles.doneButtonText}>Sulje</Text>
-        </Pressable>
+            <Text style={styles.doneButtonText}>Sulje</Text>
+          </Pressable>
         </View>
-       
       </View>
+
+      {/* Points Info Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showInfoModal}
+        onRequestClose={() => setShowInfoModal(false)}
+      >
+        <View style={styles.infoModalOverlay}>
+          <View style={styles.infoModalContent}>
+            <View style={styles.infoModalHeader}>
+              <Ionicons name="trophy" size={32} color="#37891C" />
+              <Text style={styles.infoModalTitle}>Näin saat pisteitä</Text>
+            </View>
+
+            <View style={styles.infoItem}>
+              <View style={styles.infoItemIcon}>
+                <Ionicons name="leaf" size={20} color="#37891C" />
+              </View>
+              <View style={styles.infoItemContent}>
+                <Text style={styles.infoItemTitle}>Kirjaa kasviksia</Text>
+                <Text style={styles.infoItemDescription}>Saat 1 pisteen jokaisesta kirjatusta 100g kasviksia</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoItem}>
+              <View style={styles.infoItemIcon}>
+                <Ionicons name="flame" size={20} color="#37891C" />
+              </View>
+              <View style={styles.infoItemContent}>
+                <Text style={styles.infoItemTitle}>Saavuta päivätavoite</Text>
+                <Text style={styles.infoItemDescription}>Saat 5 bonuspistettä kun saavutat päivittäisen tavoitteesi</Text>
+              </View>
+            </View>
+
+            
+
+            <Pressable onPress={() => setShowInfoModal(false)} style={styles.infoModalButton}>
+              <Text style={styles.infoModalButtonText}>Selvä!</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 });
@@ -233,6 +267,83 @@ const styles = StyleSheet.create({
   doneButtonText: {
     color: "white",
     fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  infoLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: theme.spacing.small,
+  },
+  infoLinkText: {
+    color: "#37891C",
+    fontSize: 14,
+    fontFamily: theme.fontFamily.medium,
+    marginLeft: 6,
+  },
+  infoModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.large,
+  },
+  infoModalContent: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 340,
+  },
+  infoModalHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  infoModalTitle: {
+    fontSize: 20,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
+    marginTop: 12,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  infoItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  infoItemContent: {
+    flex: 1,
+  },
+  infoItemTitle: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 2,
+  },
+  infoItemDescription: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    lineHeight: 18,
+  },
+  infoModalButton: {
+    backgroundColor: "#37891C",
+    padding: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  infoModalButtonText: {
+    color: "white",
+    fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
   },
 });
