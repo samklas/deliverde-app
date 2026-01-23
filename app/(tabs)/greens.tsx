@@ -3,16 +3,14 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
   ScrollView,
 } from "react-native";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
-import { Audio } from "expo-av";
 import { theme } from "@/theme";
 import CircularProgress from "@/components/CircularProgress";
 import CelebrationModal from "@/components/CelebrationModal";
@@ -27,9 +25,6 @@ const Tab = observer(() => {
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
   const [todayVegetables, setTodayVegetables] = useState<TodayVegetable[]>([]);
-  const celebrationOpacity = useRef(new Animated.Value(0)).current;
-  const celebrationScale = useRef(new Animated.Value(0.3)).current;
-  const [sound, setSound] = useState<Audio.Sound>();
   const [hasCelebrated, setHasCelebrated] = useState(true);
   const progress = Math.min((dailyTotal / dailyTarget) * 100, 100);
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
@@ -101,14 +96,13 @@ const Tab = observer(() => {
     getTodayVegetables();
   }, []);
 
-  // Celebration modal disabled for now
-  // useEffect(() => {
-  //   if (progress >= 100 && !hasCelebrated) {
-  //     triggerCelebration();
-  //     setHasCelebrated(true);
-  //     setIsCelebrationVisible(true);
-  //   }
-  // }, [progress, hasCelebrated]);
+  // Trigger celebration when daily goal is reached and modal is closed
+  useEffect(() => {
+    if (progress >= 100 && !hasCelebrated && !isAddModalVisible) {
+      setHasCelebrated(true);
+      setIsCelebrationVisible(true);
+    }
+  }, [progress, hasCelebrated, isAddModalVisible]);
 
   useEffect(() => {
     const saveLastUsed = async () => {
@@ -146,40 +140,8 @@ const Tab = observer(() => {
     }
   };
 
-  /*
-  const triggerCelebration = () => {
-    celebrationOpacity.setValue(0);
-    celebrationScale.setValue(0.3);
-
-    playSound();
-
-    Animated.parallel([
-      Animated.timing(celebrationOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.spring(celebrationScale, {
-        toValue: 1,
-        friction: 8,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-  */
-
   const closeCelebration = () => {
     setIsCelebrationVisible(false);
-  };
-
-  const playSound = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require("../../assets/sounds/Hello.mp3")
-    );
-    if (sound) setSound(sound);
-
-    await sound.playAsync();
   };
 
   if (isLoading) return null;
@@ -245,10 +207,9 @@ const Tab = observer(() => {
 
       {/* Celebration Animation */}
       <CelebrationModal
-        isCelebrationVisible={isCelebrationVisible}
-        celebrationOpacity={celebrationOpacity}
-        celebrationScale={celebrationScale}
-        closeCelebration={closeCelebration}
+        visible={isCelebrationVisible}
+        dailyTarget={dailyTarget}
+        onClose={closeCelebration}
       />
 
       {/* Add Vegetables Modal */}
