@@ -33,8 +33,10 @@ const LeaderboardModal = observer(() => {
       onRequestClose={() => setIsVisible(false)}
     >
       <View style={styles.modalContainer}>
+        <Pressable onPress={() => setIsVisible(false)} style={styles.closeButton}>
+          <Ionicons name="close" size={28} color="#666" />
+        </Pressable>
         <View style={styles.modalContent}>
-          
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Kuukauden salaattisankarit</Text>
           </View>
@@ -52,8 +54,8 @@ const LeaderboardModal = observer(() => {
             <Ionicons name="help-circle-outline" size={18} color="#37891C" />
             <Text style={styles.infoLinkText}>Mistä voin saada pisteitä?</Text>
           </Pressable>
-
-          <ScrollView style={{ flex: 1, marginTop: 10 }} showsVerticalScrollIndicator={false}> 
+          <View style={styles.divider} />
+          <ScrollView style={{ flex: 1}} showsVerticalScrollIndicator={false}> 
             {/* Map users by position between 1-10*/}
             {users.slice(0, 10).map((user, index) => (
               <View
@@ -88,9 +90,6 @@ const LeaderboardModal = observer(() => {
               </View>
             )}
           </ScrollView>
-          <Pressable onPress={() => setIsVisible(false)} style={styles.doneButton}>
-            <Text style={styles.doneButtonText}>Sulje</Text>
-          </Pressable>
         </View>
       </View>
 
@@ -148,11 +147,24 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     paddingTop: 60,
   },
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    right: 16,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalContent: {
     flex: 1,
     backgroundColor: theme.colors.background,
     width: "100%",
     padding: theme.spacing.large,
+    marginTop: 20,
   },
   modalHeader: {
     flexDirection: "row",
@@ -254,20 +266,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#ddd",
     marginVertical: theme.spacing.medium,
-  },
-  doneButton: {
-    backgroundColor: "#37891C",
-    padding: 14,
-    borderRadius: 14,
-    alignItems: "center",
-    marginBottom: 20,
-    marginTop: theme.spacing.medium,
-    width: "100%",
-  },
-  doneButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontFamily: theme.fontFamily.semiBold,
   },
   infoLink: {
     flexDirection: "row",
