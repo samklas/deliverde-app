@@ -59,10 +59,9 @@ const LeaderboardModal = observer(() => {
               <Text style={styles.currentUserLabel}>Oma sijoitus</Text>
               <Text style={styles.currentUserPoints}>{users[currentUserIndex]?.points} pistettä</Text>
             </View>
-            <Ionicons name="trophy-outline" size={24} color="#37891C" />
           </View>
           <View style={styles.divider} />
-          <ScrollView> 
+          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}> 
             {/* Map users by position between 1-10*/}
             {users.slice(0, 10).map((user, index) => (
               <View
@@ -111,15 +110,14 @@ export default LeaderboardModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    //flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 60,
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    paddingTop: 60,
   },
   modalContent: {
+    flex: 1,
     backgroundColor: theme.colors.background,
     width: "100%",
-    margin: 50,
     padding: theme.spacing.large,
   },
   modalHeader: {
@@ -228,8 +226,8 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 14,
     alignItems: "center",
-    marginBottom: theme.spacing.medium,
-    marginTop: 60,
+    marginBottom: 20,
+    marginTop: theme.spacing.medium,
     width: "100%",
   },
   doneButtonText: {
