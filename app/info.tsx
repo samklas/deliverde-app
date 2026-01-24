@@ -17,19 +17,19 @@ export default function Info() {
   const infoItems = [
     {
       title: "Seuraa kasvisten kulutusta",
-      description: "Seuraa kasvisten kulutustasi helposti sovelluksen avulla ja kerää pisteitä jokaisesta 100 grammasta kasviksia, jonka syöt.",
+      description: "Kirjaa syömäsi kasvikset ja kerää pisteitä jokaisesta 100 grammasta.",
     },
     {
-      title: "Aseta päivittäinen kasvistavoite",
-      description: "Aseta päivittäinen kasvistavoite, seuraa edistymistäsi ja ansaitse lisäpisteitä joka kerta kun saavutat sen.",
+      title: "Saavuta päivittäinen tavoite",
+      description: "Valitse oma kasvistavoitteesi ja ansaitse bonuspisteitä kun saavutat sen.",
     },
     {
-      title: "Kilpaile kavereiden kanssa",
-      description: "Näe miten pärjäät muihin käyttäjiin verrattuna tulostaululla.",
+      title: "Kilpaile kavereita vastaan",
+      description: "Vertaa pisteitäsi muihin ja nouse tulostaulun kärkeen.",
     },
     {
       title: "Löydä uusia reseptejä",
-      description: "Selaa terveellisiä reseptejä ja saa inspiraatiota kasvispitoiseen ruokavalioon.",
+      description: "Selaa reseptejä ja saa inspiraatiota kasvispitoiseen ruokavalioon.",
     },
   ];
 
@@ -39,6 +39,13 @@ export default function Info() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Progress indicator */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: "25%" }]} />
+          </View>
+        </View>
+
         <Text style={styles.title}>Tervetuloa!</Text>
         <Text style={styles.subtitle}>Näin Deliverde toimii</Text>
 
@@ -88,7 +95,21 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.medium,
     color: "#666",
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 24,
+  },
+  progressContainer: {
+    marginBottom: 24,
+  },
+  progressTrack: {
+    height: 10,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#37891C",
+    borderRadius: 5,
   },
   infoContainer: {
     gap: 12,

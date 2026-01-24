@@ -100,15 +100,15 @@ export default function UserLevel() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <Text style={styles.title}>Valitse taso</Text>
-          <Text style={styles.subtitle}>Mikä on päivittäinen tavoitteesi?</Text>
-
           {/* Progress indicator */}
           <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, styles.progressDotCompleted]} />
-            <View style={[styles.progressLine, styles.progressLineActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: "100%" }]} />
+            </View>
           </View>
+
+          <Text style={styles.title}>Valitse taso</Text>
+          <Text style={styles.subtitle}>Mikä on päivittäinen tavoitteesi?</Text>
 
           {/* Level Selection */}
           <View style={styles.card}>
@@ -164,31 +164,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   progressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 30,
+    marginBottom: 24,
   },
-  progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  progressTrack: {
+    height: 10,
     backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
   },
-  progressDotActive: {
+  progressFill: {
+    height: "100%",
     backgroundColor: "#37891C",
-  },
-  progressDotCompleted: {
-    backgroundColor: "#37891C",
-  },
-  progressLine: {
-    width: 40,
-    height: 2,
-    backgroundColor: "#e0e0e0",
-    marginHorizontal: 8,
-  },
-  progressLineActive: {
-    backgroundColor: "#37891C",
+    borderRadius: 5,
   },
   card: {
     backgroundColor: theme.colors.background,

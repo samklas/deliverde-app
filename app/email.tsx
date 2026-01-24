@@ -50,9 +50,16 @@ export default function Email() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Progress indicator */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: "50%" }]} />
+          </View>
+        </View>
+
         <Text style={styles.title}>Voita palkintoja</Text>
         <Text style={styles.subtitle}>
-          Lisää sähköpostiosoitteesi osallistuaksesi arvontoihin ja saadaksesi tietoa uusista ominaisuuksista.
+          Arvomme aktiivisten käyttäjien kesken säännöllisesti palkintoja. Voit halutessasi lisätä sähköpostiosoitteesi osallistuaksesi arvontoihin.
         </Text>
 
         <View style={styles.emailCard}>
@@ -109,8 +116,22 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 24,
     lineHeight: 22,
+  },
+  progressContainer: {
+    marginBottom: 24,
+  },
+  progressTrack: {
+    height: 10,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#37891C",
+    borderRadius: 5,
   },
   emailCard: {
     backgroundColor: theme.colors.background,
