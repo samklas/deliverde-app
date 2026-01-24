@@ -3,52 +3,25 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  TextInput,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
-import { useState } from "react";
 import { router } from "expo-router";
-import { auth, db } from "@/firebaseConfig";
-import { doc, updateDoc } from "firebase/firestore";
 import { theme } from "@/theme";
 import React from "react";
 
 export default function Info() {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleContinue = async () => {
-    setIsLoading(true);
-    try {
-      // Save email if provided
-      if (email.trim()) {
-        const uid = auth.currentUser?.uid;
-        if (uid) {
-          await updateDoc(doc(db, "users", uid), {
-            email: email.trim(),
-          });
-        }
-      }
-      router.replace("/(tabs)");
-    } catch (error) {
-      console.error("Error saving email:", error);
-      // Continue anyway even if email save fails
-      router.replace("/(tabs)");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleContinue = () => {
+    router.push("/email");
   };
 
   const infoItems = [
     {
-      title: "Seuraa vihanneksiasi",
-      description: "Lisää päivittäin syömäsi vihannekset ja seuraa edistymistäsi kohti tavoitettasi.",
+      title: "Seuraa kasvisten kulutusta",
+      description: "Seuraa kasvisten kulutustasi helposti sovelluksen avulla ja kerää pisteitä jokaisesta 100 grammasta kasviksia, jonka syöt.",
     },
     {
-      title: "Saavuta tavoitteesi",
-      description: "Aseta itsellesi päivittäinen vihannestavoite ja kerää pisteitä joka kerta kun saavutat sen.",
+      title: "Aseta päivittäinen kasvistavoite",
+      description: "Aseta päivittäinen kasvistavoite, seuraa edistymistäsi ja ansaitse lisäpisteitä joka kerta kun saavutat sen.",
     },
     {
       title: "Kilpaile kavereiden kanssa",
@@ -56,19 +29,15 @@ export default function Info() {
     },
     {
       title: "Löydä uusia reseptejä",
-      description: "Selaa terveellisiä reseptejä ja saa inspiraatiota vihannespitoiseen ruokavalioon.",
+      description: "Selaa terveellisiä reseptejä ja saa inspiraatiota kasvispitoiseen ruokavalioon.",
     },
   ];
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.title}>Tervetuloa!</Text>
         <Text style={styles.subtitle}>Näin Deliverde toimii</Text>
@@ -88,36 +57,12 @@ export default function Info() {
           ))}
         </View>
 
-        {/* Email section */}
-        <View style={styles.emailCard}>
-          <Text style={styles.emailTitle}>Sähköpostiosoite (valinnainen)</Text>
-          <Text style={styles.emailDescription}>
-            Lisää sähköpostiosoitteesi, jos haluat saada tietoa uusista ominaisuuksista ja päivityksistä.
-          </Text>
-          <TextInput
-            style={styles.emailInput}
-            placeholder="esimerkki@email.com"
-            placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-
         {/* Continue button */}
-        <Pressable
-          style={[styles.continueButton, isLoading && styles.continueButtonDisabled]}
-          onPress={handleContinue}
-          disabled={isLoading}
-        >
-          <Text style={styles.continueButtonText}>
-            {isLoading ? "Ladataan..." : "Aloita käyttö"}
-          </Text>
+        <Pressable style={styles.continueButton} onPress={handleContinue}>
+          <Text style={styles.continueButtonText}>Jatka</Text>
         </Pressable>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -128,7 +73,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.medium,
-    paddingTop: 60,
+    paddingTop: 100,
     paddingBottom: 40,
   },
   title: {
@@ -190,39 +135,6 @@ const styles = StyleSheet.create({
     color: "#666",
     lineHeight: 20,
   },
-  emailCard: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  emailTitle: {
-    fontSize: 16,
-    fontFamily: theme.fontFamily.semiBold,
-    color: theme.colors.primary,
-    marginBottom: 8,
-  },
-  emailDescription: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: "#666",
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  emailInput: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: theme.borderRadius.medium,
-    padding: 16,
-    fontSize: 16,
-    fontFamily: theme.fontFamily.regular,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
   continueButton: {
     backgroundColor: "#37891C",
     padding: 18,
@@ -233,9 +145,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
-  },
-  continueButtonDisabled: {
-    opacity: 0.7,
   },
   continueButtonText: {
     color: "white",

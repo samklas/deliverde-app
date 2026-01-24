@@ -20,6 +20,7 @@ import React from "react";
 export default function UserLevel() {
   const [username, setUsername] = useState("");
   const [avatarId, setAvatarId] = useState("");
+  const [email, setEmail] = useState("");
   const [level, setLevel] = useState("beginner");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,8 +29,10 @@ export default function UserLevel() {
     const loadOnboardingData = async () => {
       const savedUsername = await storage.get(STORAGE_KEYS.ONBOARDING_USERNAME);
       const savedAvatar = await storage.get(STORAGE_KEYS.ONBOARDING_AVATAR);
+      const savedEmail = await storage.get(STORAGE_KEYS.ONBOARDING_EMAIL);
       if (savedUsername) setUsername(savedUsername);
       if (savedAvatar) setAvatarId(savedAvatar);
+      if (savedEmail) setEmail(savedEmail);
     };
     loadOnboardingData();
   }, []);
@@ -58,6 +61,7 @@ export default function UserLevel() {
         score: 0,
         streak: 0,
         avatarId: avatarId,
+        ...(email && { email: email }),
       });
 
       await setDoc(doc(db, "leaderboard", uid), {
@@ -76,11 +80,12 @@ export default function UserLevel() {
       await storage.multiRemove([
         STORAGE_KEYS.ONBOARDING_USERNAME,
         STORAGE_KEYS.ONBOARDING_AVATAR,
+        STORAGE_KEYS.ONBOARDING_EMAIL,
       ]);
 
       await loadAppData();
 
-      router.replace("/info");
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Error adding user:", error);
       Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");

@@ -35,7 +35,7 @@ export default function Login() {
 
   const handleAuthResult = async (result: AuthResult) => {
     if (result.isNewUser) {
-      router.navigate("/userDetails");
+      router.navigate("/info");
     } else {
       await storage.multiSet([
         [STORAGE_KEYS.USER_ID, result.uid],
