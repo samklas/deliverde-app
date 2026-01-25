@@ -164,14 +164,16 @@ export default function UserLevel() {
           </View>
 
           <Text style={styles.title}>Valitse taso</Text>
-          <Text style={styles.subtitle}>Mikä on päivittäinen tavoitteesi?</Text>
+          <Text style={styles.subtitle}>
+            Mikä on päivittäinen tavoitteesi? Taso määrittää päivittäisen kasvistavoitteesi. Voit muuttaa tätä myöhemmin profiilissasi.
+          </Text>
 
           {/* Level Selection */}
           <View style={styles.card}>
             <LevelSelector
               selectedLevel={level}
               onSelectLevel={setLevel}
-              showHelperText={true}
+              showHelperText={false}
             />
           </View>
 
