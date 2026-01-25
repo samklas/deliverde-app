@@ -153,6 +153,15 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="friendCode"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen
           name="feedback"
           options={{
             headerShown: true,

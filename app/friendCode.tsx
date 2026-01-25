@@ -15,29 +15,37 @@ import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
 import React from "react";
 
-export default function Email() {
-  const [email, setEmail] = useState("");
+export default function FriendCode() {
+  const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleCodeChange = (text: string) => {
+    // Only allow alphanumeric characters and limit to 6 characters
+    const sanitized = text.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    if (sanitized.length <= 6) {
+      setCode(sanitized);
+    }
+  };
 
   const handleContinue = async () => {
     setIsLoading(true);
     try {
-      // Save email to storage for later use during user creation
-      if (email.trim()) {
-        await storage.set(STORAGE_KEYS.ONBOARDING_EMAIL, email.trim());
+      // Save friend code to storage for later use during user creation
+      if (code.trim().length === 6) {
+        await storage.set(STORAGE_KEYS.ONBOARDING_FRIEND_CODE, code.trim());
       }
-      router.push("/friendCode");
+      router.push("/userDetails");
     } catch (error) {
-      console.error("Error saving email:", error);
-      // Continue anyway even if email save fails
-      router.push("/friendCode");
+      console.error("Error saving friend code:", error);
+      // Continue anyway even if save fails
+      router.push("/userDetails");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSkip = () => {
-    router.push("/friendCode");
+    router.push("/userDetails");
   };
 
   return (
@@ -53,31 +61,35 @@ export default function Email() {
         {/* Progress indicator */}
         <View style={styles.progressContainer}>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: "40%" }]} />
+            <View style={[styles.progressFill, { width: "60%" }]} />
           </View>
         </View>
 
-        <Text style={styles.title}>Voita palkintoja</Text>
+        <Text style={styles.title}>Lisää kutsukoodi</Text>
         <Text style={styles.subtitle}>
-          Arvomme aktiivisten käyttäjien kesken säännöllisesti palkintoja. Voit halutessasi lisätä sähköpostiosoitteesi osallistuaksesi arvontoihin.
+          Saitko kaveriltasi kutsukoodin? Voit syöttää sen alle.
         </Text>
 
-        <View style={styles.emailCard}>
-          <Text style={styles.emailTitle}>Sähköpostiosoite</Text>
+        <View style={styles.codeCard}>
+          <Text style={styles.codeTitle}>Kutsukoodi</Text>
           <TextInput
-            style={styles.emailInput}
-            placeholder="esimerkki@email.com"
+            style={styles.codeInput}
+            placeholder="ABC123"
             placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            value={code}
+            onChangeText={handleCodeChange}
+            autoCapitalize="characters"
             autoCorrect={false}
+            maxLength={6}
           />
+          <Text style={styles.codeHint}>Syötä 6-merkkinen koodi</Text>
         </View>
 
         <Pressable
-          style={[styles.continueButton, isLoading && styles.continueButtonDisabled]}
+          style={[
+            styles.continueButton,
+            isLoading && styles.continueButtonDisabled,
+          ]}
           onPress={handleContinue}
           disabled={isLoading}
         >
@@ -133,7 +145,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#37891C",
     borderRadius: 5,
   },
-  emailCard: {
+  codeCard: {
     backgroundColor: theme.colors.background,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.medium,
@@ -144,20 +156,29 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  emailTitle: {
+  codeTitle: {
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: 12,
   },
-  emailInput: {
+  codeInput: {
     backgroundColor: "#f5f5f5",
     borderRadius: theme.borderRadius.medium,
     padding: 16,
-    fontSize: 16,
-    fontFamily: theme.fontFamily.regular,
+    fontSize: 24,
+    fontFamily: theme.fontFamily.semiBold,
     borderWidth: 1,
     borderColor: "#e0e0e0",
+    textAlign: "center",
+    letterSpacing: 8,
+  },
+  codeHint: {
+    fontSize: 12,
+    fontFamily: theme.fontFamily.regular,
+    color: "#999",
+    textAlign: "center",
+    marginTop: 8,
   },
   continueButton: {
     backgroundColor: "#37891C",

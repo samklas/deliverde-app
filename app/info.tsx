@@ -42,7 +42,7 @@ export default function Info() {
         {/* Progress indicator */}
         <View style={styles.progressContainer}>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: "25%" }]} />
+            <View style={[styles.progressFill, { width: "20%" }]} />
           </View>
         </View>
 
