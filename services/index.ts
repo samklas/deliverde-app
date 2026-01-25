@@ -12,6 +12,7 @@ export {
   getUserDetails,
   getLeaderboardUsers,
   setLevelForCurrentUser,
+  getInviteCodeForCurrentUser,
   type UserDetails,
 } from "./users.service";
 

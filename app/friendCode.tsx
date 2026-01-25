@@ -71,7 +71,7 @@ export default function FriendCode() {
         </Text>
 
         <View style={styles.codeCard}>
-          <Text style={styles.codeTitle}>Kutsukoodi</Text>
+          <Text style={styles.codeTitle}>Kutsu  koodi</Text>
           <TextInput
             style={styles.codeInput}
             placeholder="ABC123"

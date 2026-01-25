@@ -8,8 +8,36 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { auth } from "@/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDocs, query, collection, where } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+
+// Generate a unique 6-character invite code
+const generateInviteCode = (): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed confusing chars like 0, O, 1, I
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
+// Check if invite code already exists in database
+const isInviteCodeUnique = async (code: string): Promise<boolean> => {
+  const q = query(collection(db, "users"), where("inviteCode", "==", code));
+  const snapshot = await getDocs(q);
+  return snapshot.empty;
+};
+
+// Generate a unique invite code (retry if exists)
+const generateUniqueInviteCode = async (): Promise<string> => {
+  let code = generateInviteCode();
+  let attempts = 0;
+  while (!(await isInviteCodeUnique(code)) && attempts < 10) {
+    code = generateInviteCode();
+    attempts++;
+  }
+  return code;
+};
 import { router } from "expo-router";
 import { storage, loadAppData } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
@@ -21,6 +49,7 @@ export default function UserLevel() {
   const [username, setUsername] = useState("");
   const [avatarId, setAvatarId] = useState("");
   const [email, setEmail] = useState("");
+  const [friendCode, setFriendCode] = useState("");
   const [level, setLevel] = useState("beginner");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,9 +59,11 @@ export default function UserLevel() {
       const savedUsername = await storage.get(STORAGE_KEYS.ONBOARDING_USERNAME);
       const savedAvatar = await storage.get(STORAGE_KEYS.ONBOARDING_AVATAR);
       const savedEmail = await storage.get(STORAGE_KEYS.ONBOARDING_EMAIL);
+      const savedFriendCode = await storage.get(STORAGE_KEYS.ONBOARDING_FRIEND_CODE);
       if (savedUsername) setUsername(savedUsername);
       if (savedAvatar) setAvatarId(savedAvatar);
       if (savedEmail) setEmail(savedEmail);
+      if (savedFriendCode) setFriendCode(savedFriendCode);
     };
     loadOnboardingData();
   }, []);
@@ -52,6 +83,9 @@ export default function UserLevel() {
 
     setIsLoading(true);
     try {
+      // Generate unique invite code for this user
+      const inviteCode = await generateUniqueInviteCode();
+
       await setDoc(doc(db, "users", uid), {
         username: username,
         level: level,
@@ -61,7 +95,9 @@ export default function UserLevel() {
         score: 0,
         streak: 0,
         avatarId: avatarId,
+        inviteCode: inviteCode,
         ...(email && { email: email }),
+        ...(friendCode && { referredBy: friendCode }),
       });
 
       await setDoc(doc(db, "leaderboard", uid), {
@@ -81,6 +117,7 @@ export default function UserLevel() {
         STORAGE_KEYS.ONBOARDING_USERNAME,
         STORAGE_KEYS.ONBOARDING_AVATAR,
         STORAGE_KEYS.ONBOARDING_EMAIL,
+        STORAGE_KEYS.ONBOARDING_FRIEND_CODE,
       ]);
 
       await loadAppData();

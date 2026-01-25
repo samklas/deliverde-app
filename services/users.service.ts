@@ -79,3 +79,17 @@ export const setLevelForCurrentUser = async (level: string): Promise<void> => {
   const userRef = doc(db, "users", uid);
   await updateDoc(userRef, { level });
 };
+
+export const getInviteCodeForCurrentUser = async (): Promise<string | null> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) {
+    return null;
+  }
+
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const userData = userDoc.data();
+
+  if (!userData) return null;
+
+  return userData.inviteCode ?? null;
+};
