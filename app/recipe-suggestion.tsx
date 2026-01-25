@@ -15,6 +15,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { theme } from "@/theme";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import ImagePickerExample from "@/components/ImagePicker";
 import React from "react";
 
 export default function RecipeSuggestion() {
@@ -143,6 +144,12 @@ export default function RecipeSuggestion() {
             onChangeText={setInstructions}
             textAlignVertical="top"
           />
+        </View>
+
+        {/* Image */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Kuva (valinnainen)</Text>
+          <ImagePickerExample />
         </View>
 
         <Pressable
