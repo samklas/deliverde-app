@@ -37,10 +37,10 @@ export const analyzeVegetableImage = async (
           content: [
             {
               type: "text",
-              text: `Analyze this image and identify all vegetables visible. Estimate the weight in grams based on the visual size of each vegetable.
+              text: `Analyze this image and identify all vegetables, fruits and berries. Estimate the weight in grams based on the visual size of each.
 
 Return a JSON array with the following format:
-[{"name": "vegetable name in Finnish", "confidence": 0.0-1.0, "estimatedGrams": number}]
+[{"name": "name in Finnish", "confidence": 0.0-1.0, "estimatedGrams": number}]
 
 Guidelines for gram estimation:
 - Small tomato: ~80g, medium: ~120g, large: ~180g
@@ -51,6 +51,12 @@ Guidelines for gram estimation:
 - Broccoli floret: ~30-50g, whole head: ~300-500g
 - Potato: small ~100g, medium ~170g, large ~280g
 - Lettuce leaf: ~10-20g, whole head: ~300-500g
+
+Fruit weight guidelines:
+- Mandarin: ~70–100g
+- Apple: small ~120g, medium ~180g, large ~250g
+- Banana: ~120g
+- Orange: ~200g
 
 Common Finnish vegetable names:
 - tomato = tomaatti
@@ -76,8 +82,23 @@ Common Finnish vegetable names:
 - beetroot = punajuuri
 - avocado = avokado
 
-Only include vegetables, not fruits. Be specific about the type.
-If you cannot identify any vegetables, return an empty array [].
+Common Finnish fruit names:
+- mandarin = mandariini
+- orange = appelsiini
+- apple = omena
+- banana = banaani
+- pear = päärynä
+- lemon = sitruuna
+- lime = limetti
+
+Common Finnish berry names:
+- strawberry = mansikka
+- blueberry = mustikka
+- raspberry = vadelma
+- lingonberry = puolukka
+
+Be specific about the type.If an item looks like a fruit or vegetable but you are not fully certain,
+still include it with a lower confidence score.
 Return ONLY the JSON array, no other text.`,
             },
             {

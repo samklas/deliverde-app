@@ -125,7 +125,7 @@ const AnalysisResultsModal = observer(
       <Modal visible={isVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tunnistetut vihannekset</Text>
+            <Text style={styles.modalTitle}>Tunnistetut kasvikset</Text>
 
             <ScrollView style={styles.scrollView}>
               {matchedVegetables.map((item, index) => (

@@ -19,8 +19,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 import userStore from "@/stores/userStore";
 import { getDailyTotalForCurrentUser, setDailyTotalForCurrentUser } from "@/services";
-import { veggies } from "@/data/veggies";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const Tab = observer(() => {
   const { dailyTotal, dailyTarget, setDailyTotal } = userStore;
@@ -172,7 +170,7 @@ const Tab = observer(() => {
         
         {todayVegetables.length === 0 ? (
           <Text style={styles.emptyText}>
-            Ei lisättyjä vihanneksia tälle päivälle
+            Ei lisättyjä kasviksia tälle päivälle
           </Text>
         ) : (
           <ScrollView style={styles.todayScrollView}>
@@ -204,7 +202,7 @@ const Tab = observer(() => {
         onPress={() => setIsAddModalVisible(true)}
       >
         <Ionicons name="add-circle" size={24} color="white" />
-        <Text style={styles.addButtonText}>Lisää vihanneksia</Text>
+        <Text style={styles.addButtonText}>Lisää kasviksia</Text>
       </TouchableOpacity>
 
       {/* Celebration Animation */}
