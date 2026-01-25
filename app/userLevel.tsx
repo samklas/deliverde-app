@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { auth } from "@/firebaseConfig";
-import { doc, setDoc, getDocs, query, collection, where } from "firebase/firestore";
+import { doc, setDoc, getDocs, query, collection, where, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 
 // Generate a unique 6-character invite code
@@ -37,6 +37,19 @@ const generateUniqueInviteCode = async (): Promise<string> => {
     attempts++;
   }
   return code;
+};
+
+// Increment referral count for the user who owns the invite code
+const incrementReferralCount = async (inviteCode: string): Promise<void> => {
+  const q = query(collection(db, "users"), where("inviteCode", "==", inviteCode));
+  const snapshot = await getDocs(q);
+
+  if (!snapshot.empty) {
+    const referrerDoc = snapshot.docs[0];
+    await updateDoc(doc(db, "users", referrerDoc.id), {
+      referralCount: increment(1),
+    });
+  }
 };
 import { router } from "expo-router";
 import { storage, loadAppData } from "@/services";
@@ -96,9 +109,15 @@ export default function UserLevel() {
         streak: 0,
         avatarId: avatarId,
         inviteCode: inviteCode,
+        referralCount: 0,
         ...(email && { email: email }),
         ...(friendCode && { referredBy: friendCode }),
       });
+
+      // Increment referral count for the user who shared the invite code
+      if (friendCode) {
+        await incrementReferralCount(friendCode);
+      }
 
       await setDoc(doc(db, "leaderboard", uid), {
         username: username,
