@@ -6,20 +6,35 @@ import {
   Pressable,
   Alert,
   Image,
-  TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
 import { theme } from "@/theme";
 import { storage } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
+import { db } from "@/firebaseConfig";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import React from "react";
+
+// Check if username is already taken
+const isUsernameAvailable = async (username: string): Promise<boolean> => {
+  const q = query(
+    collection(db, "users"),
+    where("username", "==", username.trim())
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.empty;
+};
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const avatars = [
     { id: "1", item: require("@/assets/images/avatar2.jpg") },
@@ -48,23 +63,43 @@ export default function UserDetails() {
       return;
     }
 
-    // Save to storage before navigating (persists if app is closed)
-    await storage.multiSet([
-      [STORAGE_KEYS.ONBOARDING_USERNAME, username.trim()],
-      [STORAGE_KEYS.ONBOARDING_AVATAR, selectedAvatar],
-    ]);
+    setIsLoading(true);
+    try {
+      // Check if username is available
+      const available = await isUsernameAvailable(username);
+      if (!available) {
+        Alert.alert("Virhe", "Käyttäjänimi on jo käytössä. Valitse toinen nimi.");
+        return;
+      }
 
-    router.push("/userLevel");
+      // Save to storage before navigating (persists if app is closed)
+      await storage.multiSet([
+        [STORAGE_KEYS.ONBOARDING_USERNAME, username.trim()],
+        [STORAGE_KEYS.ONBOARDING_AVATAR, selectedAvatar],
+      ]);
+
+      router.push("/userLevel");
+    } catch (error) {
+      console.error("Error checking username:", error);
+      Alert.alert("Virhe", "Käyttäjänimen tarkistus epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-  
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.overlay}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
+    <KeyboardAvoidingView
+      style={styles.overlay}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
+      <ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={Keyboard.dismiss}
+      >
             {/* Progress indicator */}
             <View style={styles.progressContainer}>
               <View style={styles.progressTrack}>
@@ -103,16 +138,26 @@ export default function UserDetails() {
                 onChangeText={setUsername}
                 placeholder="Kirjoita käyttäjänimesi"
                 placeholderTextColor="#999"
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 100);
+                }}
               />
             </View>
 
             {/* Continue Button */}
-            <Pressable style={styles.continueButton} onPress={handleContinue}>
-              <Text style={styles.continueButtonText}>Jatka</Text>
+            <Pressable
+              style={[styles.continueButton, isLoading && styles.continueButtonDisabled]}
+              onPress={handleContinue}
+              disabled={isLoading}
+            >
+              <Text style={styles.continueButtonText}>
+                {isLoading ? "Tarkistetaan..." : "Jatka"}
+              </Text>
             </Pressable>
           </ScrollView>
-        </View>
-      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -215,6 +260,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  continueButtonDisabled: {
+    opacity: 0.7,
   },
   continueButtonText: {
     color: "white",
