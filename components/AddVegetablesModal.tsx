@@ -84,7 +84,8 @@ const AddVegetablesModal = ({
             </View>
 
             <Text style={styles.description}>
-              Etsi haluamasi vihannes tai tunnista kuvasta.
+              Etsi haluamasi vihannes tai tunnista kuvasta. Jos et löydä
+              etsimääsi, voit lisätä sen "muu" -nimikkeellä.
             </Text>
 
             {/* Search section */}

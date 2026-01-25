@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
@@ -19,6 +19,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import userStore from "@/stores/userStore";
 import { getDailyTotalForCurrentUser, setDailyTotalForCurrentUser } from "@/services";
+import { veggies } from "@/data/veggies";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 const Tab = observer(() => {
   const { dailyTotal, dailyTarget, setDailyTotal } = userStore;
