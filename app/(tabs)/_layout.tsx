@@ -55,6 +55,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: "Tulostaulukko",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="trophy" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="shop"
         options={{
           title: "Kauppa",
