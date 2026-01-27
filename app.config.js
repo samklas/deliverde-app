@@ -79,7 +79,7 @@ export default {
       },
       googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
-      openaiApiKey: process.env.OPENAI_API_KEY,
+      imageAnalysisUrl: process.env.IMAGE_ANALYSIS_URL,
     },
     owner: "smabza",
   },
