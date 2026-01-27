@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, View, Text, Button, StyleSheet } from "react-native";
+import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
 import { theme } from "@/theme";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { Picker } from "@react-native-picker/picker";
@@ -155,8 +155,12 @@ const AddVegetableModal = observer(
               </View>
             )}
 
-            <Button title="Lisää" onPress={handleAddVegetable} />
-            <Button title="Peruuta" onPress={onClose} color="red" />
+            <Pressable style={styles.addButton} onPress={handleAddVegetable}>
+              <Text style={styles.addButtonText}>Lisää</Text>
+            </Pressable>
+            <Pressable style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelButtonText}>Peruuta</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -190,12 +194,33 @@ const styles = StyleSheet.create({
     marginTop: 50,
     margin: "auto",
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: theme.spacing.small,
-    marginBottom: theme.spacing.large,
-    borderRadius: theme.borderRadius.small,
+  addButton: {
+    backgroundColor: "#37891C",
+    padding: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: theme.spacing.medium,
+    shadowColor: "#37891C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 17,
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  cancelButton: {
+    padding: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: "#666",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });
 

@@ -138,6 +138,9 @@ export default function Tab() {
                 <Text style={styles.goalText}>{inviteCode}</Text>
                 <Ionicons name="share-outline" size={20} color={theme.colors.primary} />
               </View>
+              <Text style={styles.helpText}>
+                Jaa tämä koodi kavereillesi ja olet automaattisesti mukana palkintoarvonnassa!
+              </Text>
             </Pressable>
           )}
 
@@ -222,6 +225,12 @@ const styles = StyleSheet.create({
   goalText: {
     fontFamily: theme.fontFamily.regular,
     fontSize: 16,
+  },
+  helpText: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    marginTop: 10,
   },
   goalBox: {
     marginTop: 50,
