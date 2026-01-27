@@ -83,7 +83,7 @@ export default function Tab() {
     if (inviteCode) {
       try {
         await Share.share({
-          message: `Liity mukaan Deliverdeen! Käytä kutsukoodiani: ${inviteCode}`,
+          message: `Liity mukaan DeliVerdeen! Käytä kutsukoodiani: ${inviteCode}`,
         });
       } catch (error) {
         console.error("Error sharing invite code:", error);

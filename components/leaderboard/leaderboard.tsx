@@ -117,7 +117,7 @@ const LeaderboardTab = observer(() => {
               </View>
               <View style={styles.infoItemContent}>
                 <Text style={styles.infoItemTitle}>Saavuta päivätavoite</Text>
-                <Text style={styles.infoItemDescription}>Saat 5 bonuspistettä kun saavutat päivittäisen tavoitteesi</Text>
+                <Text style={styles.infoItemDescription}>Saat 3 bonuspistettä kun saavutat päivittäisen tavoitteesi</Text>
               </View>
             </View>
 
