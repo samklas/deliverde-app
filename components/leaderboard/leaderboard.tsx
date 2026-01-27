@@ -1,14 +1,15 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import leaderboardStore from "@/stores/leaderboardStore";
 import { auth } from "@/firebaseConfig";
-import React from "react";
+import React, { useState } from "react";
 
 const LeaderboardTab = observer(() => {
   const { users } = leaderboardStore;
   const currentUserId = auth.currentUser?.uid;
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Find current user's position
   const currentUserIndex = users.findIndex(
@@ -18,7 +19,7 @@ const LeaderboardTab = observer(() => {
 
   if (!users.length || !users[0]?.username) {
     return (
-      <View style={styles.overlay}>
+      <View style={styles.container}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Ladataan tulostaulua...</Text>
         </View>
@@ -27,10 +28,11 @@ const LeaderboardTab = observer(() => {
   }
 
   return (
-    <View style={styles.overlay}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Kuukauden salaattisankarit</Text>
-
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Kuukauden salaattisankarit</Text>
+        </View>
         {/* Highlight current user's position */}
         {currentUserIndex !== -1 && (
           <View style={styles.currentUserCard}>
@@ -43,11 +45,14 @@ const LeaderboardTab = observer(() => {
                 {users[currentUserIndex]?.points} pistettä
               </Text>
             </View>
-            <Ionicons name="trophy-outline" size={24} color="#37891C" />
           </View>
         )}
-
-        <View style={styles.box}>
+        <Pressable onPress={() => setShowInfoModal(true)} style={styles.infoLink}>
+          <Ionicons name="help-circle-outline" size={18} color="#37891C" />
+          <Text style={styles.infoLinkText}>Mistä voin saada pisteitä?</Text>
+        </Pressable>
+        <View style={styles.divider} />
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {/* Map users by position between 1-10 */}
           {users.slice(0, 10).map((user, index) => (
             <View
@@ -65,7 +70,6 @@ const LeaderboardTab = observer(() => {
               </Text>
             </View>
           ))}
-
           {/* Show current user's position if outside top 10 */}
           {!isCurrentUserInTop10 && currentUserIndex !== -1 && (
             <View>
@@ -80,8 +84,49 @@ const LeaderboardTab = observer(() => {
               </View>
             </View>
           )}
+        </ScrollView>
+      </View>
+
+      {/* Points Info Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showInfoModal}
+        onRequestClose={() => setShowInfoModal(false)}
+      >
+        <View style={styles.infoModalOverlay}>
+          <View style={styles.infoModalContent}>
+            <View style={styles.infoModalHeader}>
+              <Ionicons name="trophy" size={32} color="#37891C" />
+              <Text style={styles.infoModalTitle}>Näin saat pisteitä</Text>
+            </View>
+
+            <View style={styles.infoItem}>
+              <View style={styles.infoItemIcon}>
+                <Ionicons name="leaf" size={20} color="#37891C" />
+              </View>
+              <View style={styles.infoItemContent}>
+                <Text style={styles.infoItemTitle}>Kirjaa kasviksia</Text>
+                <Text style={styles.infoItemDescription}>Saat 1 pisteen jokaisesta kirjatusta 100g kasviksia</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoItem}>
+              <View style={styles.infoItemIcon}>
+                <Ionicons name="flame" size={20} color="#37891C" />
+              </View>
+              <View style={styles.infoItemContent}>
+                <Text style={styles.infoItemTitle}>Saavuta päivätavoite</Text>
+                <Text style={styles.infoItemDescription}>Saat 5 bonuspistettä kun saavutat päivittäisen tavoitteesi</Text>
+              </View>
+            </View>
+
+            <Pressable onPress={() => setShowInfoModal(false)} style={styles.infoModalButton}>
+              <Text style={styles.infoModalButtonText}>Selvä!</Text>
+            </Pressable>
+          </View>
         </View>
-      </ScrollView>
+      </Modal>
     </View>
   );
 });
@@ -89,28 +134,28 @@ const LeaderboardTab = observer(() => {
 export default LeaderboardTab;
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     flex: 1,
-    backgroundColor: theme.colors.overlay,
-    padding: theme.spacing.medium,
+    backgroundColor: theme.colors.background,
+    paddingTop: 20,
+  },
+  content: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    width: "100%",
+    padding: theme.spacing.large,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 30,
   },
   title: {
     fontSize: theme.fonts.title.fontSize,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
-    marginBottom: theme.spacing.large,
-  },
-  box: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
-    marginBottom: theme.spacing.medium,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   leaderboardRow: {
     flexDirection: "row",
@@ -175,6 +220,83 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#ddd",
     marginVertical: theme.spacing.medium,
+  },
+  infoLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: theme.spacing.small,
+  },
+  infoLinkText: {
+    color: "#37891C",
+    fontSize: 14,
+    fontFamily: theme.fontFamily.medium,
+    marginLeft: 6,
+  },
+  infoModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.large,
+  },
+  infoModalContent: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 340,
+  },
+  infoModalHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  infoModalTitle: {
+    fontSize: 20,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
+    marginTop: 12,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  infoItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  infoItemContent: {
+    flex: 1,
+  },
+  infoItemTitle: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 2,
+  },
+  infoItemDescription: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    lineHeight: 18,
+  },
+  infoModalButton: {
+    backgroundColor: "#37891C",
+    padding: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  infoModalButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
   emptyContainer: {
     flex: 1,
