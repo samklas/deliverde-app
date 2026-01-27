@@ -1,6 +1,6 @@
 export default {
   expo: {
-    name: "Deliverde",
+    name: "DeliVerde",
     slug: "Deliverde",
     version: "1.0.0",
     orientation: "portrait",
