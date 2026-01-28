@@ -69,7 +69,13 @@ export default function Login() {
       const result = await signInWithGoogle();
       await handleAuthResult(result);
     } catch (error: any) {
-      console.error("Google Sign-In error:", error);
+      console.error("Google Sign-In error:", {
+        message: error.message,
+        code: error.code,
+        name: error.name,
+        stack: error.stack,
+        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2),
+      });
       if (error.code === "SIGN_IN_CANCELLED") {
         return;
       }

@@ -103,36 +103,72 @@ export const signInWithApple = async (): Promise<AuthResult> => {
  * Sign in with Google
  */
 export const signInWithGoogle = async (): Promise<AuthResult> => {
-  const googleSignin = await getGoogleSignin();
+  console.log("[GoogleSignIn] Starting sign in process...");
 
-  // Check if device supports Google Play Services (Android)
-  await googleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  try {
+    console.log("[GoogleSignIn] Loading Google Sign-In module...");
+    const googleSignin = await getGoogleSignin();
+    console.log("[GoogleSignIn] Module loaded successfully");
 
-  // Sign in with Google
-  const signInResult = await googleSignin.signIn();
+    console.log("[GoogleSignIn] Config:", {
+      webClientId: Constants.expoConfig?.extra?.googleWebClientId ? "SET" : "NOT SET",
+      iosClientId: Constants.expoConfig?.extra?.googleIosClientId ? "SET" : "NOT SET",
+    });
 
-  // Get ID token
-  const idToken = signInResult.data?.idToken;
-  if (!idToken) {
-    throw new Error("No ID token received from Google");
+    // Check if device supports Google Play Services (Android)
+    console.log("[GoogleSignIn] Checking Play Services...");
+    await googleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    console.log("[GoogleSignIn] Play Services available");
+
+    // Sign in with Google
+    console.log("[GoogleSignIn] Initiating Google sign in...");
+    const signInResult = await googleSignin.signIn();
+    console.log("[GoogleSignIn] Sign in result received:", {
+      type: signInResult.type,
+      hasData: !!signInResult.data,
+      hasIdToken: !!signInResult.data?.idToken,
+    });
+
+    // Get ID token
+    const idToken = signInResult.data?.idToken;
+    if (!idToken) {
+      console.error("[GoogleSignIn] No ID token in result:", JSON.stringify(signInResult, null, 2));
+      throw new Error("No ID token received from Google");
+    }
+    console.log("[GoogleSignIn] ID token received");
+
+    // Create Firebase credential
+    console.log("[GoogleSignIn] Creating Firebase credential...");
+    const credential = GoogleAuthProvider.credential(idToken);
+
+    // Sign in to Firebase
+    console.log("[GoogleSignIn] Signing in to Firebase...");
+    const userCredential = await signInWithCredential(auth, credential);
+    const uid = userCredential.user.uid;
+    console.log("[GoogleSignIn] Firebase sign in successful, uid:", uid);
+
+    // Check if user exists in Firestore
+    console.log("[GoogleSignIn] Checking if user exists in Firestore...");
+    const userExists = await checkUserExists(uid);
+    console.log("[GoogleSignIn] User exists:", userExists);
+
+    if (userExists) {
+      const username = await getUsername(uid);
+      console.log("[GoogleSignIn] Returning existing user");
+      return { uid, isNewUser: false, username: username || undefined };
+    }
+
+    console.log("[GoogleSignIn] Returning new user");
+    return { uid, isNewUser: true };
+  } catch (error: any) {
+    console.error("[GoogleSignIn] Error occurred:", {
+      message: error.message,
+      code: error.code,
+      name: error.name,
+      stack: error.stack,
+    });
+    throw error;
   }
-
-  // Create Firebase credential
-  const credential = GoogleAuthProvider.credential(idToken);
-
-  // Sign in to Firebase
-  const userCredential = await signInWithCredential(auth, credential);
-  const uid = userCredential.user.uid;
-
-  // Check if user exists in Firestore
-  const userExists = await checkUserExists(uid);
-
-  if (userExists) {
-    const username = await getUsername(uid);
-    return { uid, isNewUser: false, username: username || undefined };
-  }
-
-  return { uid, isNewUser: true };
 };
 
 /**
