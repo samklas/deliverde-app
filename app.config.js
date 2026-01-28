@@ -36,7 +36,7 @@ export default {
         "expo-image-picker",
         {
           photosPermission:
-            "The app accesses your photos to let you share them with your friends.",
+            "The app accesses your photos to let you choose vegetable images from your library and analyze them with AI.",
           cameraPermission:
             "The app needs camera access to identify vegetables from photos.",
         },

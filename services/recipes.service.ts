@@ -16,11 +16,6 @@ export const mapRecipes = async (
       title: data.title,
       ingredients: data.ingredients,
       instructions: data.instructions,
-      details: {
-        duration: data.details.duration,
-        difficultyLevel: data.details.difficultyLevel,
-        portionAmount: data.details.portionAmount,
-      },
       recipeOfMonth: data.recipeOfMonth,
     };
     recipes.push(recipe);
