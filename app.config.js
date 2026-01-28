@@ -12,6 +12,10 @@ export default {
       bundleIdentifier: "fi.deliverde.app",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        NSCameraUsageDescription:
+          "DeliVerde needs camera access to take photos of vegetables for identification.",
+        NSPhotoLibraryUsageDescription:
+          "DeliVerde needs access to your photo library to select vegetable images for identification.",
       },
       icon: "./assets/images/icon.jpeg",
       usesAppleSignIn: true,
@@ -22,7 +26,7 @@ export default {
         backgroundColor: "#5CB85C",
       },
       package: "fi.deliverde.app",
-      permissions: ["android.permission.RECORD_AUDIO"],
+      permissions: [],
     },
     web: {
       bundler: "metro",
@@ -84,5 +88,10 @@ export default {
       imageAnalysisUrl: process.env.IMAGE_ANALYSIS_URL,
     },
     owner: "smabza",
+    githubUrl: "https://github.com/sorsat/deliverde-app",
+    support: {
+      email: "tilaus@deliverde.fi",
+      url: "https://deliverde-shop.myshopify.com/pages/contact",
+    },
   },
 };
