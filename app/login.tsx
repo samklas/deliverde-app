@@ -9,10 +9,9 @@ import {
   Platform,
   Modal,
   TouchableOpacity,
-  ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import { WebView } from "react-native-webview";
 import * as AppleAuthentication from "expo-apple-authentication";
 import {
   storage,
@@ -25,14 +24,10 @@ import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
 import React from "react";
 
-const PRIVACY_POLICY_URL =
-  "https://deliverde-shop.myshopify.com/policies/privacy-policy";
-
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
-  const [webViewLoading, setWebViewLoading] = useState(true);
 
   const handleAuthResult = async (result: AuthResult) => {
     if (result.isNewUser) {
@@ -139,23 +134,59 @@ export default function Login() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tietosuojakäytänne</Text>
-            <View style={styles.webViewContainer}>
-              <WebView
-                source={{ uri: PRIVACY_POLICY_URL }}
-                style={styles.webView}
-                onLoadStart={() => setWebViewLoading(true)}
-                onLoadEnd={() => setWebViewLoading(false)}
-              />
-              {webViewLoading && (
-                <View style={styles.webViewLoading}>
-                  <ActivityIndicator
-                    size="large"
-                    color={theme.colors.primary}
-                  />
-                </View>
-              )}
-            </View>
+            <Text style={styles.modalTitle}>Tietosuojaseloste</Text>
+            <ScrollView style={styles.privacyScrollView}>
+              <Text style={styles.privacyDate}>Viimeksi päivitetty: 28.1.2026</Text>
+
+              <Text style={styles.privacySectionTitle}>1. Rekisterinpitäjä</Text>
+              <Text style={styles.privacyText}>
+                DeliVerde Puutarhat Oy{"\n"}
+                Sähköposti: tilaus@deliverde.fi
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>2. Sovelluksen tarkoitus</Text>
+              <Text style={styles.privacyText}>
+                DeliVerde on mobiilisovellus, jonka avulla käyttäjät voivat seurata kasvisten kulutustaan, selata reseptejä ja osallistua kilpailuihin.
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>3. Kerättävät henkilötiedot</Text>
+              <Text style={styles.privacyText}>
+                Sovelluksen käyttö ei edellytä henkilötietojen antamista. Käyttäjä voi halutessaan antaa:{"\n\n"}
+                • sähköpostiosoitteen{"\n"}
+                • valokuvia
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>4. Henkilötietojen käyttötarkoitus</Text>
+              <Text style={styles.privacyText}>
+                Henkilötietoja käytetään ainoastaan:{"\n\n"}
+                • kilpailuihin ja arvontoihin osallistumisen mahdollistamiseen{"\n"}
+                • sovelluksen toiminnallisuuksien toteuttamiseen käyttäjän aloitteesta{"\n\n"}
+                Tietoja ei käytetä markkinointiin.
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>5. Käsittelyn oikeusperuste</Text>
+              <Text style={styles.privacyText}>
+                Henkilötietojen käsittely perustuu käyttäjän antamaan suostumukseen (GDPR 6.1.a).
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>6. Tietojen säilytys</Text>
+              <Text style={styles.privacyText}>
+                Henkilötietoja säilytetään vain niin kauan kuin se on tarpeellista käyttötarkoituksen toteuttamiseksi tai kunnes käyttäjä pyytää tietojensa poistamista.
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>7. Tietojen käsittelijät ja siirrot</Text>
+              <Text style={styles.privacyText}>
+                Henkilötietoja käsitellään sovelluksen teknisen toteutuksen ja ylläpidon yhteydessä luotettavien palveluntarjoajien toimesta. Tietoja voidaan käsitellä EU:ssa tai EU:n ulkopuolella GDPR:n edellyttämiä suojatoimia noudattaen.
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>8. Käyttäjän oikeudet</Text>
+              <Text style={styles.privacyText}>
+                Käyttäjällä on oikeus:{"\n\n"}
+                • tarkastaa itseään koskevat tiedot{"\n"}
+                • pyytää tietojen oikaisua tai poistamista{"\n\n"}
+                Pidätämme oikeuden päivittää tätä tietosuojaselostetta. Muutoksista ilmoitetaan sovelluksessa.
+              </Text>
+            </ScrollView>
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={() => setPrivacyModalVisible(false)}
@@ -253,23 +284,27 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.medium,
     textAlign: "center",
   },
-  webViewContainer: {
-    flex: 1,
-    borderRadius: theme.borderRadius.medium,
-    overflow: "hidden",
-  },
-  webView: {
+  privacyScrollView: {
     flex: 1,
   },
-  webViewLoading: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
+  privacyDate: {
+    fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.medium,
+  },
+  privacySectionTitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.text,
+    marginTop: theme.spacing.medium,
+    marginBottom: theme.spacing.small,
+  },
+  privacyText: {
+    fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
+    color: theme.colors.text,
+    lineHeight: 22,
   },
   modalCloseButton: {
     marginTop: theme.spacing.medium,
