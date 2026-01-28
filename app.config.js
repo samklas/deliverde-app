@@ -18,8 +18,8 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/icon_android.png",
-        backgroundColor: "#ffffff",
+        foregroundImage: "./assets/images/icon.jpeg",
+        backgroundColor: "#5CB85C",
       },
       package: "fi.deliverde.app",
       permissions: ["android.permission.RECORD_AUDIO"],
@@ -52,6 +52,8 @@ export default {
           android: {
             image: "./assets/images/Deliverde_splash1.jpeg",
             resizeMode: "cover",
+            backgroundColor: "#5CB85C",
+            imageWidth: 600,
           },
         },
       ],

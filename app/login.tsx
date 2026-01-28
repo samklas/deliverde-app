@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import * as AppleAuthentication from "expo-apple-authentication";
 import {
@@ -69,13 +70,6 @@ export default function Login() {
       const result = await signInWithGoogle();
       await handleAuthResult(result);
     } catch (error: any) {
-      console.error("Google Sign-In error:", {
-        message: error.message,
-        code: error.code,
-        name: error.name,
-        stack: error.stack,
-        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2),
-      });
       if (error.code === "SIGN_IN_CANCELLED") {
         return;
       }
@@ -124,6 +118,7 @@ export default function Login() {
               onPress={handleGoogleSignIn}
               disabled={isLoading}
             >
+              <AntDesign name="google" size={20} color="white" style={styles.googleIcon} />
               <Text style={styles.googleButtonText}>
                 {isLoading ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
               </Text>
@@ -208,14 +203,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   googleButton: {
-    backgroundColor: "#4285F4",
-    //padding: ,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "white",
     borderRadius: 8,
     alignItems: "center",
+    flexDirection: "row",
     width: "100%",
     height: 48,
     justifyContent: "center",
     marginBottom: 16,
+  },
+  googleIcon: {
+    marginRight: 10,
   },
   googleButtonText: {
     color: "white",
