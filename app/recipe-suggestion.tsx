@@ -1,41 +1,40 @@
-import { db } from "@/firebaseConfig";
-import { theme } from "@/theme";
-import { addDoc, collection } from "firebase/firestore";
-import { observer } from "mobx-react-lite";
-import { useState } from "react";
 import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableWithoutFeedback,
   StyleSheet,
   Alert,
-  Keyboard,
 } from "react-native";
-import ImagePickerExample from "@/components/ImagePicker";
+import { useState } from "react";
+import { db } from "@/firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
+import { theme } from "@/theme";
 import { useRouter } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
+import ImagePickerExample from "@/components/ImagePicker";
 import React from "react";
 
-const RecipeSuggestion = observer(() => {
+export default function RecipeSuggestion() {
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
   const handleAddRecipe = async () => {
-    try {
-      if (!title.trim() || ingredients.length === 0 || !instructions.trim()) {
-        Alert.alert("Virhe", "Täytä kaikki kentät!");
-        return;
-      }
+    if (!title.trim() || ingredients.length === 0 || !instructions.trim()) {
+      Alert.alert("Virhe", "Täytä kaikki kentät ennen lähettämistä");
+      return;
+    }
 
+    setIsLoading(true);
+    try {
       const recipeData = {
         title: title.trim(),
         ingredients,
@@ -46,17 +45,20 @@ const RecipeSuggestion = observer(() => {
 
       await addDoc(collection(db, "recipeSuggestions"), recipeData);
 
+      Alert.alert("Kiitos!", "Reseptiehdotuksesi on lähetetty onnistuneesti.", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+
       // Reset form
       setTitle("");
       setIngredients([]);
       setInstructions("");
       setCurrentIngredient("");
-
-      Alert.alert("Onnistui", "Resepti lähetetty onnistuneesti!");
-      router.back();
     } catch (error) {
       console.error("Error adding recipe:", error);
-      Alert.alert("Virhe", "Virhe reseptin lisäämisessä. Yritä uudelleen.");
+      Alert.alert("Virhe", "Reseptin lähettäminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -73,217 +75,205 @@ const RecipeSuggestion = observer(() => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.content}>
-            <Text style={styles.header}>Ehdota reseptiä</Text>
-            <Text style={styles.info}>
-              Voit ehdottaa omaa suosikkireseptiäsi lisättäväksi sovellukseen.
-              Arvostamme erityisesti kasvisruokareseptejä, jotka innostavat
-              kokeilemaan kasvipohjaista ruokavaliota.
-            </Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Ehdota reseptiä</Text>
+        <Text style={styles.subtitle}>
+          Voit ehdottaa omaa suosikkireseptiäsi lisättäväksi sovellukseen.
+          Arvostamme erityisesti kasvisruokareseptejä!
+        </Text>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Reseptin nimi</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Kirjoita reseptin nimi"
-                placeholderTextColor="#999"
-                value={title}
-                onChangeText={setTitle}
-              />
-            </View>
+        {/* Recipe Name */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Reseptin nimi</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Kirjoita reseptin nimi"
+            placeholderTextColor="#999"
+            value={title}
+            onChangeText={setTitle}
+          />
+        </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Ainesosat</Text>
-              <View style={styles.ingredientInputContainer}>
-                <TextInput
-                  style={styles.ingredientInput}
-                  placeholder="Lisää ainesosa ja määrä. Esim. 2 kpl porkkanaa "
-                  placeholderTextColor="#999"
-                  value={currentIngredient}
-                  onChangeText={setCurrentIngredient}
-                  onSubmitEditing={handleAddIngredient}
-                />
-                <TouchableOpacity
-                  //style={styles.addButton}
-                  onPress={handleAddIngredient}
-                >
-                  <Ionicons name="add-circle" size={32} color="#0c4c25" />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.ingredientsList}>
-                {ingredients.map((ingredient, index) => (
-                  <View key={index} style={styles.ingredientItem}>
-                    <Text style={styles.ingredientText}>{ingredient}</Text>
-                    <TouchableOpacity
-                      //style={styles.removeButton}
-                      onPress={() => handleRemoveIngredient(index)}
-                    >
-                      <Ionicons name="remove-circle-outline" size={28} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Valmistusohjeet</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Kirjoita valmistusohjeet"
-                placeholderTextColor="#999"
-                multiline
-                value={instructions}
-                onChangeText={setInstructions}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              {/* <Text style={styles.label}>Reseptin kuva</Text> */}
-              <ImagePickerExample />
-            </View>
-
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleAddRecipe}
-            >
-              <Text style={styles.submitButtonText}>Lähetä</Text>
-            </TouchableOpacity>
+        {/* Ingredients */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Ainesosat</Text>
+          <View style={styles.ingredientInputContainer}>
+            <TextInput
+              style={styles.ingredientInput}
+              placeholder="Esim. 2 kpl porkkanaa"
+              placeholderTextColor="#999"
+              value={currentIngredient}
+              onChangeText={setCurrentIngredient}
+              onSubmitEditing={handleAddIngredient}
+            />
+            <Pressable onPress={handleAddIngredient} style={styles.addButton}>
+              <Ionicons name="add-circle" size={32} color={theme.colors.primary} />
+            </Pressable>
           </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+
+          {ingredients.length > 0 && (
+            <View style={styles.ingredientsList}>
+              {ingredients.map((ingredient, index) => (
+                <View key={index} style={styles.ingredientItem}>
+                  <Text style={styles.ingredientText}>{ingredient}</Text>
+                  <Pressable onPress={() => handleRemoveIngredient(index)}>
+                    <Ionicons name="close-circle" size={24} color="#999" />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Instructions */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Valmistusohjeet</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Kirjoita valmistusohjeet"
+            placeholderTextColor="#999"
+            multiline
+            value={instructions}
+            onChangeText={setInstructions}
+            textAlignVertical="top"
+          />
+        </View>
+
+        {/* Image */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Kuva (valinnainen)</Text>
+          <ImagePickerExample />
+        </View>
+
+        <Pressable
+          style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
+          onPress={handleAddRecipe}
+          disabled={isLoading}
+        >
+          <Text style={styles.submitButtonText}>
+            {isLoading ? "Lähetetään..." : "Lähetä"}
+          </Text>
+        </Pressable>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
-});
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 20,
+    backgroundColor: theme.colors.overlay,
   },
   scrollContent: {
-    flexGrow: 1,
+    padding: theme.spacing.medium,
+    paddingTop: 40,
+    paddingBottom: 40,
   },
-  content: {
-    padding: 20,
-  },
-  header: {
-    fontSize: 28,
+  title: {
+    fontSize: 32,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
-    marginBottom: 15,
     textAlign: "center",
+    marginBottom: 12,
   },
-  info: {
+  subtitle: {
     fontSize: 16,
     fontFamily: theme.fontFamily.regular,
     color: "#666",
     textAlign: "center",
-    marginBottom: 30,
-    lineHeight: 24,
+    marginBottom: 24,
+    lineHeight: 22,
   },
-  inputGroup: {
-    marginBottom: 20,
+  card: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  label: {
+  cardTitle: {
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
-    color: "#333",
-    marginBottom: 8,
+    color: theme.colors.primary,
+    marginBottom: 12,
   },
   input: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: theme.borderRadius.medium,
+    padding: 16,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     borderWidth: 1,
     borderColor: "#e0e0e0",
-    borderRadius: 12,
-    padding: 10,
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: "#2d3436",
   },
   textArea: {
     minHeight: 120,
-    textAlignVertical: "top",
   },
   ingredientInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    gap: 8,
   },
   ingredientInput: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+    borderRadius: theme.borderRadius.medium,
+    padding: 16,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     borderWidth: 1,
     borderColor: "#e0e0e0",
-    borderRadius: 12,
-    padding: 10,
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: "#2d3436",
-    marginRight: 10,
   },
   addButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: theme.colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 24,
-    fontFamily: theme.fontFamily.bold,
+    padding: 4,
   },
   ingredientsList: {
-    marginTop: 10,
+    marginTop: 16,
+    gap: 8,
   },
   ingredientItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    //backgroundColor: "#f0f0f0",
-    paddingBottom: 2,
-    borderRadius: 8,
-    marginBottom: 8,
+    backgroundColor: "#f5f5f5",
+    padding: 12,
+    borderRadius: theme.borderRadius.medium,
   },
   ingredientText: {
     fontSize: 14,
     fontFamily: theme.fontFamily.regular,
     color: "#333",
-  },
-  removeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#ff4444",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  removeButtonText: {
-    color: "#fff",
-    fontSize: 20,
-    fontFamily: theme.fontFamily.bold,
+    flex: 1,
   },
   submitButton: {
-    backgroundColor: theme.colors.primary,
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: "#37891C",
+    padding: 18,
+    borderRadius: theme.borderRadius.large,
     alignItems: "center",
-    marginTop: 20,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+    marginTop: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
   },
   submitButtonText: {
-    color: "#fff",
-    fontSize: 16,
+    color: "white",
+    fontSize: 18,
     fontFamily: theme.fontFamily.semiBold,
   },
 });
-
-export default RecipeSuggestion;

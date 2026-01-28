@@ -37,6 +37,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: "Tulokset",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="trophy" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="greens"
         options={{
           title: "Tavoitteet",

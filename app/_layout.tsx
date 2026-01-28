@@ -122,8 +122,10 @@ export default function RootLayout() {
         <Stack.Screen
           name="userDetails"
           options={{
-            headerTitle: "",
-            headerBackVisible: false,
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
           }}
         />
         <Stack.Screen
@@ -139,6 +141,24 @@ export default function RootLayout() {
           name="info"
           options={{
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="email"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen
+          name="friendCode"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
           }}
         />
         <Stack.Screen

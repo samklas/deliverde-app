@@ -7,41 +7,37 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from "react-native";
 import { useState } from "react";
-import { db } from "@/firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
-import { theme } from "@/theme";
 import { router } from "expo-router";
+import { storage } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
+import { theme } from "@/theme";
 import React from "react";
 
-export default function Feedback() {
-  const [feedback, setFeedback] = useState("");
+export default function Email() {
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!feedback.trim()) {
-      Alert.alert("Virhe", "Kirjoita palautetta ennen lähettämistä");
-      return;
-    }
-
+  const handleContinue = async () => {
     setIsLoading(true);
     try {
-      await addDoc(collection(db, "feedback"), {
-        createdAt: new Date(),
-        feedback: feedback.trim(),
-      });
-      Alert.alert("Kiitos!", "Palautteesi on lähetetty onnistuneesti.", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
-      setFeedback("");
+      // Save email to storage for later use during user creation
+      if (email.trim()) {
+        await storage.set(STORAGE_KEYS.ONBOARDING_EMAIL, email.trim());
+      }
+      router.push("/friendCode");
     } catch (error) {
-      console.error("Error submitting feedback:", error);
-      Alert.alert("Virhe", "Palautteen lähettäminen epäonnistui. Yritä uudelleen.");
+      console.error("Error saving email:", error);
+      // Continue anyway even if email save fails
+      router.push("/friendCode");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSkip = () => {
+    router.push("/friendCode");
   };
 
   return (
@@ -54,32 +50,44 @@ export default function Feedback() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Lähetä palautetta</Text>
+        {/* Progress indicator */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: "40%" }]} />
+          </View>
+        </View>
+
+        <Text style={styles.title}>Voita palkintoja</Text>
         <Text style={styles.subtitle}>
-          Palautteesi on meille tärkeää! Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin paremman.
+          Arvomme aktiivisten käyttäjien kesken säännöllisesti palkintoja. Voit halutessasi lisätä sähköpostiosoitteesi osallistuaksesi arvontoihin.
         </Text>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Palautteesi</Text>
+        <View style={styles.emailCard}>
+          <Text style={styles.emailTitle}>Sähköpostiosoite</Text>
           <TextInput
-            style={styles.input}
-            multiline
-            placeholder="Kirjoita palautteesi tähän..."
+            style={styles.emailInput}
+            placeholder="esimerkki@email.com"
             placeholderTextColor="#999"
-            value={feedback}
-            onChangeText={setFeedback}
-            textAlignVertical="top"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
           />
         </View>
 
         <Pressable
-          style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
+          style={[styles.continueButton, isLoading && styles.continueButtonDisabled]}
+          onPress={handleContinue}
           disabled={isLoading}
         >
-          <Text style={styles.submitButtonText}>
-            {isLoading ? "Lähetetään..." : "Lähetä"}
+          <Text style={styles.continueButtonText}>
+            {isLoading ? "Ladataan..." : "Jatka"}
           </Text>
+        </Pressable>
+
+        <Pressable style={styles.skipButton} onPress={handleSkip}>
+          <Text style={styles.skipButtonText}>Ohita</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -93,7 +101,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.medium,
-    paddingTop: 40,
+    paddingTop: 100,
     paddingBottom: 40,
   },
   title: {
@@ -111,7 +119,21 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     lineHeight: 22,
   },
-  card: {
+  progressContainer: {
+    marginBottom: 24,
+  },
+  progressTrack: {
+    height: 10,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#37891C",
+    borderRadius: 5,
+  },
+  emailCard: {
     backgroundColor: theme.colors.background,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.medium,
@@ -122,13 +144,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  cardTitle: {
+  emailTitle: {
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: 12,
   },
-  input: {
+  emailInput: {
     backgroundColor: "#f5f5f5",
     borderRadius: theme.borderRadius.medium,
     padding: 16,
@@ -136,9 +158,8 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     borderWidth: 1,
     borderColor: "#e0e0e0",
-    minHeight: 120,
   },
-  submitButton: {
+  continueButton: {
     backgroundColor: "#37891C",
     padding: 18,
     borderRadius: theme.borderRadius.large,
@@ -149,12 +170,22 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  submitButtonDisabled: {
+  continueButtonDisabled: {
     opacity: 0.7,
   },
-  submitButtonText: {
+  continueButtonText: {
     color: "white",
     fontSize: 18,
     fontFamily: theme.fontFamily.semiBold,
+  },
+  skipButton: {
+    padding: 16,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  skipButtonText: {
+    color: "#666",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.medium,
   },
 });

@@ -1,24 +1,15 @@
-import leaderboardStore from "@/stores/leaderboardStore";
-import { theme } from "@/theme";
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
-import {
-  Modal,
-  Pressable,
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
+import leaderboardStore from "@/stores/leaderboardStore";
 import { auth } from "@/firebaseConfig";
 import React, { useState } from "react";
 
-const LeaderboardModal = observer(() => {
-  const { isVisible, setIsVisible, users } = leaderboardStore;
+const LeaderboardTab = observer(() => {
+  const { users } = leaderboardStore;
   const currentUserId = auth.currentUser?.uid;
   const [showInfoModal, setShowInfoModal] = useState(false);
-
-  if (!users[0].username) return null;
 
   // Find current user's position
   const currentUserIndex = users.findIndex(
@@ -26,71 +17,74 @@ const LeaderboardModal = observer(() => {
   );
   const isCurrentUserInTop10 = currentUserIndex < 10;
 
+  if (!users.length || !users[0]?.username) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Ladataan tulostaulua...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <Modal
-      animationType="slide"
-      visible={isVisible}
-      onRequestClose={() => setIsVisible(false)}
-    >
-      <View style={styles.modalContainer}>
-        <Pressable onPress={() => setIsVisible(false)} style={styles.closeButton}>
-          <Ionicons name="close" size={28} color="#666" />
-        </Pressable>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Kuukauden salaattisankarit</Text>
-          </View>
-          {/* Highlight current user's position */}
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Kuukauden salaattisankarit</Text>
+        </View>
+        {/* Highlight current user's position */}
+        {currentUserIndex !== -1 && (
           <View style={styles.currentUserCard}>
             <View style={styles.rankBadge}>
               <Text style={styles.rankNumber}>#{currentUserIndex + 1}</Text>
             </View>
             <View style={styles.currentUserInfo}>
               <Text style={styles.currentUserLabel}>Oma sijoitus</Text>
-              <Text style={styles.currentUserPoints}>{users[currentUserIndex]?.points} pistettä</Text>
+              <Text style={styles.currentUserPoints}>
+                {users[currentUserIndex]?.points} pistettä
+              </Text>
             </View>
           </View>
-          <Pressable onPress={() => setShowInfoModal(true)} style={styles.infoLink}>
-            <Ionicons name="help-circle-outline" size={18} color="#37891C" />
-            <Text style={styles.infoLinkText}>Mistä voin saada pisteitä?</Text>
-          </Pressable>
-          <View style={styles.divider} />
-          <ScrollView style={{ flex: 1}} showsVerticalScrollIndicator={false}> 
-            {/* Map users by position between 1-10*/}
-            {users.slice(0, 10).map((user, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.leaderboardRow,
-                  user.uid === currentUserId && styles.currentUserHighlight,
-                ]}
-              >
+        )}
+        <Pressable onPress={() => setShowInfoModal(true)} style={styles.infoLink}>
+          <Ionicons name="help-circle-outline" size={18} color="#37891C" />
+          <Text style={styles.infoLinkText}>Mistä voin saada pisteitä?</Text>
+        </Pressable>
+        <View style={styles.divider} />
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          {/* Map users by position between 1-10 */}
+          {users.slice(0, 10).map((user, index) => (
+            <View
+              key={user.uid || index}
+              style={[
+                styles.leaderboardRow,
+                user.uid === currentUserId && styles.currentUserHighlight,
+              ]}
+            >
+              <Text style={styles.leaderboardPosition}>
+                {index + 1}. {user.username}
+              </Text>
+              <Text style={styles.leaderboardScore}>
+                {user.points} pistettä
+              </Text>
+            </View>
+          ))}
+          {/* Show current user's position if outside top 10 */}
+          {!isCurrentUserInTop10 && currentUserIndex !== -1 && (
+            <View>
+              <View style={styles.divider} />
+              <View style={[styles.leaderboardRow, styles.currentUserHighlight]}>
                 <Text style={styles.leaderboardPosition}>
-                  {index + 1}. {user.username}
+                  {currentUserIndex + 1}. {users[currentUserIndex].username}
                 </Text>
                 <Text style={styles.leaderboardScore}>
-                  {user.points} pistettä
+                  {users[currentUserIndex].points} pistettä
                 </Text>
               </View>
-            ))}
-            {/* Show current user's position if outside top 10 */}
-            {!isCurrentUserInTop10 && currentUserIndex !== -1 && (
-              <View>
-                <View style={styles.divider} />
-                <View
-                  style={[styles.leaderboardRow, styles.currentUserHighlight]}
-                >
-                  <Text style={styles.leaderboardPosition}>
-                    {currentUserIndex + 1}. {users[currentUserIndex].username}
-                  </Text>
-                  <Text style={styles.leaderboardScore}>
-                    {users[currentUserIndex].points} pistettä
-                  </Text>
-                </View>
-              </View>
-            )}
-          </ScrollView>
-        </View>
+            </View>
+          )}
+        </ScrollView>
       </View>
 
       {/* Points Info Modal */}
@@ -123,11 +117,9 @@ const LeaderboardModal = observer(() => {
               </View>
               <View style={styles.infoItemContent}>
                 <Text style={styles.infoItemTitle}>Saavuta päivätavoite</Text>
-                <Text style={styles.infoItemDescription}>Saat 5 bonuspistettä kun saavutat päivittäisen tavoitteesi</Text>
+                <Text style={styles.infoItemDescription}>Saat 3 bonuspistettä kun saavutat päivittäisen tavoitteesi</Text>
               </View>
             </View>
-
-            
 
             <Pressable onPress={() => setShowInfoModal(false)} style={styles.infoModalButton}>
               <Text style={styles.infoModalButtonText}>Selvä!</Text>
@@ -135,44 +127,31 @@ const LeaderboardModal = observer(() => {
           </View>
         </View>
       </Modal>
-    </Modal>
+    </View>
   );
 });
 
-export default LeaderboardModal;
+export default LeaderboardTab;
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    paddingTop: 60,
+    paddingTop: 20,
   },
-  closeButton: {
-    position: "absolute",
-    top: 50,
-    right: 16,
-    zIndex: 10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
+  content: {
     flex: 1,
     backgroundColor: theme.colors.background,
     width: "100%",
     padding: theme.spacing.large,
-    marginTop: 20,
   },
-  modalHeader: {
+  header: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 30,
   },
-  modalTitle: {
+  title: {
     fontSize: theme.fonts.title.fontSize,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
@@ -190,39 +169,14 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.medium,
     color: theme.colors.primary,
   },
-  leaderboardName: {
-    fontSize: theme.fonts.regular.fontSize,
-    fontFamily: theme.fontFamily.regular,
-    color: theme.colors.text,
-  },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
     fontFamily: theme.fontFamily.regular,
     color: "#666",
   },
-  podiumUsername: {
-    fontFamily: theme.fontFamily.semiBold,
-    color: theme.colors.primary,
-  },
-  podiumPoints: {
-    fontFamily: theme.fontFamily.regular,
-    color: "#666",
-  },
-  box: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
-    marginBottom: theme.spacing.medium,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
-    // elevation: 3,
-  },
   currentUserHighlight: {
     backgroundColor: "rgba(12, 76, 37, 0.1)",
     borderRadius: theme.borderRadius.medium,
-    fontWeight: "bold",
   },
   currentUserCard: {
     flexDirection: "row",
@@ -343,5 +297,15 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
   },
 });

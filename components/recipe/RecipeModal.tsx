@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     color: "#0c4c25",
+    textAlign: "center"
   },
   closeButton: {
     marginTop: 20,

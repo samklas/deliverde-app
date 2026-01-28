@@ -175,7 +175,7 @@ const ImageAnalysisModal = ({
                 <View style={styles.loadingOverlay}>
                   <ActivityIndicator size="large" color={theme.colors.primary} />
                   <Text style={styles.loadingText}>
-                    Tunnistetaan vihanneksia...
+                    Tunnistetaan kasviksia...
                   </Text>
                 </View>
               )}
@@ -329,13 +329,15 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   closeButton: {
-    padding: theme.spacing.medium,
+    padding: 14,
+    borderRadius: 14,
     alignItems: "center",
-    marginTop: theme.spacing.small,
+    marginTop: 10,
   },
   closeButtonText: {
     color: "#666",
-    fontWeight: "500",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
   permissionError: {
     backgroundColor: "#fff3e0",

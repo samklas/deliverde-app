@@ -10,9 +10,11 @@ import {
   Image,
   Alert,
   Pressable,
+  Share,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { storage, setLevelForCurrentUser } from "@/services";
+import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import DailyGoalModal from "@/components/DailyGoalModal";
@@ -20,6 +22,7 @@ import React from "react";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [goalModalVisible, setGoalModalVisible] = useState(false);
   const { avatarId, dailyTarget } = userStore;
@@ -71,6 +74,23 @@ export default function Tab() {
     }
   };
 
+  const loadInviteCode = async () => {
+    const code = await getInviteCodeForCurrentUser();
+    setInviteCode(code);
+  };
+
+  const shareInviteCode = async () => {
+    if (inviteCode) {
+      try {
+        await Share.share({
+          message: `Liity mukaan DeliVerdeen! Käytä kutsukoodiani: ${inviteCode}`,
+        });
+      } catch (error) {
+        console.error("Error sharing invite code:", error);
+      }
+    }
+  };
+
   const getAvatar = () => {
     if (avatarId === "1") {
       return require("../../assets/images/avatar2.jpg");
@@ -85,11 +105,16 @@ export default function Tab() {
 
   useEffect(() => {
     loadUsername();
+    loadInviteCode();
   }, []);
 
   return (
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.profileHeader}>
             <Image source={getAvatar()} style={styles.avatar} />
             <Text style={styles.username}>{username}</Text>
@@ -100,10 +125,24 @@ export default function Tab() {
             onPress={() => setGoalModalVisible(true)}
           >
             <Text style={styles.sectionTitle}>Päivän tavoite</Text>
-            <View style={styles.goalItem}>
+            <View style={styles.boxContent}>
               <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </View>
           </Pressable>
+
+          {inviteCode && (
+            <Pressable style={styles.box} onPress={shareInviteCode}>
+              <Text style={styles.sectionTitle}>Kutsukoodisi</Text>
+              <View style={styles.boxContent}>
+                <Text style={styles.goalText}>{inviteCode}</Text>
+                <Ionicons name="share-outline" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.helpText}>
+                Jaa tämä koodi kavereillesi ja olet automaattisesti mukana palkintoarvonnassa!
+              </Text>
+            </Pressable>
+          )}
 
           <Pressable
             style={[styles.feedbackButton, styles.box]}
@@ -121,9 +160,7 @@ export default function Tab() {
               <Text style={styles.deleteText}>Poista tili</Text>
             </Pressable>
           </View>
-        </View>
-
-        <DeleteAccountModal
+          <DeleteAccountModal
           visible={deleteModalVisible}
           onClose={() => setDeleteModalVisible(false)}
           onDeleted={handleAccountDeleted}
@@ -135,21 +172,28 @@ export default function Tab() {
           onClose={() => setGoalModalVisible(false)}
           onSave={handleSaveGoal}
         />
-      </View>
+        </ScrollView>
+
+        
+      
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    marginTop: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  scrollContent: {
+    paddingTop: 50,
+    paddingBottom: 30,
   },
   overlay: {
     flex: 1,
-    backgroundColor: theme.colors.overlay,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
     padding: theme.spacing.medium,
   },
   profileHeader: {
@@ -173,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: theme.colors.primary,
   },
-  goalItem: {
+  boxContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -182,14 +226,20 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     fontSize: 16,
   },
+  helpText: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    marginTop: 10,
+  },
   goalBox: {
     marginTop: 50,
   },
   box: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
-    marginBottom: theme.spacing.medium,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -208,9 +258,7 @@ const styles = StyleSheet.create({
   },
   logoutContainer: {
     alignItems: "center",
-    marginBottom: 30,
-    flex: 1,
-    justifyContent: "flex-end",
+    marginTop: 20,
   },
   logoutButton: {
     borderWidth: 2,

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Pressable } from "react-native";
 import Icon from "@expo/vector-icons/Ionicons";
 import { theme } from "@/theme";
 import { Recipe } from "@/types/recipe";
@@ -28,8 +28,7 @@ export default function RecipeBox({
     const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
 
     try {
-      await setDoc(favoriteRef, { addedAt: new Date() }); // Add recipe to favorites
-      console.log("Recipe added to favorites!");
+      await setDoc(favoriteRef, { addedAt: new Date() });
     } catch (error) {
       console.error("Error adding to favorites: ", error);
     }
@@ -40,65 +39,54 @@ export default function RecipeBox({
     const favoriteRef = doc(db, `users/${userId}/favoriteRecipes/${recipeId}`);
 
     try {
-      await deleteDoc(favoriteRef); // Remove recipe from favorites
-      console.log("Recipe removed from favorites!");
+      await deleteDoc(favoriteRef);
     } catch (error) {
       console.error("Error removing from favorites: ", error);
     }
   };
 
-  let isFavorite = userFavoriteRecipes.some((fav) => fav.id === recipe.id);
+  const isFavorite = userFavoriteRecipes.some((fav) => fav.id === recipe.id);
+
+  const handleFavoritePress = () => {
+    if (isFavorite) {
+      removeFromFavorites(recipe.id);
+    } else {
+      addToFavorites(recipe.id);
+    }
+  };
 
   return (
     <View>
-      <TouchableOpacity
-        key={recipe.id}
-        onPress={() => setIsRecipeModalVisible(true)}
-      >
+      <Pressable onPress={() => setIsRecipeModalVisible(true)}>
         <View style={styles.box}>
           {isRecipeOfMonth && (
             <Text style={styles.boxTitle}>Kuukauden resepti</Text>
           )}
-          <View style={styles.recipeContent}>
+
+          <View style={styles.imageContainer}>
             <Image
               style={styles.recipeImage}
               source={{ uri: recipe.imageUrl }}
             />
-            <Text style={styles.recipeTitle}>
-              {capitalizeFirstLetter(recipe.title)}
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+            <TouchableOpacity
+              style={styles.heartButton}
+              onPress={handleFavoritePress}
+              activeOpacity={0.7}
             >
-              <Text style={styles.recipeDetails}>
-                {`${
-                  recipe.details.duration
-                } min • ${capitalizeFirstLetter(
-                  recipe.details.difficultyLevel
-                )} • ${recipe.details.portionAmount} annosta`}
-              </Text>
-              <TouchableOpacity
-                style={styles.heartButton}
-                onPress={() => {
-                  isFavorite
-                    ? removeFromFavorites(recipe.id)
-                    : addToFavorites(recipe.id);
-                }}
-              >
-                <Icon
-                  name={isFavorite ? "heart" : "heart-outline"}
-                  size={30}
-                  color={"#37891C"}
-                />
-              </TouchableOpacity>
-            </View>
+              <Icon
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={24}
+                color={isFavorite ? "#37891C" : "#fff"}
+              />
+            </TouchableOpacity>
           </View>
+
+          <Text style={styles.recipeTitle}>
+            {capitalizeFirstLetter(recipe.title)}
+          </Text>
         </View>
-      </TouchableOpacity>
+      </Pressable>
+
       <RecipeModal
         selectedRecipe={recipe}
         isVisible={isRecipeModalVisible}
@@ -109,10 +97,6 @@ export default function RecipeBox({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
   box: {
     backgroundColor: "white",
     borderRadius: 16,
@@ -124,50 +108,36 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  recipeContent: {
-    alignItems: "center",
-  },
-  recipeImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
-    overflow: "hidden",
-  },
-  recipeTitle: {
-    fontSize: 18,
-    fontFamily: theme.fontFamily.semiBold,
-    color: "#333",
-    marginBottom: 4,
-  },
-  recipeDetails: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: "#666",
-  },
-  addButton: {
-    position: "absolute",
-    bottom: 30,
-    right: 30,
-    backgroundColor: "#4cd964",
-    padding: 15,
-    borderRadius: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 5,
-  },
-  addButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontFamily: theme.fontFamily.semiBold,
-  },
-  heartButton: {
-    marginLeft: 30,
-  },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
     fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
+  },
+  imageContainer: {
+    position: "relative",
+    marginBottom: 12,
+  },
+  recipeImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+  },
+  heartButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recipeTitle: {
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    textAlign: "center",
   },
 });

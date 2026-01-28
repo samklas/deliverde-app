@@ -8,11 +8,6 @@ const initRecipe: Recipe = {
   title: "",
   ingredients: [],
   instructions: "",
-  details: {
-    duration: "",
-    difficultyLevel: "",
-    portionAmount: "",
-  },
   recipeOfMonth: false,
 };
 

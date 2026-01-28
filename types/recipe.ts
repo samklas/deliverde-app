@@ -5,12 +5,5 @@ export type Recipe = {
   title: string;
   ingredients: string[];
   instructions: string;
-  details: Details;
   recipeOfMonth: boolean;
-};
-
-type Details = {
-  duration: string;
-  difficultyLevel: string;
-  portionAmount: string;
 };

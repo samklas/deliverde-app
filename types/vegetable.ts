@@ -2,6 +2,7 @@ export type Vegetable = {
   id: string;
   name: string;
   averageWeight: number;
+  category?: string;
 };
 
 export type TodayVegetable = {

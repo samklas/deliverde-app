@@ -8,8 +8,49 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { auth } from "@/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDocs, query, collection, where, updateDoc, increment } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+
+// Generate a unique 6-character invite code
+const generateInviteCode = (): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed confusing chars like 0, O, 1, I
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
+// Check if invite code already exists in database
+const isInviteCodeUnique = async (code: string): Promise<boolean> => {
+  const q = query(collection(db, "users"), where("inviteCode", "==", code));
+  const snapshot = await getDocs(q);
+  return snapshot.empty;
+};
+
+// Generate a unique invite code (retry if exists)
+const generateUniqueInviteCode = async (): Promise<string> => {
+  let code = generateInviteCode();
+  let attempts = 0;
+  while (!(await isInviteCodeUnique(code)) && attempts < 10) {
+    code = generateInviteCode();
+    attempts++;
+  }
+  return code;
+};
+
+// Increment referral count for the user who owns the invite code
+const incrementReferralCount = async (inviteCode: string): Promise<void> => {
+  const q = query(collection(db, "users"), where("inviteCode", "==", inviteCode));
+  const snapshot = await getDocs(q);
+
+  if (!snapshot.empty) {
+    const referrerDoc = snapshot.docs[0];
+    await updateDoc(doc(db, "users", referrerDoc.id), {
+      referralCount: increment(1),
+    });
+  }
+};
 import { router } from "expo-router";
 import { storage, loadAppData } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
@@ -20,6 +61,8 @@ import React from "react";
 export default function UserLevel() {
   const [username, setUsername] = useState("");
   const [avatarId, setAvatarId] = useState("");
+  const [email, setEmail] = useState("");
+  const [friendCode, setFriendCode] = useState("");
   const [level, setLevel] = useState("beginner");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,8 +71,12 @@ export default function UserLevel() {
     const loadOnboardingData = async () => {
       const savedUsername = await storage.get(STORAGE_KEYS.ONBOARDING_USERNAME);
       const savedAvatar = await storage.get(STORAGE_KEYS.ONBOARDING_AVATAR);
+      const savedEmail = await storage.get(STORAGE_KEYS.ONBOARDING_EMAIL);
+      const savedFriendCode = await storage.get(STORAGE_KEYS.ONBOARDING_FRIEND_CODE);
       if (savedUsername) setUsername(savedUsername);
       if (savedAvatar) setAvatarId(savedAvatar);
+      if (savedEmail) setEmail(savedEmail);
+      if (savedFriendCode) setFriendCode(savedFriendCode);
     };
     loadOnboardingData();
   }, []);
@@ -49,6 +96,9 @@ export default function UserLevel() {
 
     setIsLoading(true);
     try {
+      // Generate unique invite code for this user
+      const inviteCode = await generateUniqueInviteCode();
+
       await setDoc(doc(db, "users", uid), {
         username: username,
         level: level,
@@ -58,7 +108,16 @@ export default function UserLevel() {
         score: 0,
         streak: 0,
         avatarId: avatarId,
+        inviteCode: inviteCode,
+        referralCount: 0,
+        ...(email && { email: email }),
+        ...(friendCode && { referredBy: friendCode }),
       });
+
+      // Increment referral count for the user who shared the invite code
+      if (friendCode) {
+        await incrementReferralCount(friendCode);
+      }
 
       await setDoc(doc(db, "leaderboard", uid), {
         username: username,
@@ -76,11 +135,13 @@ export default function UserLevel() {
       await storage.multiRemove([
         STORAGE_KEYS.ONBOARDING_USERNAME,
         STORAGE_KEYS.ONBOARDING_AVATAR,
+        STORAGE_KEYS.ONBOARDING_EMAIL,
+        STORAGE_KEYS.ONBOARDING_FRIEND_CODE,
       ]);
 
       await loadAppData();
 
-      router.replace("/info");
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Error adding user:", error);
       Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");
@@ -95,22 +156,24 @@ export default function UserLevel() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          <Text style={styles.title}>Valitse taso</Text>
-          <Text style={styles.subtitle}>Mikä on päivittäinen tavoitteesi?</Text>
-
           {/* Progress indicator */}
           <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, styles.progressDotCompleted]} />
-            <View style={[styles.progressLine, styles.progressLineActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: "100%" }]} />
+            </View>
           </View>
+
+          <Text style={styles.title}>Valitse taso</Text>
+          <Text style={styles.subtitle}>
+            Mikä on päivittäinen tavoitteesi? Taso määrittää päivittäisen kasvistavoitteesi. Voit muuttaa tätä myöhemmin profiilissasi.
+          </Text>
 
           {/* Level Selection */}
           <View style={styles.card}>
             <LevelSelector
               selectedLevel={level}
               onSelectLevel={setLevel}
-              showHelperText={true}
+              showHelperText={false}
             />
           </View>
 
@@ -159,31 +222,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   progressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 30,
+    marginBottom: 24,
   },
-  progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  progressTrack: {
+    height: 10,
     backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
   },
-  progressDotActive: {
+  progressFill: {
+    height: "100%",
     backgroundColor: "#37891C",
-  },
-  progressDotCompleted: {
-    backgroundColor: "#37891C",
-  },
-  progressLine: {
-    width: 40,
-    height: 2,
-    backgroundColor: "#e0e0e0",
-    marginHorizontal: 8,
-  },
-  progressLineActive: {
-    backgroundColor: "#37891C",
+    borderRadius: 5,
   },
   card: {
     backgroundColor: theme.colors.background,

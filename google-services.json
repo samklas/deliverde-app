@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "6387168010",
+    "project_id": "deliverde-app",
+    "storage_bucket": "deliverde-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:6387168010:android:b506f0b4a90e4b7dcf00f3",
+        "android_client_info": {
+          "package_name": "fi.deliverde.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "6387168010-iiqrqnrpip1dnko3hh791gtn7p23peo7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fi.deliverde.app",
+            "certificate_hash": "876ecf5744774bf73605747ce804a77ed64f24cd"
+          }
+        },
+        {
+          "client_id": "6387168010-padnten9tjngu7oid20l1b57vftkbfps.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChK9wyTjn8OC5SpDPoG7QNDDhETEgrTr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "6387168010-padnten9tjngu7oid20l1b57vftkbfps.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "6387168010-giblm632ei30iot9lrtakqvonfdps8rm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "fi.deliverde.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

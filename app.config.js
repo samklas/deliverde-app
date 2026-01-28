@@ -1,6 +1,6 @@
 export default {
   expo: {
-    name: "Deliverde",
+    name: "DeliVerde",
     slug: "Deliverde",
     version: "1.0.0",
     orientation: "portrait",
@@ -18,8 +18,8 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/icon_android.png",
-        backgroundColor: "#ffffff",
+        foregroundImage: "./assets/images/icon.jpeg",
+        backgroundColor: "#5CB85C",
       },
       package: "fi.deliverde.app",
       permissions: ["android.permission.RECORD_AUDIO"],
@@ -36,7 +36,7 @@ export default {
         "expo-image-picker",
         {
           photosPermission:
-            "The app accesses your photos to let you share them with your friends.",
+            "The app accesses your photos to let you choose vegetable images from your library and analyze them with AI.",
           cameraPermission:
             "The app needs camera access to identify vegetables from photos.",
         },
@@ -52,6 +52,8 @@ export default {
           android: {
             image: "./assets/images/Deliverde_splash1.jpeg",
             resizeMode: "cover",
+            backgroundColor: "#5CB85C",
+            imageWidth: 600,
           },
         },
       ],
@@ -79,7 +81,7 @@ export default {
       },
       googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
-      openaiApiKey: process.env.OPENAI_API_KEY,
+      imageAnalysisUrl: process.env.IMAGE_ANALYSIS_URL,
     },
     owner: "smabza",
   },

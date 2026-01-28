@@ -80,11 +80,12 @@ const AddVegetablesModal = ({
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.header}>
-              <Text style={styles.title}>Lisää vihanneksia</Text>
+              <Text style={styles.title}>Lisää kasviksia</Text>
             </View>
 
             <Text style={styles.description}>
-              Etsi haluamasi vihannes tai tunnista kuvasta.
+              Etsi haluamasi kasvis tai tunnista kuvasta. Jos et löydä
+              etsimääsi, voit lisätä sen "muu" -nimikkeellä.
             </Text>
 
             {/* Search section */}
@@ -92,7 +93,7 @@ const AddVegetablesModal = ({
               <View style={styles.searchRow}>
                 <TextInput
                   style={styles.searchInput}
-                  placeholder="Etsi vihanneksia..."
+                  placeholder="Etsi kasviksia..."
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholderTextColor="#666"

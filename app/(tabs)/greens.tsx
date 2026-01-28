@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
@@ -170,7 +170,7 @@ const Tab = observer(() => {
         
         {todayVegetables.length === 0 ? (
           <Text style={styles.emptyText}>
-            Ei lisättyjä vihanneksia tälle päivälle
+            Ei lisättyjä kasviksia tälle päivälle
           </Text>
         ) : (
           <ScrollView style={styles.todayScrollView}>
@@ -202,7 +202,7 @@ const Tab = observer(() => {
         onPress={() => setIsAddModalVisible(true)}
       >
         <Ionicons name="add-circle" size={24} color="white" />
-        <Text style={styles.addButtonText}>Lisää vihanneksia</Text>
+        <Text style={styles.addButtonText}>Lisää kasviksia</Text>
       </TouchableOpacity>
 
       {/* Celebration Animation */}
