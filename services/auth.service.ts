@@ -59,6 +59,14 @@ export const getUsername = async (uid: string): Promise<string | null> => {
 };
 
 /**
+ * Check if the current user is anonymous
+ */
+export const isAnonymousUser = (): boolean => {
+  const user = auth.currentUser;
+  return user?.isAnonymous ?? false;
+};
+
+/**
  * Sign in anonymously
  */
 export const signInAnonymous = async (): Promise<AuthResult> => {

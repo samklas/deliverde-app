@@ -24,6 +24,7 @@ export {
   signInWithApple,
   signInWithGoogle,
   signInAnonymous,
+  isAnonymousUser,
   reauthenticateWithApple,
   reauthenticateWithGoogle,
   checkUserExists,

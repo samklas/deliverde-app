@@ -30,6 +30,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [anonymousModalVisible, setAnonymousModalVisible] = useState(false);
 
   const handleAuthResult = async (result: AuthResult) => {
     if (result.isNewUser) {
@@ -70,6 +71,20 @@ export default function Login() {
       if (error.code === "SIGN_IN_CANCELLED") {
         return;
       }
+      setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAnonymousSignIn = async () => {
+    setAnonymousModalVisible(false);
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+      const result = await signInAnonymous();
+      await handleAuthResult(result);
+    } catch (error) {
       setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
     } finally {
       setIsLoading(false);
@@ -126,17 +141,7 @@ export default function Login() {
 
           <Pressable
             style={styles.anonymousButton}
-            onPress={async () => {
-              try {
-                setIsLoading(true);
-                const result = await signInAnonymous();
-                await handleAuthResult(result);
-              } catch (error) {
-                setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
-              } finally {
-                setIsLoading(false);
-              }
-            }}
+            onPress={() => setAnonymousModalVisible(true)}
             disabled={isLoading}
           >
             <Text style={styles.anonymousButtonText}>
@@ -176,6 +181,36 @@ export default function Login() {
             >
               <Text style={styles.modalCloseButtonText}>Sulje</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={anonymousModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setAnonymousModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.anonymousModalContent}>
+            <Text style={styles.anonymousModalTitle}>Anonyymi käyttö</Text>
+            <Text style={styles.anonymousModalText}>
+              Jatkamalla anonyymisti voit käyttää sovellusta ilman kirjautumista. Huomioithan kuitenkin, että tällöin tietosi tallennetaan vain laitteellesi. Jos poistat sovelluksen tai vaihdat laitetta, tietosi menetetään.
+            </Text>
+            <View style={styles.anonymousModalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setAnonymousModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Peruuta</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleAnonymousSignIn}
+              >
+                <Text style={styles.confirmButtonText}>Jatka</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -312,5 +347,54 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontFamily: theme.fontFamily.semiBold,
+  },
+  anonymousModalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    width: "100%",
+  },
+  anonymousModalTitle: {
+    fontSize: 22,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.medium,
+    textAlign: "center",
+  },
+  anonymousModalText: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.regular,
+    color: theme.colors.text,
+    lineHeight: 24,
+    marginBottom: theme.spacing.medium,
+  },
+  anonymousModalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    padding: theme.spacing.small,
+    borderRadius: theme.borderRadius.medium,
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 16,
+  },
+  confirmButton: {
+    flex: 1,
+    padding: theme.spacing.small,
+    backgroundColor: "#37891C",
+    borderRadius: theme.borderRadius.medium,
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    color: "white",
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 16,
   },
 });

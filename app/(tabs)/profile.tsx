@@ -14,7 +14,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser } from "@/services";
+import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser, isAnonymousUser, deleteAccount } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import DailyGoalModal from "@/components/DailyGoalModal";
@@ -29,14 +29,22 @@ export default function Tab() {
   const router = useRouter();
 
   const handleLogout = async () => {
+    const isAnonymous = isAnonymousUser();
+
     Alert.alert(
-      "Vahvista uloskirjautuminen",
-      "Oletko varma, että haluat kirjautua ulos?",
+      isAnonymous ? "Vahvista uloskirjautuminen" : "Vahvista uloskirjautuminen",
+      isAnonymous
+        ? "Olet kirjautunut anonyymisti. Jos kirjaudut ulos, kaikki tietosi poistetaan pysyvästi. Haluatko jatkaa?"
+        : "Oletko varma, että haluat kirjautua ulos?",
       [
         {
           text: "Kyllä",
           onPress: async () => {
             try {
+              if (isAnonymous) {
+                // Delete account and data for anonymous users
+                await deleteAccount();
+              }
               await storage.clearUserData();
               auth.signOut();
             } catch (error) {

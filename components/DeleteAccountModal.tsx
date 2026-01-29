@@ -14,6 +14,7 @@ import {
   reauthenticateWithApple,
   reauthenticateWithGoogle,
   deleteAccount,
+  isAnonymousUser,
   storage,
 } from "@/services";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,7 +35,23 @@ export default function DeleteAccountModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
+    // Anonymous users don't need re-authentication
+    if (isAnonymousUser()) {
+      setIsLoading(true);
+      try {
+        await deleteAccount();
+        await storage.clearUserData();
+        onDeleted();
+      } catch (error) {
+        console.error("Error during account deletion:", error);
+        setErrorMessage("Tilin poistaminen epäonnistui. Yritä uudelleen.");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     setStep("reauth");
     setErrorMessage("");
   };
@@ -104,20 +121,35 @@ export default function DeleteAccountModal({
                 poistetaan pysyvästi, eikä tätä toimintoa voi perua.
               </Text>
 
-              <View style={styles.buttonContainer}>
-                <Pressable
-                  style={styles.cancelButton}
-                  onPress={handleClose}
-                >
-                  <Text style={styles.cancelButtonText}>Peruuta</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.deleteButton}
-                  onPress={handleConfirmDelete}
-                >
-                  <Text style={styles.deleteButtonText}>Jatka</Text>
-                </Pressable>
-              </View>
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator
+                    size="large"
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.loadingText}>Poistetaan tiliä...</Text>
+                </View>
+              ) : (
+                <>
+                  {errorMessage ? (
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                  ) : null}
+                  <View style={styles.buttonContainer}>
+                    <Pressable
+                      style={styles.cancelButton}
+                      onPress={handleClose}
+                    >
+                      <Text style={styles.cancelButtonText}>Peruuta</Text>
+                    </Pressable>
+                    <Pressable
+                      style={styles.deleteButton}
+                      onPress={handleConfirmDelete}
+                    >
+                      <Text style={styles.deleteButtonText}>Jatka</Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
             </>
           ) : (
             <>
