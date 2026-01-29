@@ -8,7 +8,7 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: "fi.deliverde.app",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,

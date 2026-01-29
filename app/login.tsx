@@ -19,6 +19,7 @@ import {
   loadAppData,
   signInWithApple,
   signInWithGoogle,
+  signInAnonymous,
   type AuthResult,
 } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
@@ -120,6 +121,28 @@ export default function Login() {
               </Text>
             </Pressable>
           )}
+
+          <Text style={styles.orText}>Tai</Text>
+
+          <Pressable
+            style={styles.anonymousButton}
+            onPress={async () => {
+              try {
+                setIsLoading(true);
+                const result = await signInAnonymous();
+                await handleAuthResult(result);
+              } catch (error) {
+                setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            disabled={isLoading}
+          >
+            <Text style={styles.anonymousButtonText}>
+              {isLoading ? "Kirjaudutaan..." : "Jatka anonyymisti"}
+            </Text>
+          </Pressable>
 
           {errorMessage ? (
             <Text style={styles.errorText}>{errorMessage}</Text>
@@ -266,5 +289,28 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: theme.fontFamily.semiBold,
     fontSize: 16,
+  },
+  orText: {
+    color: "white",
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 14,
+    marginVertical: 16,
+    textAlign: "center",
+  },
+  anonymousButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+    height: 48,
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  anonymousButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

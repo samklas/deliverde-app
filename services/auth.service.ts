@@ -2,6 +2,7 @@ import { auth, db } from "@/firebaseConfig";
 import {
   signInWithCredential,
   reauthenticateWithCredential,
+  signInAnonymously,
   OAuthProvider,
   GoogleAuthProvider,
   deleteUser,
@@ -55,6 +56,23 @@ export const getUsername = async (uid: string): Promise<string | null> => {
     return document.data().username as string;
   }
   return null;
+};
+
+/**
+ * Sign in anonymously
+ */
+export const signInAnonymous = async (): Promise<AuthResult> => {
+  const userCredential = await signInAnonymously(auth);
+  const uid = userCredential.user.uid;
+
+  const userExists = await checkUserExists(uid);
+
+  if (userExists) {
+    const username = await getUsername(uid);
+    return { uid, isNewUser: false, username: username || undefined };
+  }
+
+  return { uid, isNewUser: true };
 };
 
 /**

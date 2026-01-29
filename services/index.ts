@@ -23,6 +23,7 @@ export { loadAppData } from "./appData.service";
 export {
   signInWithApple,
   signInWithGoogle,
+  signInAnonymous,
   reauthenticateWithApple,
   reauthenticateWithGoogle,
   checkUserExists,
