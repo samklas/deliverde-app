@@ -150,7 +150,7 @@ const Tab = observer(() => {
     <View style={styles.container}>
       {/* Today box */}
       <View style={styles.todayBox}>
-        <Text style={styles.title}>Tänään</Text>
+        <Text style={styles.title}>Päivän tavoite</Text>
         <View style={styles.progressWrapper}>
           <CircularProgress
             size={120}
