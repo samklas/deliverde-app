@@ -9,8 +9,9 @@ import {
   Platform,
   Modal,
   TouchableOpacity,
-  ScrollView,
+  ActivityIndicator,
 } from "react-native";
+import { WebView } from "react-native-webview";
 import { AntDesign } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import {
@@ -134,59 +135,18 @@ export default function Login() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tietosuojaseloste</Text>
-            <ScrollView style={styles.privacyScrollView}>
-              <Text style={styles.privacyDate}>Viimeksi päivitetty: 28.1.2026</Text>
-
-              <Text style={styles.privacySectionTitle}>1. Rekisterinpitäjä</Text>
-              <Text style={styles.privacyText}>
-                DeliVerde Puutarhat Oy{"\n"}
-                Sähköposti: tilaus@deliverde.fi
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>2. Sovelluksen tarkoitus</Text>
-              <Text style={styles.privacyText}>
-                DeliVerde on mobiilisovellus, jonka avulla käyttäjät voivat seurata kasvisten kulutustaan, selata reseptejä ja osallistua kilpailuihin.
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>3. Kerättävät henkilötiedot</Text>
-              <Text style={styles.privacyText}>
-                Sovelluksen käyttö ei edellytä henkilötietojen antamista. Käyttäjä voi halutessaan antaa:{"\n\n"}
-                • sähköpostiosoitteen{"\n"}
-                • valokuvia
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>4. Henkilötietojen käyttötarkoitus</Text>
-              <Text style={styles.privacyText}>
-                Henkilötietoja käytetään ainoastaan:{"\n\n"}
-                • kilpailuihin ja arvontoihin osallistumisen mahdollistamiseen{"\n"}
-                • sovelluksen toiminnallisuuksien toteuttamiseen käyttäjän aloitteesta{"\n\n"}
-                Tietoja ei käytetä markkinointiin.
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>5. Käsittelyn oikeusperuste</Text>
-              <Text style={styles.privacyText}>
-                Henkilötietojen käsittely perustuu käyttäjän antamaan suostumukseen (GDPR 6.1.a).
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>6. Tietojen säilytys</Text>
-              <Text style={styles.privacyText}>
-                Henkilötietoja säilytetään vain niin kauan kuin se on tarpeellista käyttötarkoituksen toteuttamiseksi tai kunnes käyttäjä pyytää tietojensa poistamista.
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>7. Tietojen käsittelijät ja siirrot</Text>
-              <Text style={styles.privacyText}>
-                Henkilötietoja käsitellään sovelluksen teknisen toteutuksen ja ylläpidon yhteydessä luotettavien palveluntarjoajien toimesta. Tietoja voidaan käsitellä EU:ssa tai EU:n ulkopuolella GDPR:n edellyttämiä suojatoimia noudattaen.
-              </Text>
-
-              <Text style={styles.privacySectionTitle}>8. Käyttäjän oikeudet</Text>
-              <Text style={styles.privacyText}>
-                Käyttäjällä on oikeus:{"\n\n"}
-                • tarkastaa itseään koskevat tiedot{"\n"}
-                • pyytää tietojen oikaisua tai poistamista{"\n\n"}
-                Pidätämme oikeuden päivittää tätä tietosuojaselostetta. Muutoksista ilmoitetaan sovelluksessa.
-              </Text>
-            </ScrollView>
+            <View style={styles.webViewContainer}>
+              <WebView
+                source={{ uri: "https://deliverde-shop.myshopify.com/policies/privacy-policy" }}
+                style={styles.webView}
+                startInLoadingState={true}
+                renderLoading={() => (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                  </View>
+                )}
+              />
+            </View>
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={() => setPrivacyModalVisible(false)}
@@ -277,34 +237,23 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "80%",
   },
-  modalTitle: {
-    fontSize: 22,
-    fontFamily: theme.fontFamily.bold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.medium,
-    textAlign: "center",
+  webViewContainer: {
+    flex: 1,
+    borderRadius: theme.borderRadius.medium,
+    overflow: "hidden",
   },
-  privacyScrollView: {
+  webView: {
     flex: 1,
   },
-  privacyDate: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.medium,
-  },
-  privacySectionTitle: {
-    fontSize: 16,
-    fontFamily: theme.fontFamily.bold,
-    color: theme.colors.text,
-    marginTop: theme.spacing.medium,
-    marginBottom: theme.spacing.small,
-  },
-  privacyText: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.regular,
-    color: theme.colors.text,
-    lineHeight: 22,
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
   },
   modalCloseButton: {
     marginTop: theme.spacing.medium,
