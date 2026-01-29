@@ -154,6 +154,8 @@ export default function UserLevel() {
       <View style={styles.overlay}>
         <ScrollView
           showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
           {/* Progress indicator */}
@@ -199,13 +201,16 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: theme.colors.overlay,
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  scrollView: {
+    flex: 1,
+    width: "100%",
   },
   scrollContent: {
     padding: theme.spacing.medium,
     paddingTop: 60,
     paddingBottom: 40,
+    width: "100%",
   },
   title: {
     fontSize: 32,

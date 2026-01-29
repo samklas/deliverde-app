@@ -31,7 +31,7 @@ const LeaderboardTab = observer(() => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Kuukauden salaattisankarit</Text>
+          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>Kuukauden salaattisankarit</Text>
         </View>
         {/* Highlight current user's position */}
         {currentUserIndex !== -1 && (

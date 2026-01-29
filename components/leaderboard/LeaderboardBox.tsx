@@ -19,7 +19,7 @@ const LeaderboardBox = observer(() => {
         <View style={styles.headerRow}>
           <View style={styles.titleContainer}>
             
-            <Text style={styles.boxTitle}>Kuukauden salaattisankarit</Text>
+            <Text style={styles.boxTitle} numberOfLines={2} adjustsFontSizeToFit>Kuukauden salaattisankarit</Text>
           </View>
         </View>
         <View style={styles.leaderboardList}>

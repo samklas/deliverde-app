@@ -63,12 +63,14 @@ export default function Info() {
             </View>
           ))}
         </View>
+      </ScrollView>
 
-        {/* Continue button */}
+      {/* Continue button - fixed at bottom */}
+      <View style={styles.buttonContainer}>
         <Pressable style={styles.continueButton} onPress={handleContinue}>
           <Text style={styles.continueButtonText}>Jatka</Text>
         </Pressable>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: theme.spacing.medium,
     paddingTop: 100,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   title: {
     fontSize: 32,
@@ -113,7 +115,6 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     gap: 12,
-    marginBottom: 24,
   },
   infoCard: {
     backgroundColor: theme.colors.background,
@@ -155,6 +156,10 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     color: "#666",
     lineHeight: 20,
+  },
+  buttonContainer: {
+    padding: theme.spacing.medium,
+    paddingBottom: 40,
   },
   continueButton: {
     backgroundColor: "#37891C",

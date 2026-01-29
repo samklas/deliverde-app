@@ -38,7 +38,7 @@ const LeaderboardModal = observer(() => {
         </Pressable>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Kuukauden salaattisankarit</Text>
+            <Text style={styles.modalTitle} numberOfLines={2} adjustsFontSizeToFit>Kuukauden salaattisankarit</Text>
           </View>
           {/* Highlight current user's position */}
           <View style={styles.currentUserCard}>
