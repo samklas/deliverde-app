@@ -26,8 +26,10 @@ import { STORAGE_KEYS } from "@/constants";
 import { theme } from "@/theme";
 import React from "react";
 
+type LoadingMethod = "apple" | "google" | "anonymous" | null;
+
 export default function Login() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMethod, setLoadingMethod] = useState<LoadingMethod>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [anonymousModalVisible, setAnonymousModalVisible] = useState(false);
@@ -47,7 +49,7 @@ export default function Login() {
 
   const handleAppleSignIn = async () => {
     try {
-      setIsLoading(true);
+      setLoadingMethod("apple");
       setErrorMessage("");
       const result = await signInWithApple();
       await handleAuthResult(result);
@@ -57,13 +59,13 @@ export default function Login() {
       }
       setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
     } finally {
-      setIsLoading(false);
+      setLoadingMethod(null);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      setIsLoading(true);
+      setLoadingMethod("google");
       setErrorMessage("");
       const result = await signInWithGoogle();
       await handleAuthResult(result);
@@ -73,21 +75,21 @@ export default function Login() {
       }
       setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
     } finally {
-      setIsLoading(false);
+      setLoadingMethod(null);
     }
   };
 
   const handleAnonymousSignIn = async () => {
     setAnonymousModalVisible(false);
     try {
-      setIsLoading(true);
+      setLoadingMethod("anonymous");
       setErrorMessage("");
       const result = await signInAnonymous();
       await handleAuthResult(result);
     } catch (error) {
       setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
     } finally {
-      setIsLoading(false);
+      setLoadingMethod(null);
     }
   };
 
@@ -128,11 +130,11 @@ export default function Login() {
             <Pressable
               style={styles.googleButton}
               onPress={handleGoogleSignIn}
-              disabled={isLoading}
+              disabled={loadingMethod !== null}
             >
               <AntDesign name="google" size={20} color="white" style={styles.googleIcon} />
               <Text style={styles.googleButtonText}>
-                {isLoading ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
+                {loadingMethod === "google" ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
               </Text>
             </Pressable>
           )}
@@ -142,10 +144,10 @@ export default function Login() {
           <Pressable
             style={styles.anonymousButton}
             onPress={() => setAnonymousModalVisible(true)}
-            disabled={isLoading}
+            disabled={loadingMethod !== null}
           >
             <Text style={styles.anonymousButtonText}>
-              {isLoading ? "Kirjaudutaan..." : "Jatka anonyymisti"}
+              {loadingMethod === "anonymous" ? "Kirjaudutaan..." : "Jatka anonyymisti"}
             </Text>
           </Pressable>
 
