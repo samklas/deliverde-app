@@ -22,8 +22,8 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/icon.jpeg",
-        backgroundColor: "#5CB85C",
+        foregroundImage: "./assets/images/logo.png",
+        backgroundColor: "#37891C",
       },
       package: "fi.deliverde.app",
       permissions: [],
@@ -54,10 +54,9 @@ export default {
             enableFullScreenImage_legacy: true,
           },
           android: {
-            image: "./assets/images/Deliverde_splash1.jpeg",
+            image: "./assets/images/logo.png",
             resizeMode: "cover",
-            backgroundColor: "#5CB85C",
-            imageWidth: 600,
+            backgroundColor: "#37891C",
           },
         },
       ],
