@@ -22,8 +22,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo.png",
-        backgroundColor: "#37891C",
+        foregroundImage: "./assets/images/android_icon.png",
       },
       package: "fi.deliverde.app",
       permissions: [],
