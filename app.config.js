@@ -53,7 +53,7 @@ export default {
             enableFullScreenImage_legacy: true,
           },
           android: {
-            image: "./assets/images/logo.png",
+            image: "./assets/images/logo_nav.png",
             resizeMode: "cover",
             backgroundColor: "#37891C",
           },
