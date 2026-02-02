@@ -22,7 +22,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/android_icon.png",
+        foregroundImage: "./assets/images/android_icon_deliverde.png",
       },
       package: "fi.deliverde.app",
       permissions: [],
