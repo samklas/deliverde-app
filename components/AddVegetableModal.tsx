@@ -5,7 +5,7 @@ import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { Picker } from "@react-native-picker/picker";
 import { observer } from "mobx-react-lite";
 import userStore from "@/stores/userStore";
-import { setDailyTotalForCurrentUser } from "@/services";
+import { setDailyTotalForCurrentUser, updateAllGroupLeaderboards } from "@/services";
 
 type Props = {
   isVisible: boolean;
@@ -32,6 +32,14 @@ const AddVegetableModal = observer(
 
       setDailyTotal(dailyTotal + grams);
       setDailyTotalForCurrentUser(dailyTotal + grams);
+
+      // Update group leaderboards with points (1 point per 100g)
+      const pointsToAdd = Math.floor(grams / 100);
+      if (pointsToAdd > 0) {
+        updateAllGroupLeaderboards(pointsToAdd).catch((error) => {
+          console.error("Error updating group leaderboards:", error);
+        });
+      }
 
       if (vegetable) {
         // Add to today's vegetables

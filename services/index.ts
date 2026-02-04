@@ -34,3 +34,16 @@ export {
 } from "./auth.service";
 
 export { analyzeVegetableImage } from "./vision.service";
+
+export {
+  createGroup,
+  joinGroup,
+  leaveGroup,
+  deleteGroup,
+  getUserGroups,
+  getGroup,
+  getGroupMembers,
+  getGroupLeaderboard,
+  getGroupLeaderboardEntries,
+  updateAllGroupLeaderboards,
+} from "./groups.service";

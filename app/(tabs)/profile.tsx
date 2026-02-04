@@ -153,6 +153,21 @@ export default function Tab() {
           )}
 
           <Pressable
+            style={[styles.box, styles.groupsBox]}
+            onPress={() => router.push("/groups" as any)}
+          >
+            <View style={styles.groupsBoxContent}>
+              <View style={styles.groupsTextContainer}>
+                <Text style={styles.sectionTitle}>Omat ryhmät</Text>
+                <Text style={styles.helpText}>
+                  Luo ryhmiä ja kilpaile kavereiden kanssa!
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
+            </View>
+          </Pressable>
+
+          <Pressable
             style={[styles.feedbackButton, styles.box]}
             onPress={() => router.push("/feedback")}
           >
@@ -290,5 +305,24 @@ const styles = StyleSheet.create({
   deleteText: {
     color: theme.colors.error,
     fontFamily: theme.fontFamily.medium,
+  },
+  groupsBox: {
+    marginTop: 0,
+  },
+  groupsBoxContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  groupsIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  groupsTextContainer: {
+    flex: 1,
   },
 });
