@@ -139,19 +139,6 @@ export default function Tab() {
             </View>
           </Pressable>
 
-          {inviteCode && (
-            <Pressable style={styles.box} onPress={shareInviteCode}>
-              <Text style={styles.sectionTitle}>Kutsukoodisi</Text>
-              <View style={styles.boxContent}>
-                <Text style={styles.goalText}>{inviteCode}</Text>
-                <Ionicons name="share-outline" size={20} color={theme.colors.primary} />
-              </View>
-              <Text style={styles.helpText}>
-                Jaa tämä koodi kavereillesi ja olet automaattisesti mukana palkintoarvonnassa!
-              </Text>
-            </Pressable>
-          )}
-
           <Pressable
             style={[styles.box, styles.groupsBox]}
             onPress={() => router.push("/groups" as any)}
@@ -166,6 +153,19 @@ export default function Tab() {
               <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </View>
           </Pressable>
+
+          {inviteCode && (
+            <Pressable style={styles.box} onPress={shareInviteCode}>
+              <Text style={styles.sectionTitle}>Kutsukoodisi</Text>
+              <View style={styles.boxContent}>
+                <Text style={styles.goalText}>{inviteCode}</Text>
+                <Ionicons name="share-outline" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.helpText}>
+                Jaa tämä koodi kavereillesi ja olet automaattisesti mukana palkintoarvonnassa!
+              </Text>
+            </Pressable>
+          )}
 
           <Pressable
             style={[styles.feedbackButton, styles.box]}
