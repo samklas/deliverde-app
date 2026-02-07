@@ -5,8 +5,6 @@ import {
   StyleSheet,
   TextInput,
   Pressable,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Alert,
   ActivityIndicator,
@@ -60,15 +58,13 @@ export default function CreateGroupScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets
       >
         <View style={styles.iconContainer}>
           <Ionicons name="people" size={48} color="#37891C" />
@@ -83,12 +79,12 @@ export default function CreateGroupScreen() {
           <Text style={styles.label}>Ryhmän nimi *</Text>
           <TextInput
             style={styles.input}
-            placeholder="esim. Perheen kasvishaaste"
+            placeholder="Ryhmän nimi..."
             placeholderTextColor="#999"
             value={name}
             onChangeText={setName}
             maxLength={30}
-            autoFocus
+            autoFocus={false}
           />
 
           <Text style={styles.label}>Kuvaus (valinnainen)</Text>
@@ -119,7 +115,7 @@ export default function CreateGroupScreen() {
           )}
         </Pressable>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

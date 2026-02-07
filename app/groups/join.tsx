@@ -5,8 +5,6 @@ import {
   StyleSheet,
   TextInput,
   Pressable,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Alert,
   ActivityIndicator,
@@ -63,15 +61,13 @@ export default function JoinGroupScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets
       >
         <View style={styles.iconContainer}>
           <Ionicons name="enter" size={48} color="#37891C" />
@@ -93,7 +89,7 @@ export default function JoinGroupScreen() {
             autoCapitalize="characters"
             autoCorrect={false}
             maxLength={6}
-            autoFocus
+            autoFocus={false}
           />
           <Text style={styles.codeHint}>Syötä 6-merkkinen koodi</Text>
         </View>
@@ -116,7 +112,7 @@ export default function JoinGroupScreen() {
           )}
         </Pressable>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
