@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -17,20 +17,15 @@ import { auth } from "@/firebaseConfig";
 import {
   getGroup,
   getGroupMembers,
-  getGroupLeaderboard,
-  getGroupLeaderboardEntries,
   leaveGroup,
   deleteGroup,
 } from "@/services";
 import {
   Group,
   GroupMember,
-  GroupLeaderboard as GroupLeaderboardType,
-  GroupLeaderboardEntry,
 } from "@/types/groups";
 import groupsStore from "@/stores/groupsStore";
 import GroupMembersList from "@/components/groups/GroupMembersList";
-import GroupLeaderboard from "@/components/groups/GroupLeaderboard";
 
 export default function GroupDetailScreen() {
   const { groupId } = useLocalSearchParams<{ groupId: string }>();
@@ -39,8 +34,6 @@ export default function GroupDetailScreen() {
 
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
-  const [leaderboard, setLeaderboard] = useState<GroupLeaderboardType | null>(null);
-  const [leaderboardEntries, setLeaderboardEntries] = useState<GroupLeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -50,21 +43,13 @@ export default function GroupDetailScreen() {
     if (!groupId) return;
 
     try {
-      const [groupData, membersData, leaderboardData] = await Promise.all([
+      const [groupData, membersData] = await Promise.all([
         getGroup(groupId),
         getGroupMembers(groupId),
-        getGroupLeaderboard(groupId),
       ]);
 
       setGroup(groupData);
       setMembers(membersData);
-      setLeaderboard(leaderboardData);
-
-      // Load leaderboard entries
-      if (leaderboardData) {
-        const entries = await getGroupLeaderboardEntries(groupId, leaderboardData.id);
-        setLeaderboardEntries(entries);
-      }
     } catch (error) {
       console.error("Error loading group:", error);
       Alert.alert("Virhe", "Ryhmän tietojen lataaminen epäonnistui");
@@ -204,25 +189,6 @@ export default function GroupDetailScreen() {
             </View>
           </Pressable>
 
-          {/* Leaderboard section */}
-          {leaderboard && (
-            <View style={styles.section}>
-              <GroupLeaderboard
-                leaderboard={leaderboard}
-                entries={leaderboardEntries}
-                currentUserId={currentUserId}
-              />
-            </View>
-          )}
-
-          {/* Points info */}
-          <View style={styles.infoBox}>
-            <Ionicons name="information-circle-outline" size={20} color="#37891C" />
-            <Text style={styles.infoText}>
-              Saat pisteitä kirjaamalla kasviksia. 1 piste per 100g kasviksia.
-            </Text>
-          </View>
-
           {/* Members section */}
           <View style={styles.section}>
             <GroupMembersList members={members} currentUserId={currentUserId} />
@@ -350,22 +316,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 16,
-  },
-  infoBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "rgba(55, 137, 28, 0.08)",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
-    gap: 10,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    fontFamily: theme.fontFamily.regular,
-    color: "#666",
-    lineHeight: 18,
   },
   actions: {
     marginTop: 16,
