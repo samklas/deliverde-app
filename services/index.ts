@@ -45,5 +45,4 @@ export {
   getGroupMembers,
   getGroupLeaderboard,
   getGroupLeaderboardEntries,
-  updateAllGroupLeaderboards,
 } from "./groups.service";

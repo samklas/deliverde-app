@@ -15,7 +15,7 @@ import { VegetableAnalysisResult, MatchedVegetable } from "@/types/vision";
 import { matchVegetableToDatabase } from "@/utils/vegetableMatcher";
 import { observer } from "mobx-react-lite";
 import userStore from "@/stores/userStore";
-import { setDailyTotalForCurrentUser, updateAllGroupLeaderboards } from "@/services";
+import { setDailyTotalForCurrentUser } from "@/services";
 
 type Props = {
   isVisible: boolean;
@@ -82,14 +82,6 @@ const AnalysisResultsModal = observer(
 
       setDailyTotal(newDailyTotal);
       setDailyTotalForCurrentUser(newDailyTotal);
-
-      // Update group leaderboards with points (1 point per 100g)
-      const pointsToAdd = Math.floor(roundedGrams / 100);
-      if (pointsToAdd > 0) {
-        updateAllGroupLeaderboards(pointsToAdd).catch((error) => {
-          console.error("Error updating group leaderboards:", error);
-        });
-      }
 
       // Add to today's vegetables and update last used
       const selectedItems = matchedVegetables.filter(
