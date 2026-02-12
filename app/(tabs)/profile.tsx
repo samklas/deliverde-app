@@ -129,17 +129,6 @@ export default function Tab() {
           </View>
 
           <Pressable
-            style={[styles.box, styles.goalBox]}
-            onPress={() => setGoalModalVisible(true)}
-          >
-            <Text style={styles.sectionTitle}>Päivän tavoite</Text>
-            <View style={styles.boxContent}>
-              <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
-              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
-            </View>
-          </Pressable>
-
-          <Pressable
             style={[styles.box, styles.groupsBox]}
             onPress={() => router.push("/groups" as any)}
           >
@@ -150,6 +139,17 @@ export default function Tab() {
                   Luo ryhmiä ja kilpaile kavereiden kanssa!
                 </Text>
               </View>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
+            </View>
+          </Pressable>
+
+          <Pressable
+            style={[styles.box, styles.goalBox]}
+            onPress={() => setGoalModalVisible(true)}
+          >
+            <Text style={styles.sectionTitle}>Päivän tavoite</Text>
+            <View style={styles.boxContent}>
+              <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
               <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </View>
           </Pressable>

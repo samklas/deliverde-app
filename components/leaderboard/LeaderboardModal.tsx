@@ -282,7 +282,15 @@ const LeaderboardModal = observer(() => {
         {renderTabBar()}
         <View style={styles.modalContent}>
           {activeTab === "groups" ? (
-            renderGroupsTab()
+            <>
+              <View style={styles.groupInfoBanner}>
+                <Ionicons name="information-circle-outline" size={18} color="#666" />
+                <Text style={styles.groupInfoText}>
+                  Voit hallita ryhmiäsi Profiili-välilehdellä.
+                </Text>
+              </View>
+              {renderGroupsTab()}
+            </>
           ) : (
             <>
               <View style={styles.modalHeader}>
@@ -672,6 +680,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: theme.fontFamily.medium,
     color: "#37891C",
+  },
+  groupInfoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.04)",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: 16,
+    gap: 8,
+  },
+  groupInfoText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
   },
   emptyContainer: {
     flex: 1,
