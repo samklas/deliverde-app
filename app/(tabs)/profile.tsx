@@ -134,7 +134,7 @@ export default function Tab() {
           >
             <View style={styles.groupsBoxContent}>
               <View style={styles.groupsTextContainer}>
-                <Text style={styles.sectionTitle}>Omat ryhmät</Text>
+                <Text style={styles.sectionTitle}>Ryhmät</Text>
                 <Text style={styles.helpText}>
                   Luo ryhmiä ja kilpaile kavereiden kanssa!
                 </Text>
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   goalBox: {
-    marginTop: 50,
+    marginTop: 0,
   },
   box: {
     backgroundColor: "white",
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.medium,
   },
   groupsBox: {
-    marginTop: 0,
+    marginTop: 50,
   },
   groupsBoxContent: {
     flexDirection: "row",

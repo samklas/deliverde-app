@@ -292,7 +292,15 @@ const LeaderboardTab = observer(() => {
       {renderTabBar()}
       <View style={styles.content}>
         {activeTab === "groups" ? (
-          renderGroupsTab()
+          <>
+            <View style={styles.infoLink}>
+              <Ionicons name="information-circle-outline" size={18} color="#37891C" />
+              <Text style={styles.infoLinkText}>
+                Voit hallita ryhmiäsi Profiili-välilehdellä.
+              </Text>
+            </View>
+            {renderGroupsTab()}
+          </>
         ) : (
           <>
             <View style={styles.header}>

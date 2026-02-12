@@ -283,9 +283,9 @@ const LeaderboardModal = observer(() => {
         <View style={styles.modalContent}>
           {activeTab === "groups" ? (
             <>
-              <View style={styles.groupInfoBanner}>
-                <Ionicons name="information-circle-outline" size={18} color="#666" />
-                <Text style={styles.groupInfoText}>
+              <View style={styles.infoLink}>
+                <Ionicons name="information-circle-outline" size={18} color="#37891C" />
+                <Text style={styles.infoLinkText}>
                   Voit hallita ryhmiäsi Profiili-välilehdellä.
                 </Text>
               </View>
@@ -680,22 +680,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: theme.fontFamily.medium,
     color: "#37891C",
-  },
-  groupInfoBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.04)",
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    marginTop: 16,
-    gap: 8,
-  },
-  groupInfoText: {
-    flex: 1,
-    fontSize: 13,
-    fontFamily: theme.fontFamily.regular,
-    color: "#666",
   },
   emptyContainer: {
     flex: 1,
