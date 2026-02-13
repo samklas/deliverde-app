@@ -4,7 +4,7 @@ import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import leaderboardStore from "@/stores/leaderboardStore";
 import { auth } from "@/firebaseConfig";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { getUserGroups, getGroupLeaderboard, getGroupLeaderboardEntries } from "@/services";
 import { GroupSummary, GroupLeaderboard as GroupLeaderboardType, GroupLeaderboardEntry } from "@/types/groups";
@@ -19,12 +19,12 @@ const LeaderboardTab = observer(() => {
 
   // Groups tab state
   const [groups, setGroups] = useState<GroupSummary[]>([]);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [showGroupLeaderboardModal, setShowGroupLeaderboardModal] = useState(false);
+  const [modalGroupId, setModalGroupId] = useState<string | null>(null);
   const [groupLeaderboard, setGroupLeaderboard] = useState<GroupLeaderboardType | null>(null);
   const [groupEntries, setGroupEntries] = useState<GroupLeaderboardEntry[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
-  const [showGroupPicker, setShowGroupPicker] = useState(false);
 
   // Load groups when groups tab is active
   useFocusEffect(
@@ -40,10 +40,6 @@ const LeaderboardTab = observer(() => {
     try {
       const userGroups = await getUserGroups();
       setGroups(userGroups);
-      // Auto-select first group if available and none selected
-      if (userGroups.length > 0 && !selectedGroupId) {
-        setSelectedGroupId(userGroups[0].id);
-      }
     } catch (error) {
       console.error("Error loading groups:", error);
     } finally {
@@ -51,12 +47,13 @@ const LeaderboardTab = observer(() => {
     }
   };
 
-  // Load leaderboard when group is selected
-  useEffect(() => {
-    if (selectedGroupId) {
-      loadGroupLeaderboard(selectedGroupId);
-    }
-  }, [selectedGroupId]);
+  const openGroupModal = (groupId: string) => {
+    setModalGroupId(groupId);
+    setGroupLeaderboard(null);
+    setGroupEntries([]);
+    setShowGroupLeaderboardModal(true);
+    loadGroupLeaderboard(groupId);
+  };
 
   const loadGroupLeaderboard = async (groupId: string) => {
     setIsLoadingLeaderboard(true);
@@ -80,10 +77,6 @@ const LeaderboardTab = observer(() => {
   );
   const isCurrentUserInTop10 = currentUserIndex < 10;
 
-  // Group leaderboard current user position
-  const groupUserIndex = groupEntries.findIndex((e) => e.uid === currentUserId);
-  const isGroupUserInTop10 = groupUserIndex >= 0 && groupUserIndex < 10;
-
   const renderTabBar = () => (
     <View style={styles.tabButtons}>
       <Pressable
@@ -102,79 +95,13 @@ const LeaderboardTab = observer(() => {
         }}
       >
         <Text style={[styles.tabText, activeTab === "groups" && styles.activeText]}>
-          Omat ryhmät
+          Ryhmät
         </Text>
       </Pressable>
     </View>
   );
 
-  const selectedGroup = groups.find((g) => g.id === selectedGroupId);
-
-  const renderGroupSelector = () => {
-    if (groups.length === 0) return null;
-
-    return (
-      <View style={styles.groupList}>
-        {/* Selected group card */}
-        {selectedGroup && (
-          <View style={[styles.groupCard, styles.selectedGroupCard]}>
-            <View style={styles.groupIconContainer}>
-              <Ionicons name="people" size={24} color="#37891C" />
-            </View>
-            <View style={styles.groupCardContent}>
-              <Text style={styles.groupCardName} numberOfLines={1}>
-                {selectedGroup.name}
-              </Text>
-              <Text style={styles.groupCardMembers}>
-                {selectedGroup.memberCount} {selectedGroup.memberCount === 1 ? "jäsen" : "jäsentä"}
-              </Text>
-            </View>
-            <Ionicons name="checkmark-circle" size={22} color="#37891C" />
-          </View>
-        )}
-
-        {/* Toggle button to show/hide other groups */}
-        {groups.length > 1 && (
-          <Pressable
-            style={styles.changeGroupButton}
-            onPress={() => setShowGroupPicker(!showGroupPicker)}
-          >
-            <Ionicons name={showGroupPicker ? "chevron-up" : "swap-horizontal"} size={18} color="#37891C" />
-            <Text style={styles.changeGroupText}>
-              {showGroupPicker ? "Piilota" : "Vaihda ryhmää"}
-            </Text>
-          </Pressable>
-        )}
-
-        {/* Expandable list of other groups */}
-        {showGroupPicker &&
-          groups
-            .filter((g) => g.id !== selectedGroupId)
-            .map((group) => (
-              <Pressable
-                key={group.id}
-                style={styles.groupCard}
-                onPress={() => {
-                  setSelectedGroupId(group.id);
-                  setShowGroupPicker(false);
-                }}
-              >
-                <View style={styles.groupIconContainer}>
-                  <Ionicons name="people" size={24} color="#37891C" />
-                </View>
-                <View style={styles.groupCardContent}>
-                  <Text style={styles.groupCardName} numberOfLines={1}>
-                    {group.name}
-                  </Text>
-                  <Text style={styles.groupCardMembers}>
-                    {group.memberCount} {group.memberCount === 1 ? "jäsen" : "jäsentä"}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-      </View>
-    );
-  };
+  const modalGroup = groups.find((g) => g.id === modalGroupId);
 
   const renderGroupsTab = () => {
     if (isLoadingGroups) {
@@ -197,80 +124,120 @@ const LeaderboardTab = observer(() => {
       );
     }
 
-    if (isLoadingLeaderboard) {
-      return (
-        <>
-          {renderGroupSelector()}
-          <View style={styles.emptyContainer}>
-            <ActivityIndicator size="large" color="#37891C" />
-          </View>
-        </>
-      );
-    }
+    return (
+      <ScrollView style={{ flex: 1, marginTop: 8, overflow: "visible" }} contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
+        {groups.map((group) => (
+          <Pressable
+            key={group.id}
+            style={styles.groupCard}
+            onPress={() => openGroupModal(group.id)}
+          >
+            <View style={styles.groupIconContainer}>
+              <Ionicons name="people" size={24} color="#37891C" />
+            </View>
+            <View style={styles.groupCardContent}>
+              <Text style={styles.groupCardName} numberOfLines={1}>
+                {group.name}
+              </Text>
+              <Text style={styles.groupCardMembers}>
+                {group.memberCount} {group.memberCount === 1 ? "jäsen" : "jäsentä"}
+              </Text>
+            </View>
+            {group.myPoints != null && (
+              <Text style={styles.groupCardPoints}>{group.myPoints} p</Text>
+            )}
+            <Ionicons name="chevron-forward" size={22} color="#999" />
+          </Pressable>
+        ))}
+       
+      </ScrollView>
+    );
+  };
 
-    if (!groupLeaderboard || groupEntries.length === 0) {
-      return (
-        <>
-          {renderGroupSelector()}
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Ei tulostaulua</Text>
-          </View>
-        </>
-      );
-    }
+  const renderGroupLeaderboardModal = () => {
+    const groupUserIndex = groupEntries.findIndex((e) => e.uid === currentUserId);
+    const isGroupUserInTop10 = groupUserIndex >= 0 && groupUserIndex < 10;
 
     return (
-      <>
-        {renderGroupSelector()}
-
-        {/* Current user position */}
-        {groupUserIndex !== -1 && (
-          <View style={styles.currentUserCard}>
-            <View style={styles.rankBadge}>
-              <Text style={styles.rankNumber}>#{groupUserIndex + 1}</Text>
-            </View>
-            <View style={styles.currentUserInfo}>
-              <Text style={styles.currentUserLabel}>Oma sijoitus</Text>
-              <Text style={styles.currentUserPoints}>
-                {groupEntries[groupUserIndex].points} pistettä
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showGroupLeaderboardModal}
+        onRequestClose={() => setShowGroupLeaderboardModal(false)}
+      >
+        <View style={styles.infoModalOverlay}>
+          <View style={[styles.infoModalContent, { maxWidth: 400, maxHeight: "80%" }]}>
+            {/* Header */}
+            <View style={styles.groupModalHeader}>
+              <Text style={styles.groupModalTitle} numberOfLines={1}>
+                {modalGroup?.name ?? ""}
               </Text>
+              <Pressable onPress={() => setShowGroupLeaderboardModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </Pressable>
             </View>
-          </View>
-        )}
 
-        <View style={styles.divider} />
-
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {groupEntries.slice(0, 10).map((entry, index) => (
-            <View
-              key={entry.uid}
-              style={[
-                styles.leaderboardRow,
-                entry.uid === currentUserId && styles.currentUserHighlight,
-              ]}
-            >
-              <Text style={styles.leaderboardPosition}>
-                {index + 1}. {entry.username}
-              </Text>
-              <Text style={styles.leaderboardScore}>{entry.points} pistettä</Text>
-            </View>
-          ))}
-          {/* Show current user if outside top 10 */}
-          {!isGroupUserInTop10 && groupUserIndex !== -1 && (
-            <View>
-              <View style={styles.divider} />
-              <View style={[styles.leaderboardRow, styles.currentUserHighlight]}>
-                <Text style={styles.leaderboardPosition}>
-                  {groupUserIndex + 1}. {groupEntries[groupUserIndex].username}
-                </Text>
-                <Text style={styles.leaderboardScore}>
-                  {groupEntries[groupUserIndex].points} pistettä
-                </Text>
+            {isLoadingLeaderboard ? (
+              <View style={styles.modalLoadingContainer}>
+                <ActivityIndicator size="large" color="#37891C" />
               </View>
-            </View>
-          )}
-        </ScrollView>
-      </>
+            ) : !groupLeaderboard || groupEntries.length === 0 ? (
+              <View style={styles.modalLoadingContainer}>
+                <Text style={styles.emptyText}>Ei tulostaulua</Text>
+              </View>
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Current user position */}
+                {groupUserIndex !== -1 && (
+                  <View style={styles.currentUserCard}>
+                    <View style={styles.rankBadge}>
+                      <Text style={styles.rankNumber}>#{groupUserIndex + 1}</Text>
+                    </View>
+                    <View style={styles.currentUserInfo}>
+                      <Text style={styles.currentUserLabel}>Oma sijoitus</Text>
+                      <Text style={styles.currentUserPoints}>
+                        {groupEntries[groupUserIndex].points} pistettä
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.divider} />
+
+                {groupEntries.slice(0, 10).map((entry, index) => (
+                  <View
+                    key={entry.uid}
+                    style={[
+                      styles.leaderboardRow,
+                      entry.uid === currentUserId && styles.currentUserHighlight,
+                    ]}
+                  >
+                    <Text style={styles.leaderboardPosition}>
+                      {index + 1}. {entry.username}
+                    </Text>
+                    <Text style={styles.leaderboardScore}>{entry.points} pistettä</Text>
+                  </View>
+                ))}
+
+                {/* Show current user if outside top 10 */}
+                {!isGroupUserInTop10 && groupUserIndex !== -1 && (
+                  <View>
+                    <View style={styles.divider} />
+                    <View style={[styles.leaderboardRow, styles.currentUserHighlight]}>
+                      <Text style={styles.leaderboardPosition}>
+                        {groupUserIndex + 1}. {groupEntries[groupUserIndex].username}
+                      </Text>
+                      <Text style={styles.leaderboardScore}>
+                        {groupEntries[groupUserIndex].points} pistettä
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     );
   };
 
@@ -293,10 +260,10 @@ const LeaderboardTab = observer(() => {
       <View style={styles.content}>
         {activeTab === "groups" ? (
           <>
-            <View style={styles.infoLink}>
-              <Ionicons name="information-circle-outline" size={18} color="#37891C" />
-              <Text style={styles.infoLinkText}>
-                Voit hallita ryhmiäsi Profiili-välilehdellä.
+            <View style={styles.infoBanner}>
+              <Ionicons name="information-circle-outline" size={16} color="#888" />
+              <Text style={styles.infoBannerText}>
+                Voit liittyä ryhmään tai luoda oman ryhmän Profiili-välilehdellä
               </Text>
             </View>
             {renderGroupsTab()}
@@ -402,6 +369,9 @@ const LeaderboardTab = observer(() => {
           </View>
         </View>
       </Modal>
+
+      {/* Group Leaderboard Modal */}
+      {renderGroupLeaderboardModal()}
     </View>
   );
 });
@@ -444,10 +414,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     color: theme.colors.primary,
   },
-  groupList: {
-    marginBottom: 16,
-    marginTop: 16,
-  },
   groupCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -460,10 +426,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
-  },
-  selectedGroupCard: {
-    borderWidth: 2,
-    borderColor: "#37891C",
   },
   groupIconContainer: {
     width: 48,
@@ -488,17 +450,11 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     color: "#666",
   },
-  changeGroupButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    gap: 6,
-  },
-  changeGroupText: {
-    fontSize: 14,
-    fontFamily: theme.fontFamily.medium,
+  groupCardPoints: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.semiBold,
     color: "#37891C",
+    marginRight: 8,
   },
   header: {
     flexDirection: "row",
@@ -577,6 +533,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
     marginVertical: theme.spacing.medium,
   },
+  infoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.04)",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  infoBannerText: {
+    color: "#888",
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    marginLeft: 8,
+    flex: 1,
+  },
   infoLink: {
     flexDirection: "row",
     alignItems: "center",
@@ -588,6 +561,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: theme.fontFamily.medium,
     marginLeft: 6,
+    marginTop: 4,
+    marginBottom: 4,
+    textAlign: "center",
   },
   infoModalOverlay: {
     flex: 1,
@@ -653,6 +629,24 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
+  },
+  groupModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  groupModalTitle: {
+    fontSize: 20,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
+    flex: 1,
+    marginRight: 12,
+  },
+  modalLoadingContainer: {
+    paddingVertical: 48,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,

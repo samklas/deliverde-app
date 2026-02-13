@@ -369,11 +369,27 @@ export const getUserGroups = async (): Promise<GroupSummary[]> => {
       const memberDoc = await getDoc(doc(db, "groups", groupId, "members", uid));
       const memberData = memberDoc.data() as GroupMember | undefined;
 
+      // Fetch current user's points from the group's leaderboard
+      let myPoints: number | undefined;
+      const leaderboardsSnapshot = await getDocs(
+        collection(db, "groups", groupId, "leaderboards")
+      );
+      if (!leaderboardsSnapshot.empty) {
+        const leaderboardId = leaderboardsSnapshot.docs[0].id;
+        const entryDoc = await getDoc(
+          doc(db, "groups", groupId, "leaderboards", leaderboardId, "entries", uid)
+        );
+        if (entryDoc.exists()) {
+          myPoints = entryDoc.data().points;
+        }
+      }
+
       groups.push({
         id: groupId,
         name: groupData.name,
         memberCount: groupData.memberCount,
         role: memberData?.role || "member",
+        myPoints,
       });
     }
   }

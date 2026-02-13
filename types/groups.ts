@@ -40,4 +40,5 @@ export type GroupSummary = {
   name: string;
   memberCount: number;
   role: GroupRole;
+  myPoints?: number;
 };
