@@ -181,6 +181,15 @@ export default function RootLayout() {
         />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
+          name="leaderboard-view"
+          options={{
+            headerShown: true,
+            title: "Tulokset",
+            headerBackTitle: "Etusivu",
+            headerTintColor: "#0c4c25",
+          }}
+        />
+        <Stack.Screen
           name="groups"
           options={{
             headerShown: false,

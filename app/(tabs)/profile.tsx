@@ -135,8 +135,8 @@ export default function Tab() {
             <View style={styles.groupsBoxContent}>
               <View style={styles.groupsTextContainer}>
                 <Text style={styles.sectionTitle}>Ryhmät</Text>
-                <Text style={styles.helpText}>
-                  Luo ryhmiä ja kilpaile kavereiden kanssa!
+                <Text style={styles.goalText}>
+                  Luo tai liity ryhmiin ja kilpaile kavereiden kanssa!
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
@@ -168,11 +168,13 @@ export default function Tab() {
           )}
 
           <Pressable
-            style={[styles.feedbackButton, styles.box]}
+            style={styles.box}
             onPress={() => router.push("/feedback")}
           >
-            <Text style={styles.feedbackText}>Lähetä palautetta</Text>
-            <Ionicons name="arrow-forward" size={20} />
+            <View style={styles.boxContent}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Lähetä palautetta</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
+            </View>
           </Pressable>
 
           <View style={styles.logoutContainer}>
@@ -268,16 +270,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-  },
-  feedbackButton: {
-    flex: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  feedbackText: {
-    fontFamily: theme.fontFamily.regular,
-    fontSize: 16,
   },
   logoutContainer: {
     alignItems: "center",
