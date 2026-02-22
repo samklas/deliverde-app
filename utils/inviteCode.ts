@@ -61,3 +61,25 @@ export const generateUniqueGroupInviteCode = async (): Promise<string> => {
   }
   return code;
 };
+
+export const isCompetitionInviteCodeUnique = async (
+  code: string
+): Promise<boolean> => {
+  const q = query(
+    collection(db, "competitions"),
+    where("inviteCode", "==", code)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.empty;
+};
+
+export const generateUniqueCompetitionInviteCode =
+  async (): Promise<string> => {
+    let code = generateInviteCode();
+    let attempts = 0;
+    while (!(await isCompetitionInviteCodeUnique(code)) && attempts < 10) {
+      code = generateInviteCode();
+      attempts++;
+    }
+    return code;
+  };

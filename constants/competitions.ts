@@ -1,0 +1,2 @@
+export const MAX_GROUPS_PER_COMPETITION = 20;
+export const MAX_COMPETITIONS_PER_GROUP = 5;

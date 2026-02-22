@@ -6,10 +6,10 @@ import leaderboardStore from "@/stores/leaderboardStore";
 import { auth } from "@/firebaseConfig";
 import React, { useState, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
-import { getUserGroups, getGroupLeaderboard, getGroupLeaderboardEntries } from "@/services";
-import { GroupSummary, GroupLeaderboard as GroupLeaderboardType, GroupLeaderboardEntry } from "@/types/groups";
+import { getUserGroups, getCompetitionsForGroup, getCompetitionRankings } from "@/services";
+import { CompetitionSummary, CompetitionGroupRanking } from "@/types/competitions";
 
-type TabType = "general" | "groups";
+type TabType = "general" | "competitions";
 
 const LeaderboardTab = observer(() => {
   const { users } = leaderboardStore;
@@ -17,57 +17,62 @@ const LeaderboardTab = observer(() => {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("general");
 
-  // Groups tab state
-  const [groups, setGroups] = useState<GroupSummary[]>([]);
-  const [showGroupLeaderboardModal, setShowGroupLeaderboardModal] = useState(false);
-  const [modalGroupId, setModalGroupId] = useState<string | null>(null);
-  const [groupLeaderboard, setGroupLeaderboard] = useState<GroupLeaderboardType | null>(null);
-  const [groupEntries, setGroupEntries] = useState<GroupLeaderboardEntry[]>([]);
-  const [isLoadingGroups, setIsLoadingGroups] = useState(false);
-  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
+  // Competitions tab state
+  const [competitions, setCompetitions] = useState<CompetitionSummary[]>([]);
+  const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(false);
+  const [showCompetitionModal, setShowCompetitionModal] = useState(false);
+  const [competitionRankings, setCompetitionRankings] = useState<CompetitionGroupRanking[]>([]);
+  const [modalCompetition, setModalCompetition] = useState<CompetitionSummary | null>(null);
+  const [isLoadingCompetitionRankings, setIsLoadingCompetitionRankings] = useState(false);
+  const [myGroupIds, setMyGroupIds] = useState<string[]>([]);
 
-  // Load groups when groups tab is active
+  // Load competitions when tab is active
   useFocusEffect(
     useCallback(() => {
-      if (activeTab === "groups") {
-        loadGroups();
+      if (activeTab === "competitions") {
+        loadCompetitions();
       }
     }, [activeTab])
   );
 
-  const loadGroups = async () => {
-    setIsLoadingGroups(true);
+  const loadCompetitions = async () => {
+    setIsLoadingCompetitions(true);
     try {
       const userGroups = await getUserGroups();
-      setGroups(userGroups);
+      const groupIds = userGroups.map((g) => g.id);
+      setMyGroupIds(groupIds);
+
+      const allCompetitions: CompetitionSummary[] = [];
+      const seenIds = new Set<string>();
+      for (const group of userGroups) {
+        const groupCompetitions = await getCompetitionsForGroup(group.id);
+        for (const comp of groupCompetitions) {
+          if (!seenIds.has(comp.id)) {
+            seenIds.add(comp.id);
+            allCompetitions.push(comp);
+          }
+        }
+      }
+      setCompetitions(allCompetitions);
     } catch (error) {
-      console.error("Error loading groups:", error);
+      console.error("Error loading competitions:", error);
     } finally {
-      setIsLoadingGroups(false);
+      setIsLoadingCompetitions(false);
     }
   };
 
-  const openGroupModal = (groupId: string) => {
-    setModalGroupId(groupId);
-    setGroupLeaderboard(null);
-    setGroupEntries([]);
-    setShowGroupLeaderboardModal(true);
-    loadGroupLeaderboard(groupId);
-  };
-
-  const loadGroupLeaderboard = async (groupId: string) => {
-    setIsLoadingLeaderboard(true);
+  const openCompetitionModal = async (comp: CompetitionSummary) => {
+    setModalCompetition(comp);
+    setCompetitionRankings([]);
+    setShowCompetitionModal(true);
+    setIsLoadingCompetitionRankings(true);
     try {
-      const leaderboard = await getGroupLeaderboard(groupId);
-      setGroupLeaderboard(leaderboard);
-      if (leaderboard) {
-        const entries = await getGroupLeaderboardEntries(groupId, leaderboard.id);
-        setGroupEntries(entries);
-      }
+      const rankings = await getCompetitionRankings(comp.id, myGroupIds);
+      setCompetitionRankings(rankings);
     } catch (error) {
-      console.error("Error loading group leaderboard:", error);
+      console.error("Error loading competition rankings:", error);
     } finally {
-      setIsLoadingLeaderboard(false);
+      setIsLoadingCompetitionRankings(false);
     }
   };
 
@@ -88,23 +93,21 @@ const LeaderboardTab = observer(() => {
         </Text>
       </Pressable>
       <Pressable
-        style={[styles.tabButton, activeTab === "groups" && styles.activeTab]}
+        style={[styles.tabButton, activeTab === "competitions" && styles.activeTab]}
         onPress={() => {
-          setActiveTab("groups");
-          if (groups.length === 0) loadGroups();
+          setActiveTab("competitions");
+          if (competitions.length === 0) loadCompetitions();
         }}
       >
-        <Text style={[styles.tabText, activeTab === "groups" && styles.activeText]}>
-          Ryhmät
+        <Text style={[styles.tabText, activeTab === "competitions" && styles.activeText]}>
+          Kilpailut
         </Text>
       </Pressable>
     </View>
   );
 
-  const modalGroup = groups.find((g) => g.id === modalGroupId);
-
-  const renderGroupsTab = () => {
-    if (isLoadingGroups) {
+  const renderCompetitionsTab = () => {
+    if (isLoadingCompetitions) {
       return (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color="#37891C" />
@@ -112,13 +115,13 @@ const LeaderboardTab = observer(() => {
       );
     }
 
-    if (groups.length === 0) {
+    if (competitions.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Ionicons name="people-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>Ei ryhmiä</Text>
+          <Ionicons name="trophy-outline" size={64} color="#ccc" />
+          <Text style={styles.emptyTitle}>Ei kilpailuja</Text>
           <Text style={styles.emptySubtext}>
-            Liity ryhmään nähdäksesi ryhmän tulostaulun
+            Luo kilpailu tai liity kilpailuun ryhmäsi sivulta
           </Text>
         </View>
       );
@@ -126,118 +129,27 @@ const LeaderboardTab = observer(() => {
 
     return (
       <ScrollView style={{ flex: 1, marginTop: 8, overflow: "visible" }} contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
-        {groups.map((group) => (
+        {competitions.map((comp) => (
           <Pressable
-            key={group.id}
-            style={styles.groupCard}
-            onPress={() => openGroupModal(group.id)}
+            key={comp.id}
+            style={styles.competitionCard}
+            onPress={() => openCompetitionModal(comp)}
           >
-            <View style={styles.groupIconContainer}>
-              <Ionicons name="people" size={24} color="#37891C" />
+            <View style={styles.competitionIconContainer}>
+              <Ionicons name="trophy" size={24} color="#37891C" />
             </View>
-            <View style={styles.groupCardContent}>
-              <Text style={styles.groupCardName} numberOfLines={1}>
-                {group.name}
+            <View style={styles.competitionCardContent}>
+              <Text style={styles.competitionCardName} numberOfLines={1}>
+                {comp.name}
               </Text>
-              <Text style={styles.groupCardMembers}>
-                {group.memberCount} {group.memberCount === 1 ? "jäsen" : "jäsentä"}
+              <Text style={styles.competitionCardMembers}>
+                {comp.groupCount} {comp.groupCount === 1 ? "ryhmä" : "ryhmää"}
               </Text>
             </View>
-            {group.myPoints != null && (
-              <Text style={styles.groupCardPoints}>{group.myPoints} p</Text>
-            )}
             <Ionicons name="chevron-forward" size={22} color="#999" />
           </Pressable>
         ))}
-       
       </ScrollView>
-    );
-  };
-
-  const renderGroupLeaderboardModal = () => {
-    const groupUserIndex = groupEntries.findIndex((e) => e.uid === currentUserId);
-    const isGroupUserInTop10 = groupUserIndex >= 0 && groupUserIndex < 10;
-
-    return (
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showGroupLeaderboardModal}
-        onRequestClose={() => setShowGroupLeaderboardModal(false)}
-      >
-        <View style={styles.infoModalOverlay}>
-          <View style={[styles.infoModalContent, { maxWidth: 400, maxHeight: "80%" }]}>
-            {/* Header */}
-            <View style={styles.groupModalHeader}>
-              <Text style={styles.groupModalTitle} numberOfLines={1}>
-                {modalGroup?.name ?? ""}
-              </Text>
-              <Pressable onPress={() => setShowGroupLeaderboardModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </Pressable>
-            </View>
-
-            {isLoadingLeaderboard ? (
-              <View style={styles.modalLoadingContainer}>
-                <ActivityIndicator size="large" color="#37891C" />
-              </View>
-            ) : !groupLeaderboard || groupEntries.length === 0 ? (
-              <View style={styles.modalLoadingContainer}>
-                <Text style={styles.emptyText}>Ei tulostaulua</Text>
-              </View>
-            ) : (
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Current user position */}
-                {groupUserIndex !== -1 && (
-                  <View style={styles.currentUserCard}>
-                    <View style={styles.rankBadge}>
-                      <Text style={styles.rankNumber}>#{groupUserIndex + 1}</Text>
-                    </View>
-                    <View style={styles.currentUserInfo}>
-                      <Text style={styles.currentUserLabel}>Oma sijoitus</Text>
-                      <Text style={styles.currentUserPoints}>
-                        {groupEntries[groupUserIndex].points} pistettä
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                <View style={styles.divider} />
-
-                {groupEntries.slice(0, 10).map((entry, index) => (
-                  <View
-                    key={entry.uid}
-                    style={[
-                      styles.leaderboardRow,
-                      entry.uid === currentUserId && styles.currentUserHighlight,
-                    ]}
-                  >
-                    <Text style={styles.leaderboardPosition}>
-                      {index + 1}. {entry.username}
-                    </Text>
-                    <Text style={styles.leaderboardScore}>{entry.points} pistettä</Text>
-                  </View>
-                ))}
-
-                {/* Show current user if outside top 10 */}
-                {!isGroupUserInTop10 && groupUserIndex !== -1 && (
-                  <View>
-                    <View style={styles.divider} />
-                    <View style={[styles.leaderboardRow, styles.currentUserHighlight]}>
-                      <Text style={styles.leaderboardPosition}>
-                        {groupUserIndex + 1}. {groupEntries[groupUserIndex].username}
-                      </Text>
-                      <Text style={styles.leaderboardScore}>
-                        {groupEntries[groupUserIndex].points} pistettä
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              </ScrollView>
-            )}
-          </View>
-        </View>
-      </Modal>
     );
   };
 
@@ -258,15 +170,15 @@ const LeaderboardTab = observer(() => {
     <View style={styles.container}>
       {renderTabBar()}
       <View style={styles.content}>
-        {activeTab === "groups" ? (
+        {activeTab === "competitions" ? (
           <>
             <View style={styles.infoBanner}>
               <Ionicons name="information-circle-outline" size={16} color="#888" />
               <Text style={styles.infoBannerText}>
-                Voit liittyä ryhmään tai luoda oman ryhmän Profiili-välilehdellä
+                Voit luoda tai liittyä kilpailuun ryhmäsi sivulta
               </Text>
             </View>
-            {renderGroupsTab()}
+            {renderCompetitionsTab()}
           </>
         ) : (
           <>
@@ -370,8 +282,77 @@ const LeaderboardTab = observer(() => {
         </View>
       </Modal>
 
-      {/* Group Leaderboard Modal */}
-      {renderGroupLeaderboardModal()}
+      {/* Competition Rankings Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showCompetitionModal}
+        onRequestClose={() => setShowCompetitionModal(false)}
+      >
+        <View style={styles.infoModalOverlay}>
+          <View style={[styles.infoModalContent, { maxWidth: 400, maxHeight: "80%" }]}>
+            <View style={styles.competitionModalHeader}>
+              <Text style={styles.competitionModalTitle} numberOfLines={1}>
+                {modalCompetition?.name ?? ""}
+              </Text>
+              <Pressable onPress={() => setShowCompetitionModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </Pressable>
+            </View>
+
+            {isLoadingCompetitionRankings ? (
+              <View style={styles.modalLoadingContainer}>
+                <ActivityIndicator size="large" color="#37891C" />
+              </View>
+            ) : competitionRankings.length === 0 ? (
+              <View style={styles.modalLoadingContainer}>
+                <Text style={styles.emptyText}>Ei vielä tuloksia</Text>
+              </View>
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* My group position card */}
+                {(() => {
+                  const myGroupIndex = competitionRankings.findIndex((r) => r.myGroup);
+                  if (myGroupIndex === -1) return null;
+                  const myGroup = competitionRankings[myGroupIndex];
+                  return (
+                    <View style={styles.currentUserCard}>
+                      <View style={styles.rankBadge}>
+                        <Text style={styles.rankNumber}>#{myGroupIndex + 1}</Text>
+                      </View>
+                      <View style={styles.currentUserInfo}>
+                        <Text style={styles.currentUserLabel}>Oma ryhmä</Text>
+                        <Text style={styles.currentUserPoints}>
+                          {myGroup.averagePoints} pistettä
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })()}
+
+                <View style={styles.divider} />
+
+                {competitionRankings.map((ranking, index) => (
+                  <View
+                    key={ranking.groupId}
+                    style={[
+                      styles.leaderboardRow,
+                      ranking.myGroup && styles.currentUserHighlight,
+                    ]}
+                  >
+                    <Text style={styles.leaderboardPosition}>
+                      {index + 1}. {ranking.groupName}
+                    </Text>
+                    <Text style={styles.leaderboardScore}>
+                      {ranking.averagePoints} pistettä
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 });
@@ -414,7 +395,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     color: theme.colors.primary,
   },
-  groupCard: {
+  competitionCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
@@ -427,7 +408,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  groupIconContainer: {
+  competitionIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -436,25 +417,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 14,
   },
-  groupCardContent: {
+  competitionCardContent: {
     flex: 1,
   },
-  groupCardName: {
+  competitionCardName: {
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: 4,
   },
-  groupCardMembers: {
+  competitionCardMembers: {
     fontSize: 13,
     fontFamily: theme.fontFamily.regular,
     color: "#666",
-  },
-  groupCardPoints: {
-    fontSize: 15,
-    fontFamily: theme.fontFamily.semiBold,
-    color: "#37891C",
-    marginRight: 8,
   },
   header: {
     flexDirection: "row",
@@ -630,13 +605,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: theme.fontFamily.semiBold,
   },
-  groupModalHeader: {
+  competitionModalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
   },
-  groupModalTitle: {
+  competitionModalTitle: {
     fontSize: 20,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,

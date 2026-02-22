@@ -195,6 +195,12 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="competitions"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
     </View>
   );

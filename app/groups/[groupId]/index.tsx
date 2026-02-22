@@ -19,11 +19,13 @@ import {
   getGroupMembers,
   leaveGroup,
   deleteGroup,
+  getCompetitionsForGroup,
 } from "@/services";
 import {
   Group,
   GroupMember,
 } from "@/types/groups";
+import { CompetitionSummary } from "@/types/competitions";
 import groupsStore from "@/stores/groupsStore";
 import GroupMembersList from "@/components/groups/GroupMembersList";
 
@@ -34,8 +36,10 @@ export default function GroupDetailScreen() {
 
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
+  const [competitions, setCompetitions] = useState<CompetitionSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showCompetitionsModal, setShowCompetitionsModal] = useState(false);
 
   const isOwner = group?.createdBy === currentUserId;
 
@@ -43,13 +47,15 @@ export default function GroupDetailScreen() {
     if (!groupId) return;
 
     try {
-      const [groupData, membersData] = await Promise.all([
+      const [groupData, membersData, competitionsData] = await Promise.all([
         getGroup(groupId),
         getGroupMembers(groupId),
+        getCompetitionsForGroup(groupId),
       ]);
 
       setGroup(groupData);
       setMembers(membersData);
+      setCompetitions(competitionsData);
     } catch (error) {
       console.error("Error loading group:", error);
       Alert.alert("Virhe", "Ryhmän tietojen lataaminen epäonnistui");
@@ -188,6 +194,95 @@ export default function GroupDetailScreen() {
               <Ionicons name="share-outline" size={22} color="#37891C" />
             </View>
           </Pressable>
+
+          {/* Competitions section */}
+          {isOwner && (
+            <View style={styles.competitionsSection}>
+              <Pressable
+                style={styles.competitionsCard}
+                onPress={() => {
+                  if (competitions.length === 1) {
+                    router.push(
+                      `/competitions/${competitions[0].id}` as any
+                    );
+                  } else if (competitions.length > 1) {
+                    setShowCompetitionsModal(true);
+                  }
+                }}
+              >
+                <View style={styles.competitionsIconContainer}>
+                  <Ionicons name="trophy" size={24} color="#37891C" />
+                </View>
+                <View style={styles.competitionsCardContent}>
+                  <Text style={styles.competitionsCardTitle}>Kilpailut</Text>
+                  <Text style={styles.competitionsCardCount}>
+                    {competitions.length}{" "}
+                    {competitions.length === 1 ? "kilpailu" : "kilpailua"}
+                  </Text>
+                </View>
+                {competitions.length > 0 && (
+                  <Ionicons name="chevron-forward" size={22} color="#999" />
+                )}
+              </Pressable>
+              <View style={styles.competitionsActions}>
+                <Pressable
+                  style={styles.competitionsActionBtn}
+                  onPress={() =>
+                    router.push(
+                      `/competitions/create?groupId=${groupId}` as any
+                    )
+                  }
+                >
+                  <Ionicons name="add-circle-outline" size={18} color="#37891C" />
+                  <Text style={styles.competitionsActionText}>Luo</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.competitionsActionBtn}
+                  onPress={() =>
+                    router.push(
+                      `/competitions/join?groupId=${groupId}` as any
+                    )
+                  }
+                >
+                  <Ionicons name="enter-outline" size={18} color="#37891C" />
+                  <Text style={styles.competitionsActionText}>Liity</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {/* Competitions list modal */}
+          {showCompetitionsModal && (
+            <View style={styles.competitionsModal}>
+              <View style={styles.competitionsModalHeader}>
+                <Text style={styles.competitionsModalTitle}>Kilpailut</Text>
+                <Pressable onPress={() => setShowCompetitionsModal(false)}>
+                  <Ionicons name="close" size={24} color="#666" />
+                </Pressable>
+              </View>
+              {competitions.map((comp) => (
+                <Pressable
+                  key={comp.id}
+                  style={styles.competitionsModalItem}
+                  onPress={() => {
+                    setShowCompetitionsModal(false);
+                    router.push(`/competitions/${comp.id}` as any);
+                  }}
+                >
+                  <Ionicons name="trophy" size={20} color="#37891C" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.competitionsModalItemName}>
+                      {comp.name}
+                    </Text>
+                    <Text style={styles.competitionsModalItemCount}>
+                      {comp.groupCount} ryhmää
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#999" />
+                </Pressable>
+              ))}
+            </View>
+          )}
 
           {/* Members section */}
           <View style={styles.section}>
@@ -344,5 +439,102 @@ const styles = StyleSheet.create({
     color: theme.colors.error,
     fontSize: 15,
     fontFamily: theme.fontFamily.medium,
+  },
+  competitionsSection: {
+    marginBottom: 16,
+  },
+  competitionsCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  competitionsIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  competitionsCardContent: {
+    flex: 1,
+  },
+  competitionsCardTitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 2,
+  },
+  competitionsCardCount: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+  },
+  competitionsActions: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  competitionsActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(55, 137, 28, 0.08)",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    gap: 6,
+  },
+  competitionsActionText: {
+    fontSize: 14,
+    fontFamily: theme.fontFamily.medium,
+    color: "#37891C",
+  },
+  competitionsModal: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  competitionsModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  competitionsModalTitle: {
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+  },
+  competitionsModalItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  competitionsModalItemName: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.medium,
+    color: theme.colors.primary,
+  },
+  competitionsModalItemCount: {
+    fontSize: 12,
+    fontFamily: theme.fontFamily.regular,
+    color: "#999",
   },
 });

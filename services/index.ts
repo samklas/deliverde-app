@@ -46,3 +46,14 @@ export {
   getGroupLeaderboard,
   getGroupLeaderboardEntries,
 } from "./groups.service";
+
+export {
+  createCompetition,
+  joinCompetition,
+  leaveCompetition,
+  deleteCompetition,
+  getCompetitionsForGroup,
+  getCompetition,
+  getCompetitionGroups,
+  getCompetitionRankings,
+} from "./competitions.service";

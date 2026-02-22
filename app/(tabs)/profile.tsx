@@ -136,14 +136,13 @@ export default function Tab() {
               <View style={styles.groupsTextContainer}>
                 <Text style={styles.sectionTitle}>Ryhmät</Text>
                 <Text style={styles.goalText}>
-                  Luo tai liity ryhmiin ja kilpaile kavereiden kanssa!
+                  Luo tai liity ryhmiin ja kilpaile muita ryhmiä vastaan!
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </View>
           </Pressable>
-
-          <Pressable
+         <Pressable
             style={[styles.box, styles.goalBox]}
             onPress={() => setGoalModalVisible(true)}
           >
