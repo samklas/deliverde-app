@@ -14,6 +14,7 @@ export type CompetitionGroup = {
   groupName: string;
   joinedAt: Date;
   addedBy: string;
+  pointsSnapshot: Record<string, number>;
 };
 
 export type CompetitionGroupRanking = {

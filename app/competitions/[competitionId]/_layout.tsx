@@ -1,7 +1,11 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React from "react";
+import { Pressable, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CompetitionDetailLayout() {
+  const router = useRouter();
+
   return (
     <Stack
       screenOptions={{
@@ -13,7 +17,12 @@ export default function CompetitionDetailLayout() {
           fontFamily: "Poppins_600SemiBold",
         },
         headerTintColor: "#0c4c25",
-        headerBackTitle: "Takaisin",
+        headerLeft: () => (
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color="#0c4c25" />
+            <Text style={styles.backText}>Takaisin</Text>
+          </Pressable>
+        ),
       }}
     >
       <Stack.Screen
@@ -25,3 +34,16 @@ export default function CompetitionDetailLayout() {
     </Stack>
   );
 }
+
+const styles = StyleSheet.create({
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: -8,
+  },
+  backText: {
+    color: "#0c4c25",
+    fontSize: 17,
+    fontFamily: "Poppins_400Regular",
+  },
+});

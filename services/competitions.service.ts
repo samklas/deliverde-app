@@ -46,6 +46,29 @@ const validateGroupOwnership = async (groupId: string): Promise<void> => {
 };
 
 /**
+ * Snapshot current points for all members of a group from their leaderboard entries.
+ * Returns a map of { uid: points } to use as a baseline when joining a competition.
+ */
+const snapshotGroupPoints = async (
+  groupId: string
+): Promise<Record<string, number>> => {
+  const leaderboardsSnapshot = await getDocs(
+    collection(db, "groups", groupId, "leaderboards")
+  );
+  const pointsSnapshot: Record<string, number> = {};
+  if (!leaderboardsSnapshot.empty) {
+    const leaderboardId = leaderboardsSnapshot.docs[0].id;
+    const entriesSnapshot = await getDocs(
+      collection(db, "groups", groupId, "leaderboards", leaderboardId, "entries")
+    );
+    entriesSnapshot.docs.forEach((doc) => {
+      pointsSnapshot[doc.id] = doc.data().points || 0;
+    });
+  }
+  return pointsSnapshot;
+};
+
+/**
  * Create a new competition with the creator's group as the first participant
  */
 export const createCompetition = async (
@@ -76,6 +99,9 @@ export const createCompetition = async (
   const competitionId = competitionRef.id;
   const now = Timestamp.now();
 
+  // Snapshot current member points so the competition starts from 0
+  const pointsSnapshot = await snapshotGroupPoints(groupId);
+
   const batch = writeBatch(db);
 
   // Create competition document
@@ -89,7 +115,7 @@ export const createCompetition = async (
     status: "active",
   });
 
-  // Add first group subdoc
+  // Add first group subdoc with points baseline
   batch.set(
     doc(db, "competitions", competitionId, "groups", groupId),
     {
@@ -97,6 +123,7 @@ export const createCompetition = async (
       groupName,
       joinedAt: now,
       addedBy: uid,
+      pointsSnapshot,
     }
   );
 
@@ -158,6 +185,10 @@ export const joinCompetition = async (
   const groupName = groupDoc.data().name;
 
   const now = Timestamp.now();
+
+  // Snapshot current member points so the competition starts from 0
+  const pointsSnapshot = await snapshotGroupPoints(groupId);
+
   const batch = writeBatch(db);
 
   // Add group to competition's groupIds array
@@ -165,7 +196,7 @@ export const joinCompetition = async (
     groupIds: arrayUnion(groupId),
   });
 
-  // Add group subdoc
+  // Add group subdoc with points baseline
   batch.set(
     doc(db, "competitions", competitionId, "groups", groupId),
     {
@@ -173,6 +204,7 @@ export const joinCompetition = async (
       groupName,
       joinedAt: now,
       addedBy: uid,
+      pointsSnapshot,
     }
   );
 
@@ -328,6 +360,7 @@ export const getCompetitionGroups = async (
       groupName: data.groupName,
       joinedAt: data.joinedAt?.toDate() || new Date(),
       addedBy: data.addedBy,
+      pointsSnapshot: data.pointsSnapshot || {},
     };
   });
 };
@@ -366,7 +399,9 @@ export const getCompetitionRankings = async (
 
       memberCount = entriesSnapshot.size;
       entriesSnapshot.docs.forEach((doc) => {
-        totalPoints += doc.data().points || 0;
+        const currentPoints = doc.data().points || 0;
+        const baselinePoints = group.pointsSnapshot[doc.id] || 0;
+        totalPoints += Math.max(0, currentPoints - baselinePoints);
       });
     }
 
