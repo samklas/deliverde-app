@@ -23,7 +23,7 @@ export default function GroupDetailLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Ryhmä",
+          title: "",
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="chevron-back" size={28} color="#0c4c25" />

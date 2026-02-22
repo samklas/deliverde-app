@@ -102,6 +102,7 @@ export default function RootLayout() {
       <Stack
         initialRouteName={initialRoute}
         screenOptions={{
+          headerBackTitle: "Takaisin",
           headerBackTitleStyle: {
             fontFamily: "Poppins_400Regular",
           },
@@ -184,8 +185,8 @@ export default function RootLayout() {
           name="leaderboard-view"
           options={{
             headerShown: true,
-            title: "Tulokset",
-            headerBackTitle: "Etusivu",
+            title: "",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />

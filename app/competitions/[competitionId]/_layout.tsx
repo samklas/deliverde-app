@@ -28,7 +28,7 @@ export default function CompetitionDetailLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Kilpailu",
+          title: "",
         }}
       />
     </Stack>

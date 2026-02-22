@@ -170,7 +170,7 @@ export default function CompetitionDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: competition.name }} />
+      <Stack.Screen options={{ title: "" }} />
       <View style={styles.container}>
         <ScrollView
           style={styles.scrollView}

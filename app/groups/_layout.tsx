@@ -23,7 +23,7 @@ export default function GroupsLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Ryhmät",
+          title: "",
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="chevron-back" size={28} color="#0c4c25" />
@@ -35,13 +35,13 @@ export default function GroupsLayout() {
       <Stack.Screen
         name="create"
         options={{
-          title: "Luo ryhmä",
+          title: "",
         }}
       />
       <Stack.Screen
         name="join"
         options={{
-          title: "Liity ryhmään",
+          title: "",
         }}
       />
       <Stack.Screen

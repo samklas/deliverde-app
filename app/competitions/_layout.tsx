@@ -23,7 +23,7 @@ export default function CompetitionsLayout() {
       <Stack.Screen
         name="create"
         options={{
-          title: "Luo kilpailu",
+          title: "",
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="chevron-back" size={28} color="#0c4c25" />
@@ -35,7 +35,7 @@ export default function CompetitionsLayout() {
       <Stack.Screen
         name="join"
         options={{
-          title: "Liity kilpailuun",
+          title: "",
           headerLeft: () => (
             <Pressable onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="chevron-back" size={28} color="#0c4c25" />
