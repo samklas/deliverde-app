@@ -25,7 +25,7 @@ export default function Info() {
     },
     {
       title: "Kilpaile kavereita vastaan",
-      description: "Vertaa pisteitäsi muihin ja nouse tulostaulun kärkeen.",
+      description: "Vertaa pisteitäsi muihin ja nouse tulostaulun kärkeen. Voit myös luoda tai liittyä ryhmiin ja kilpailla muita ryhmiä vastaan!",
     },
     {
       title: "Löydä uusia reseptejä",
@@ -47,7 +47,7 @@ export default function Info() {
         </View>
 
         <Text style={styles.title}>Tervetuloa!</Text>
-        <Text style={styles.subtitle}>Näin DeliVerde toimii</Text>
+        <Text style={styles.subtitle}>Näin DeliVerde-sovellus toimii</Text>
 
         {/* Info cards */}
         <View style={styles.infoContainer}>

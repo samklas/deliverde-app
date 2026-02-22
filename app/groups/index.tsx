@@ -103,7 +103,7 @@ const GroupsScreen = observer(() => {
             <Ionicons name="people-outline" size={56} color="#ccc" />
             <Text style={styles.emptyTitle}>Ei ryhmiä vielä</Text>
             <Text style={styles.emptyText}>
-              Luo oma ryhmä tai liity kaverin ryhmään kutsukoodilla.
+              Luo oma ryhmä tai liity kaverin ryhmään ryhmäkoodilla.
             </Text>
           </View>
         ) : (
@@ -164,7 +164,7 @@ const GroupsScreen = observer(() => {
             <Ionicons name="trophy-outline" size={56} color="#ccc" />
             <Text style={styles.emptyTitle}>Ei kilpailuja vielä</Text>
             <Text style={styles.emptyText}>
-              Luo kilpailu ja kutsu muita ryhmiä mukaan kutsukoodilla.
+              Luo kilpailu ja kutsu muita ryhmiä mukaan kilpailukoodilla.
             </Text>
           </View>
         ) : (
