@@ -1,6 +1,44 @@
 import { auth, db } from "@/firebaseConfig";
-import { doc, updateDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, updateDoc, getDoc, collection, getDocs, increment } from "firebase/firestore";
 import { LEVEL_TARGETS } from "@/constants";
+
+export const IMAGE_ANALYSIS_DAILY_LIMIT = 5;
+
+const getTodayDateString = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+export const getImageAnalysisUsageToday = async (): Promise<number> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("User is not authenticated");
+
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const data = userDoc.data();
+  if (!data) return 0;
+
+  const today = getTodayDateString();
+  if (data.imageAnalysisDate !== today) return 0;
+
+  return data.imageAnalysisCount ?? 0;
+};
+
+export const incrementImageAnalysisUsage = async (): Promise<void> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("User is not authenticated");
+
+  const userRef = doc(db, "users", uid);
+  const today = getTodayDateString();
+
+  const userDoc = await getDoc(userRef);
+  const data = userDoc.data();
+
+  if (data?.imageAnalysisDate === today) {
+    await updateDoc(userRef, { imageAnalysisCount: increment(1) });
+  } else {
+    await updateDoc(userRef, { imageAnalysisDate: today, imageAnalysisCount: 1 });
+  }
+};
 import { LeaderboardUser } from "@/types/users";
 
 export const setDailyTotalForUser = async (

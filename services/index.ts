@@ -13,6 +13,9 @@ export {
   getLeaderboardUsers,
   setLevelForCurrentUser,
   getInviteCodeForCurrentUser,
+  getImageAnalysisUsageToday,
+  incrementImageAnalysisUsage,
+  IMAGE_ANALYSIS_DAILY_LIMIT,
   type UserDetails,
 } from "./users.service";
 

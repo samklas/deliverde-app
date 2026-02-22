@@ -12,7 +12,12 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { analyzeVegetableImage } from "@/services";
+import {
+  analyzeVegetableImage,
+  getImageAnalysisUsageToday,
+  incrementImageAnalysisUsage,
+  IMAGE_ANALYSIS_DAILY_LIMIT,
+} from "@/services";
 import { VegetableAnalysisResult } from "@/types/vision";
 
 type Props = {
@@ -91,6 +96,15 @@ const ImageAnalysisModal = ({
     setErrorMessage("");
 
     try {
+      const usageToday = await getImageAnalysisUsageToday();
+      if (usageToday >= IMAGE_ANALYSIS_DAILY_LIMIT) {
+        setErrorMessage(
+          `Olet käyttänyt päivittäisen kuva-analyysikiintiösi (${IMAGE_ANALYSIS_DAILY_LIMIT}/${IMAGE_ANALYSIS_DAILY_LIMIT}). Yritä uudelleen huomenna.`
+        );
+        setAnalysisState("error");
+        return;
+      }
+
       const results = await analyzeVegetableImage(imageUri);
 
       if (results.length === 0) {
@@ -99,6 +113,7 @@ const ImageAnalysisModal = ({
         return;
       }
 
+      await incrementImageAnalysisUsage();
       onAnalysisComplete(results);
       handleClose();
     } catch (error) {
@@ -135,6 +150,13 @@ const ImageAnalysisModal = ({
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Tunnista kuvasta</Text>
+
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={15} color="#888" />
+            <Text style={styles.infoText}>
+              Kuva-analyysi on suuntaa-antava. Tarkistathan tulokset ennen tallentamista. Päivittäinen raja on {IMAGE_ANALYSIS_DAILY_LIMIT} analyysiä.
+            </Text>
+          </View>
 
           {!imageUri ? (
             <View>
@@ -245,6 +267,23 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     marginBottom: theme.spacing.large,
     textAlign: "center",
+  },
+  infoBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "rgba(0,0,0,0.04)",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: theme.spacing.medium,
+    gap: 6,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#888",
+    lineHeight: 17,
+    fontFamily: theme.fontFamily.regular,
   },
   buttonContainer: {
     flexDirection: "row",
