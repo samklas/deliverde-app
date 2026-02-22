@@ -16,13 +16,12 @@ import { theme } from "@/theme";
 import { auth } from "@/firebaseConfig";
 import {
   getCompetition,
-  getCompetitionRankings,
+  getCompetitionGroups,
   leaveCompetition,
   deleteCompetition,
   getUserGroups,
 } from "@/services";
-import { Competition } from "@/types/competitions";
-import { CompetitionGroupRanking } from "@/types/competitions";
+import { Competition, CompetitionGroup } from "@/types/competitions";
 
 export default function CompetitionDetailScreen() {
   const { competitionId } = useLocalSearchParams<{
@@ -32,7 +31,7 @@ export default function CompetitionDetailScreen() {
   const currentUserId = auth.currentUser?.uid;
 
   const [competition, setCompetition] = useState<Competition | null>(null);
-  const [rankings, setRankings] = useState<CompetitionGroupRanking[]>([]);
+  const [competitionGroups, setCompetitionGroups] = useState<CompetitionGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [myGroupIds, setMyGroupIds] = useState<string[]>([]);
@@ -53,13 +52,13 @@ export default function CompetitionDetailScreen() {
       const userGroupIds = userGroups.map((g) => g.id);
       setMyGroupIds(userGroupIds);
 
-      const [competitionData, rankingsData] = await Promise.all([
+      const [competitionData, groupsData] = await Promise.all([
         getCompetition(competitionId),
-        getCompetitionRankings(competitionId, userGroupIds),
+        getCompetitionGroups(competitionId),
       ]);
 
       setCompetition(competitionData);
-      setRankings(rankingsData);
+      setCompetitionGroups(groupsData);
     } catch (error) {
       console.error("Error loading competition:", error);
       Alert.alert("Virhe", "Kilpailun tietojen lataaminen epäonnistui");
@@ -203,7 +202,10 @@ export default function CompetitionDetailScreen() {
           {isCreator && (
             <Pressable style={styles.inviteCard} onPress={handleShareCode}>
               <View style={styles.inviteContent}>
-                <Text style={styles.inviteLabel}>Kutsukoodi</Text>
+                <Text style={styles.inviteLabel}>Kilpailukoodi</Text>
+                <Text style={styles.inviteHint}>
+                  Jakamalla koodin muut ryhmät pääsevät osallistumaan kilpailuun
+                </Text>
                 <Text style={styles.inviteCode}>
                   {competition.inviteCode}
                 </Text>
@@ -214,43 +216,32 @@ export default function CompetitionDetailScreen() {
             </Pressable>
           )}
 
-          {/* Rankings */}
-          <Text style={styles.sectionTitle}>Tulokset</Text>
-          <Text style={styles.sectionSubtitle}>
-            Keskimääräiset pisteet per jäsen
-          </Text>
+          {/* Groups list */}
+          <Text style={styles.sectionTitle}>Kilpailuun osallistujat</Text>
 
-          {rankings.length === 0 ? (
+          {competitionGroups.length === 0 ? (
             <View style={styles.emptyRankings}>
-              <Text style={styles.emptyText}>Ei vielä tuloksia</Text>
+              <Text style={styles.emptyText}>Ei osallistujia vielä</Text>
             </View>
           ) : (
             <>
-              {rankings.map((ranking, index) => (
-                <View
-                  key={ranking.groupId}
-                  style={[
-                    styles.rankingRow,
-                    ranking.myGroup && styles.myGroupHighlight,
-                  ]}
-                >
-                  <View style={styles.rankBadge}>
-                    <Text style={styles.rankNumber}>{index + 1}</Text>
-                  </View>
-                  <View style={styles.rankingInfo}>
-                    <Text style={styles.rankingGroupName} numberOfLines={1}>
-                      {ranking.groupName}
-                      {ranking.myGroup ? " (sinun)" : ""}
-                    </Text>
-                    <Text style={styles.rankingMembers}>
-                      {ranking.memberCount} jäsentä
+              {competitionGroups.map((group) => {
+                const isMyGroup = myGroupIds.includes(group.groupId);
+                return (
+                  <View
+                    key={group.groupId}
+                    style={[styles.groupRow, isMyGroup && styles.myGroupHighlight]}
+                  >
+                    <View style={styles.groupIcon}>
+                      <Ionicons name="people" size={20} color="#37891C" />
+                    </View>
+                    <Text style={styles.groupName} numberOfLines={1}>
+                      {group.groupName}
+                      {isMyGroup ? " (sinun)" : ""}
                     </Text>
                   </View>
-                  <Text style={styles.rankingPoints}>
-                    {ranking.averagePoints} p
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </>
           )}
 
@@ -373,6 +364,13 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 4,
   },
+  inviteHint: {
+    fontSize: 12,
+    fontFamily: theme.fontFamily.regular,
+    color: "#999",
+    marginBottom: 6,
+    lineHeight: 16,
+  },
   inviteCode: {
     fontSize: 20,
     fontFamily: theme.fontFamily.bold,
@@ -394,12 +392,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 4,
   },
-  sectionSubtitle: {
-    fontSize: 13,
-    fontFamily: theme.fontFamily.regular,
-    color: "#999",
-    marginBottom: 12,
-  },
   emptyRankings: {
     paddingVertical: 32,
     alignItems: "center",
@@ -409,7 +401,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.regular,
     color: "#999",
   },
-  rankingRow: {
+  groupRow: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
@@ -427,44 +419,20 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: "#37891C",
   },
-  rankBadge: {
+  groupIcon: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#37891C",
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
-  rankNumber: {
-    color: "white",
-    fontSize: 15,
-    fontFamily: theme.fontFamily.bold,
-  },
-  rankingInfo: {
+  groupName: {
     flex: 1,
-  },
-  rankingGroupName: {
     fontSize: 15,
     fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
-    marginBottom: 2,
-  },
-  rankingMembers: {
-    fontSize: 12,
-    fontFamily: theme.fontFamily.regular,
-    color: "#999",
-  },
-  rankingPoints: {
-    fontSize: 16,
-    fontFamily: theme.fontFamily.bold,
-    color: "#37891C",
-    marginLeft: 8,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#ddd",
-    marginVertical: 12,
   },
   actions: {
     marginTop: 24,

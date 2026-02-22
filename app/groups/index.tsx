@@ -7,6 +7,7 @@ import {
   Pressable,
   RefreshControl,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +25,7 @@ const GroupsScreen = observer(() => {
   const router = useRouter();
   const { groups, isLoading, setGroups, setIsLoading } = groupsStore;
   const [activeTab, setActiveTab] = useState<Tab>("groups");
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [competitions, setCompetitions] = useState<CompetitionSummary[]>([]);
   const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(false);
@@ -242,6 +244,14 @@ const GroupsScreen = observer(() => {
         </Pressable>
       </View>
 
+      {/* Info link */}
+      <Pressable onPress={() => setShowInfoModal(true)} style={styles.infoLink}>
+        <Ionicons name="help-circle-outline" size={18} color="#37891C" />
+        <Text style={styles.infoLinkText}>
+          {activeTab === "groups" ? "Miten ryhmät toimivat?" : "Miten kilpailut toimivat?"}
+        </Text>
+      </Pressable>
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -256,6 +266,94 @@ const GroupsScreen = observer(() => {
       >
         {activeTab === "groups" ? renderGroupsTab() : renderCompetitionsTab()}
       </ScrollView>
+
+      {/* Info modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showInfoModal}
+        onRequestClose={() => setShowInfoModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {activeTab === "groups" ? (
+              <>
+                <View style={styles.modalHeader}>
+                  <Ionicons name="people" size={32} color="#37891C" />
+                  <Text style={styles.modalTitle}>Miten ryhmät toimivat?</Text>
+                </View>
+                <View style={styles.modalItem}>
+                  <View style={styles.modalItemIcon}>
+                    <Ionicons name="person-add-outline" size={20} color="#37891C" />
+                  </View>
+                  <View style={styles.modalItemContent}>
+                    <Text style={styles.modalItemTitle}>Luo tai liity ryhmään</Text>
+                    <Text style={styles.modalItemDesc}>
+                      Luo oma ryhmä tai liity kaverin ryhmään ryhmäkoodilla. Yhdessä on hauskempaa!
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.modalItem}>
+                  <View style={styles.modalItemIcon}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color="#37891C" />
+                  </View>
+                  <View style={styles.modalItemContent}>
+                    <Text style={styles.modalItemTitle}>Kilpaile muita ryhmiä vastaan</Text>
+                    <Text style={styles.modalItemDesc}>
+                      Ryhmät voivat liittyä kilpailuihin, joissa kilpaillaan toisia ryhmiä vastaan. Kilpailuiden luonti ja niihin liittyminen tapahtuu "Kilpailut"-välilehdeltä.
+                    </Text>
+                  </View>
+                </View>
+                
+              </>
+            ) : (
+              <>
+                <View style={styles.modalHeader}>
+                  <Ionicons name="trophy" size={32} color="#37891C" />
+                  <Text style={styles.modalTitle}>Miten kilpailut toimivat?</Text>
+                </View>
+                <View style={styles.modalItem}>
+                  <View style={styles.modalItemIcon}>
+                    <Ionicons name="enter-outline" size={20} color="#37891C" />
+                  </View>
+                  <View style={styles.modalItemContent}>
+                    <Text style={styles.modalItemTitle}>Liity tai luo kilpailu</Text>
+                    <Text style={styles.modalItemDesc}>
+                      Ryhmän omistaja voi luoda uuden kilpailun tai liittyä olemassa olevaan kilpailukoodilla.
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.modalItem}>
+                  <View style={styles.modalItemIcon}>
+                    <Ionicons name="people-outline" size={20} color="#37891C" />
+                  </View>
+                  <View style={styles.modalItemContent}>
+                    <Text style={styles.modalItemTitle}>Ryhmät kilpailevat</Text>
+                    <Text style={styles.modalItemDesc}>
+                      Kilpailuissa ryhmät kilpailevat toisiaan vastaan.
+                    </Text>
+                  </View>
+                </View>
+                
+                <View style={styles.modalItem}>
+                  <View style={styles.modalItemIcon}>
+                    <Ionicons name="flag-outline" size={20} color="#37891C" />
+                  </View>
+                  <View style={styles.modalItemContent}>
+                    <Text style={styles.modalItemTitle}>Tasapuolinen kilpailu</Text>
+                    <Text style={styles.modalItemDesc}>
+                      Ryhmien pisteet lasketaan ryhmien jäsenten pisteiden keskiarvona, joten kaikilla on tasavertaiset lähtökohdat, vaikka ryhmät olisivat erikokoisia.
+                    </Text>
+                  </View>
+                </View>
+              </>
+            )}
+            <Pressable onPress={() => setShowInfoModal(false)} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Selvä!</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 });
@@ -398,6 +496,87 @@ const styles = StyleSheet.create({
     color: "#aaa",
     marginTop: 8,
     lineHeight: 18,
+  },
+  infoLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: theme.spacing.small,
+  },
+  infoLinkText: {
+    color: "#37891C",
+    fontSize: 14,
+    fontFamily: theme.fontFamily.medium,
+    marginLeft: 6,
+    marginTop: 4,
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.large,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 340,
+  },
+  modalHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
+    marginTop: 12,
+    textAlign: "center",
+  },
+  modalItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  modalItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  modalItemContent: {
+    flex: 1,
+  },
+  modalItemTitle: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 2,
+  },
+  modalItemDesc: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    lineHeight: 18,
+  },
+  modalButton: {
+    backgroundColor: "#37891C",
+    padding: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });
 

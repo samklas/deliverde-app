@@ -181,7 +181,10 @@ export default function GroupDetailScreen() {
           {/* Invite code card */}
           <Pressable style={styles.inviteCard} onPress={handleShareCode}>
             <View style={styles.inviteContent}>
-              <Text style={styles.inviteLabel}>Kutsukoodi</Text>
+              <Text style={styles.inviteLabel}>Ryhmäkoodi</Text>
+              <Text style={styles.inviteHint}>
+                Jakamalla koodin muut käyttäjät pääsevät liittymään ryhmään
+              </Text>
               <Text style={styles.inviteCode}>{group.inviteCode}</Text>
             </View>
             <View style={styles.shareButton}>
@@ -299,6 +302,13 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.medium,
     color: "#666",
     marginBottom: 4,
+  },
+  inviteHint: {
+    fontSize: 12,
+    fontFamily: theme.fontFamily.regular,
+    color: "#999",
+    marginBottom: 6,
+    lineHeight: 16,
   },
   inviteCode: {
     fontSize: 20,

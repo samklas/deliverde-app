@@ -134,7 +134,7 @@ export default function Tab() {
           >
             <View style={styles.groupsBoxContent}>
               <View style={styles.groupsTextContainer}>
-                <Text style={styles.sectionTitle}>Ryhmät</Text>
+                <Text style={styles.sectionTitle}>Ryhmät ja kilpailut</Text>
                 <Text style={styles.goalText}>
                   Luo tai liity ryhmiin ja kilpaile muita ryhmiä vastaan!
                 </Text>

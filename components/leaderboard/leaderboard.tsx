@@ -175,7 +175,7 @@ const LeaderboardTab = observer(() => {
             <View style={styles.infoBanner}>
               <Ionicons name="information-circle-outline" size={16} color="#888" />
               <Text style={styles.infoBannerText}>
-                Voit luoda tai liittyä kilpailuun Ryhmät-sivulta
+                Voit luoda tai liittyä kilpailuihin Profiili-sivulta
               </Text>
             </View>
             {renderCompetitionsTab()}
