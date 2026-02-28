@@ -178,6 +178,21 @@ export default function GroupDetailScreen() {
             ) : null}
           </View>
 
+          {/* Leaderboard card */}
+          <Pressable
+            style={styles.leaderboardCard}
+            onPress={() => router.push(`/groups/${groupId}/leaderboard` as any)}
+          >
+            <View style={styles.leaderboardIcon}>
+              <Ionicons name="trophy" size={22} color="#37891C" />
+            </View>
+            <View style={styles.leaderboardText}>
+              <Text style={styles.leaderboardTitle}>Tulokset</Text>
+              <Text style={styles.leaderboardSubtitle}>Katso ryhmän pisteet</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#37891C" />
+          </Pressable>
+
           {/* Invite code card */}
           <Pressable style={styles.inviteCard} onPress={handleShareCode}>
             <View style={styles.inviteContent}>
@@ -277,6 +292,42 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 8,
     lineHeight: 20,
+  },
+  leaderboardCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  leaderboardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(55, 137, 28, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  leaderboardText: {
+    flex: 1,
+  },
+  leaderboardTitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+  },
+  leaderboardSubtitle: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    marginTop: 2,
   },
   inviteCard: {
     flexDirection: "row",

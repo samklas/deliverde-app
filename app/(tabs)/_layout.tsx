@@ -36,21 +36,22 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="leaderboard"
-        options={{
-          title: "Tulokset",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="trophy" color={color} />
-          ),
-        }}
-      />
+     
       <Tabs.Screen
         name="greens"
         options={{
           title: "Tavoitteet",
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="leaf" color={color} />
+          ),
+        }}
+      />
+       <Tabs.Screen
+        name="groups"
+        options={{
+          title: "Ryhmät",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="users" color={color} />
           ),
         }}
       />
@@ -61,13 +62,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="book" color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="shop"
-        options={{
-          title: "Kauppa",
-          href: null,
         }}
       />
       <Tabs.Screen

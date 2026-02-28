@@ -32,6 +32,12 @@ export default function GroupDetailLayout() {
           ),
         }}
       />
+      <Stack.Screen
+        name="leaderboard"
+        options={{
+          title: "",
+        }}
+      />
     </Stack>
   );
 }

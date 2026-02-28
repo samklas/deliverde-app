@@ -28,7 +28,7 @@ const Tab = observer(() => {
       >
         <Ionicons name="bag-handle-outline" size={18} color={theme.colors.primary} />
         <Text style={styles.shopLink}>DeliVerde Shoppiin</Text>
-        <Ionicons name="open-outline" size={16} color={theme.colors.primary} />
+        
       </Pressable>
       <DailyChallengeBox />
       <LeaderboardBox />

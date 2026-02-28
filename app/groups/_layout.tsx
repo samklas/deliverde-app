@@ -1,11 +1,7 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import React from "react";
-import { Pressable, Text, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function GroupsLayout() {
-  const router = useRouter();
-
   return (
     <Stack
       screenOptions={{
@@ -20,18 +16,6 @@ export default function GroupsLayout() {
         headerBackTitle: "Takaisin",
       }}
     >
-      <Stack.Screen
-        name="index"
-        options={{
-          title: "Ryhmät",
-          headerLeft: () => (
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="chevron-back" size={28} color="#0c4c25" />
-              <Text style={styles.backText}>Takaisin</Text>
-            </Pressable>
-          ),
-        }}
-      />
       <Stack.Screen
         name="create"
         options={{
@@ -53,16 +37,3 @@ export default function GroupsLayout() {
     </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: -8,
-  },
-  backText: {
-    color: "#0c4c25",
-    fontSize: 17,
-    fontFamily: "Poppins_400Regular",
-  },
-});

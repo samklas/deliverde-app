@@ -128,22 +128,7 @@ export default function Tab() {
             <Text style={styles.username}>{username}</Text>
           </View>
 
-          <Pressable
-            style={[styles.box, styles.groupsBox]}
-            onPress={() => router.push("/groups" as any)}
-          >
-            <View style={styles.groupsBoxContent}>
-              <View style={styles.groupsTextContainer}>
-                <Text style={styles.sectionTitle}>Ryhmät</Text>
-                <Text style={styles.goalText}>
-                  Luo tai liity ryhmiin ja kilpaile kavereiden kanssa!
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
-            </View>
-          </Pressable>
-
-          <Pressable
+<Pressable
             style={[styles.box, styles.goalBox]}
             onPress={() => setGoalModalVisible(true)}
           >
@@ -154,18 +139,6 @@ export default function Tab() {
             </View>
           </Pressable>
 
-          {inviteCode && (
-            <Pressable style={styles.box} onPress={shareInviteCode}>
-              <Text style={styles.sectionTitle}>Kutsukoodisi</Text>
-              <View style={styles.boxContent}>
-                <Text style={styles.goalText}>{inviteCode}</Text>
-                <Ionicons name="share-outline" size={20} color={theme.colors.primary} />
-              </View>
-              <Text style={styles.helpText}>
-                Jaa tämä koodi kavereillesi ja olet automaattisesti mukana palkintoarvonnassa!
-              </Text>
-            </Pressable>
-          )}
 
           <Pressable
             style={styles.box}
@@ -258,7 +231,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   goalBox: {
-    marginTop: 0,
+    marginTop: 50,
   },
   box: {
     backgroundColor: "white",
@@ -297,24 +270,5 @@ const styles = StyleSheet.create({
   deleteText: {
     color: theme.colors.error,
     fontFamily: theme.fontFamily.medium,
-  },
-  groupsBox: {
-    marginTop: 50,
-  },
-  groupsBoxContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  groupsIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(55, 137, 28, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  groupsTextContainer: {
-    flex: 1,
   },
 });
