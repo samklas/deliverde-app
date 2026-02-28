@@ -1,4 +1,4 @@
-import { Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { Text, StyleSheet, ScrollView, Pressable, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
@@ -22,6 +22,14 @@ const Tab = observer(() => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      <Pressable
+        style={styles.shopLinkContainer}
+        onPress={() => Linking.openURL("https://deliverde-shop.myshopify.com/collections/all")}
+      >
+        <Ionicons name="bag-handle-outline" size={18} color={theme.colors.primary} />
+        <Text style={styles.shopLink}>DeliVerde Shoppiin</Text>
+        <Ionicons name="open-outline" size={16} color={theme.colors.primary} />
+      </Pressable>
       <DailyChallengeBox />
       <LeaderboardBox />
       {recipeOfMonth && recipeOfMonth.id && (
@@ -74,5 +82,19 @@ const styles = StyleSheet.create({
   feedbackText: {
     color: theme.colors.primary,
     fontFamily: theme.fontFamily.semiBold,
+  },
+  shopLinkContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    alignSelf: "center",
+    marginBottom: theme.spacing.medium,
+  },
+  shopLink: {
+    color: theme.colors.primary,
+    fontFamily: theme.fontFamily.semiBold,
+    textDecorationLine: "underline",
+    fontSize: 15,
   },
 });
