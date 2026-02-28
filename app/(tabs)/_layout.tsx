@@ -51,7 +51,7 @@ export default function TabLayout() {
         options={{
           title: "Ryhmät",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="users" color={color} />
+            <Ionicons size={28} name="people" color={color} />
           ),
         }}
       />

@@ -140,7 +140,7 @@ export default function Tab() {
           </Pressable>
 
 
-          <Pressable
+<Pressable
             style={styles.box}
             onPress={() => router.push("/feedback")}
           >
@@ -170,7 +170,8 @@ export default function Tab() {
           onClose={() => setGoalModalVisible(false)}
           onSave={handleSaveGoal}
         />
-        </ScrollView>
+
+</ScrollView>
 
         
       
