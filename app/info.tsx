@@ -47,7 +47,7 @@ export default function Info() {
         </View>
 
         <Text style={styles.title}>Tervetuloa!</Text>
-        <Text style={styles.subtitle}>Näin DeliVerde toimii</Text>
+        <Text style={styles.subtitle}>Näin DeliVerde-sovellus toimii</Text>
 
         {/* Info cards */}
         <View style={styles.infoContainer}>

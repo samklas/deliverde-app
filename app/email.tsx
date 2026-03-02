@@ -26,18 +26,18 @@ export default function Email() {
       if (email.trim()) {
         await storage.set(STORAGE_KEYS.ONBOARDING_EMAIL, email.trim());
       }
-      router.push("/friendCode");
+      router.push("/userDetails");
     } catch (error) {
       console.error("Error saving email:", error);
       // Continue anyway even if email save fails
-      router.push("/friendCode");
+      router.push("/userDetails");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSkip = () => {
-    router.push("/friendCode");
+    router.push("/userDetails");
   };
 
   return (

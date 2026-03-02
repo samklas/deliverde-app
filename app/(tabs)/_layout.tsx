@@ -1,3 +1,4 @@
+import { FontAwesome6 } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
@@ -51,7 +52,8 @@ export default function TabLayout() {
         options={{
           title: "Ryhmät",
           tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="people" color={color} />
+            
+            <FontAwesome6 size={24} name="user-group" color={color} />
           ),
         }}
       />

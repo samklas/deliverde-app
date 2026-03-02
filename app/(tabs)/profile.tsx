@@ -12,6 +12,7 @@ import {
   Pressable,
   Share,
   ScrollView,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser, isAnonymousUser, deleteAccount } from "@/services";
@@ -25,6 +26,7 @@ export default function Tab() {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [goalModalVisible, setGoalModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const { avatarId, dailyTarget } = userStore;
   const router = useRouter();
 
@@ -140,6 +142,16 @@ export default function Tab() {
           </Pressable>
 
 
+          <Pressable
+            style={styles.box}
+            onPress={() => setInfoModalVisible(true)}
+          >
+            <View style={styles.boxContent}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Näin DeliVerde toimii</Text>
+              <Ionicons name="information-circle-outline" size={22} color={theme.colors.primary} />
+            </View>
+          </Pressable>
+
 <Pressable
             style={styles.box}
             onPress={() => router.push("/feedback")}
@@ -170,6 +182,41 @@ export default function Tab() {
           onClose={() => setGoalModalVisible(false)}
           onSave={handleSaveGoal}
         />
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={infoModalVisible}
+          onRequestClose={() => setInfoModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Text style={styles.modalTitle}>Näin DeliVerde toimii</Text>
+                <Text style={styles.modalSubtitle}>Tervetuloa!</Text>
+                {[
+                  { title: "Seuraa kasvisten kulutusta", description: "Kirjaa syömäsi kasvikset ja kerää pisteitä jokaisesta 100 grammasta." },
+                  { title: "Saavuta päivittäinen tavoite", description: "Valitse oma kasvistavoitteesi ja ansaitse bonuspisteitä kun saavutat sen." },
+                  { title: "Kilpaile kavereita vastaan", description: "Vertaa pisteitäsi muihin ja nouse tulostaulun kärkeen." },
+                  { title: "Löydä uusia reseptejä", description: "Selaa reseptejä ja saa inspiraatiota kasvispitoiseen ruokavalioon." },
+                ].map((item, index) => (
+                  <View key={index} style={styles.infoItem}>
+                    <View style={styles.infoNumber}>
+                      <Text style={styles.infoNumberText}>{index + 1}</Text>
+                    </View>
+                    <View style={styles.infoItemContent}>
+                      <Text style={styles.infoItemTitle}>{item.title}</Text>
+                      <Text style={styles.infoItemDescription}>{item.description}</Text>
+                    </View>
+                  </View>
+                ))}
+                <Pressable style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
+                  <Text style={styles.modalCloseButtonText}>Sulje</Text>
+                </Pressable>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
 
 </ScrollView>
 
@@ -271,5 +318,79 @@ const styles = StyleSheet.create({
   deleteText: {
     color: theme.colors.error,
     fontFamily: theme.fontFamily.medium,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 48,
+    maxHeight: "85%",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.medium,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 20,
+  },
+  infoNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#37891C",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+    marginTop: 2,
+  },
+  infoNumberText: {
+    color: "white",
+    fontSize: 15,
+    fontFamily: theme.fontFamily.bold,
+  },
+  infoItemContent: {
+    flex: 1,
+  },
+  infoItemTitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 4,
+  },
+  infoItemDescription: {
+    fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    lineHeight: 20,
+  },
+  modalCloseButton: {
+    backgroundColor: "#37891C",
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  modalCloseButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });
