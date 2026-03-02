@@ -53,7 +53,7 @@ export default function Email() {
         {/* Progress indicator */}
         <View style={styles.progressContainer}>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: "40%" }]} />
+            <View style={[styles.progressFill, { width: "60%" }]} />
           </View>
         </View>
 
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",

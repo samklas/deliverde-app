@@ -52,7 +52,7 @@ export default function RootLayout() {
             setInitialRoute("(tabs)");
           } else {
             // User is authenticated but hasn't completed profile
-            setInitialRoute("userDetails");
+            setInitialRoute("welcome");
           }
         } else {
           // User not logged in
@@ -138,9 +138,18 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="info"
+          name="welcome"
           options={{
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="info"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
           }}
         />
         <Stack.Screen
@@ -181,8 +190,8 @@ export default function RootLayout() {
           name="leaderboard-view"
           options={{
             headerShown: true,
-            title: "Tulokset",
-            headerBackTitle: "Etusivu",
+            title: "",
+            headerBackTitle: "Takaisin",
             headerTintColor: "#0c4c25",
           }}
         />
