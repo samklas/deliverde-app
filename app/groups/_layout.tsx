@@ -19,18 +19,24 @@ export default function GroupsLayout() {
       <Stack.Screen
         name="create"
         options={{
-          title: "Luo ryhmä",
-        }}
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
+          }}
       />
       <Stack.Screen
         name="join"
         options={{
-          title: "Liity ryhmään",
+          headerBackTitle: "Takaisin",
+          title: "",
         }}
       />
       <Stack.Screen
         name="[groupId]"
         options={{
+          headerBackTitle: "Takaisin",
+          title: "",
           headerShown: false,
         }}
       />

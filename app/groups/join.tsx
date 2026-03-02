@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { joinGroup, getGroup } from "@/services";
@@ -61,6 +61,22 @@ export default function JoinGroupScreen() {
   };
 
   return (
+    <>
+    <Stack.Screen
+      options={{
+        headerLeft: () => (
+          <Pressable
+            onPress={() => router.back()}
+            style={{ flexDirection: "row", alignItems: "center", marginLeft: 4 }}
+          >
+            <Ionicons name="chevron-back" size={28} color="#0c4c25" />
+            <Text style={{ color: "#0c4c25", fontSize: 17, fontFamily: theme.fontFamily.regular }}>
+              Takaisin
+            </Text>
+          </Pressable>
+        ),
+      }}
+    />
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
@@ -113,6 +129,7 @@ export default function JoinGroupScreen() {
         </Pressable>
       </ScrollView>
     </View>
+    </>
   );
 }
 

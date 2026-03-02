@@ -156,7 +156,7 @@ export default function GroupDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: group.name }} />
+      <Stack.Screen options={{ title: "" }} />
       <View style={styles.container}>
         <ScrollView
           style={styles.scrollView}
