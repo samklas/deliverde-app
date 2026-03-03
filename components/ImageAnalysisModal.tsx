@@ -12,7 +12,11 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { analyzeVegetableImage } from "@/services";
+import {
+  analyzeVegetableImage,
+  getRemainingAnalyses,
+  incrementAnalysisCount,
+} from "@/services";
 import { VegetableAnalysisResult } from "@/types/vision";
 
 type Props = {
@@ -32,6 +36,13 @@ const ImageAnalysisModal = ({
   const [analysisState, setAnalysisState] = useState<AnalysisState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showSettingsPrompt, setShowSettingsPrompt] = useState(false);
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (isVisible) {
+      getRemainingAnalyses().then(setRemaining);
+    }
+  }, [isVisible]);
 
   const handlePickImage = async (useCamera: boolean) => {
     try {
@@ -87,11 +98,20 @@ const ImageAnalysisModal = ({
   const handleAnalyze = async () => {
     if (!imageUri) return;
 
+    const currentRemaining = await getRemainingAnalyses();
+    if (currentRemaining <= 0) {
+      setErrorMessage("Olet käyttänyt päivittäisen analysointikiintiösi (5/5). Yritä huomenna uudelleen.");
+      setAnalysisState("error");
+      return;
+    }
+
     setAnalysisState("analyzing");
     setErrorMessage("");
 
     try {
       const results = await analyzeVegetableImage(imageUri);
+      await incrementAnalysisCount();
+      setRemaining(currentRemaining - 1);
 
       if (results.length === 0) {
         setErrorMessage("Kuvasta ei tunnistettu vihanneksia.");
@@ -123,6 +143,7 @@ const ImageAnalysisModal = ({
     setAnalysisState("idle");
     setErrorMessage("");
     setShowSettingsPrompt(false);
+    setRemaining(null);
     onClose();
   };
 
@@ -135,6 +156,16 @@ const ImageAnalysisModal = ({
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Tunnista kuvasta</Text>
+
+          {remaining !== null && (
+            <View style={[styles.usageBadge, remaining === 0 && styles.usageBadgeEmpty]}>
+              <Text style={[styles.usageText, remaining === 0 && styles.usageTextEmpty]}>
+                {remaining === 0
+                  ? "Päivittäinen kiintiö täynnä (0/5)"
+                  : `${remaining}/5 analyysiä jäljellä tänään`}
+              </Text>
+            </View>
+          )}
 
           {!imageUri ? (
             <View>
@@ -149,22 +180,31 @@ const ImageAnalysisModal = ({
                 </View>
               )}
 
-              <View style={styles.buttonContainer}>
+              <View style={[styles.buttonContainer, remaining === 0 && styles.disabledContainer]}>
                 <TouchableOpacity
-                  style={styles.optionButton}
-                  onPress={() => handlePickImage(true)}
+                  style={[styles.optionButton, remaining === 0 && styles.disabledButton]}
+                  onPress={() => remaining !== 0 && handlePickImage(true)}
+                  disabled={remaining === 0}
                 >
-                  <Ionicons name="camera" size={32} color="#37891C" />
-                  <Text style={styles.optionText}>Ota kuva</Text>
+                  <Ionicons name="camera" size={32} color={remaining === 0 ? "#bbb" : "#37891C"} />
+                  <Text style={[styles.optionText, remaining === 0 && styles.disabledText]}>Ota kuva</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.optionButton}
-                  onPress={() => handlePickImage(false)}
+                  style={[styles.optionButton, remaining === 0 && styles.disabledButton]}
+                  onPress={() => remaining !== 0 && handlePickImage(false)}
+                  disabled={remaining === 0}
                 >
-                  <Ionicons name="images" size={32} color="#37891C" />
-                  <Text style={styles.optionText}>Valitse galleriasta</Text>
+                  <Ionicons name="images" size={32} color={remaining === 0 ? "#bbb" : "#37891C"} />
+                  <Text style={[styles.optionText, remaining === 0 && styles.disabledText]}>Valitse galleriasta</Text>
                 </TouchableOpacity>
+              </View>
+
+              <View style={styles.infoBox}>
+                <Ionicons name="information-circle-outline" size={15} color="#888" />
+                <Text style={styles.infoText}>
+                  Kasvikset tunnistetaan kuvasta tekoälyn avulla, joten tulos ei aina ole täysin tarkka.
+                </Text>
               </View>
             </View>
           ) : (
@@ -361,6 +401,48 @@ const styles = StyleSheet.create({
   settingsButtonText: {
     color: "white",
     fontWeight: "600",
+  },
+  usageBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#e8f5e9",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: theme.borderRadius.medium,
+    alignSelf: "center",
+    marginBottom: theme.spacing.medium,
+  },
+  usageBadgeEmpty: {
+    backgroundColor: "#ffebee",
+  },
+  usageText: {
+    fontSize: 13,
+    color: "#37891C",
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  usageTextEmpty: {
+    color: "#c62828",
+  },
+  disabledContainer: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    color: "#bbb",
+  },
+  infoBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    backgroundColor: "#f5f5f5",
+    padding: theme.spacing.small,
+    borderRadius: theme.borderRadius.medium,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#888",
+    lineHeight: 17,
   },
 });
 
