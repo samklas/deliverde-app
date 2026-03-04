@@ -145,15 +145,6 @@ export default function Tab() {
           </Pressable>
 
 
-          <Pressable
-            style={styles.box}
-            onPress={() => setInfoModalVisible(true)}
-          >
-            <View style={styles.boxContent}>
-              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Näin DeliVerde toimii</Text>
-              <Ionicons name="information-circle-outline" size={22} color={theme.colors.primary} />
-            </View>
-          </Pressable>
 
 <Pressable
             style={styles.box}
@@ -173,6 +164,10 @@ export default function Tab() {
               <Text style={styles.deleteText}>Poista tili</Text>
             </Pressable>
           </View>
+
+          <Pressable style={styles.infoButton} onPress={() => setInfoModalVisible(true)}>
+            <Text style={styles.infoButtonText}>?</Text>
+          </Pressable>
           <DeleteAccountModal
           visible={deleteModalVisible}
           onClose={() => setDeleteModalVisible(false)}
@@ -196,11 +191,11 @@ export default function Tab() {
             <View style={styles.modalContent}>
               <ScrollView showsVerticalScrollIndicator={false}>
                 <Text style={styles.modalTitle}>Näin DeliVerde toimii</Text>
-                <Text style={styles.modalSubtitle}>Tervetuloa!</Text>
                 {[
-                  { title: "Seuraa kasvisten kulutusta", description: "Kirjaa syömäsi kasvikset ja kerää pisteitä jokaisesta 100 grammasta." },
-                  { title: "Saavuta päivittäinen tavoite", description: "Valitse oma kasvistavoitteesi ja ansaitse bonuspisteitä kun saavutat sen." },
-                  { title: "Kilpaile kavereita vastaan", description: "Vertaa pisteitäsi muihin ja nouse tulostaulun kärkeen." },
+                  { title: "Seuraa kasvisten kulutusta", description: "Kirjaa syömäsi kasvikset Tavoitteet-välilehdellä ja näe edistymisesi kohti päivittäistä tavoitettasi." },
+                  { title: "Kerää pisteitä", description: "Jokaista 100g syötyä kasvista kohden ansaitset pisteen ja saavuttamalla päiväkohtaisen tavoitteen saat 3 bonuspistettä." },
+                  { title: "Kilpaile leikkimielisesti", description: "Voit kilpailla leikkimielisesti muita käyttäjiä vastaan keräämilläsi pisteillä Etusivu-välilehdeltä löytyvällä tulostaululla." },
+                  { title: "Haasta ystävät ja perheenjäsenet", description: "Voit perustaa ryhmiä ja haastaa ystäviä tai perheenjäseniä mukaan kilpailemaan Ryhmät-välilehdellä." },
                   { title: "Löydä uusia reseptejä", description: "Selaa reseptejä ja saa inspiraatiota kasvispitoiseen ruokavalioon." },
                 ].map((item, index) => (
                   <View key={index} style={styles.infoItem}>
@@ -248,6 +243,22 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: "center",
     marginTop: 20,
+  },
+  infoButton: {
+    alignSelf: "center",
+    marginTop: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoButtonText: {
+    color: theme.colors.primary,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
   avatar: {
     width: 120,
