@@ -20,6 +20,9 @@ const getAvatar = (avatarId: string) => {
   if (avatarId === "3") {
     return require("../../assets/images/avatar4.jpg");
   }
+  if (avatarId === "4") {
+    return require("../../assets/images/avatar5.png");
+  }
   return require("../../assets/images/avatar2.jpg");
 };
 
