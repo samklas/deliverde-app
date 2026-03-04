@@ -17,8 +17,8 @@ export default function Welcome() {
         <Text style={styles.title}>Tervetuloa DeliVerde-sovellukseen!</Text>
 
         <Text style={styles.body}>
-  Ravintosuositusten mukaan kasviksia tulisi syödä 600–800 grammaa päivässä.
-  DeliVerde-sovelluksen avulla kasvistavoitteen saavuttamisen seuraamisesta tulee helppoa ja hauskaa.
+  DeliVerde-sovelluksen avulla päivittäisen kasvistavoitteen seuraamisesta tulee helppoa ja hauskaa!
+
 </Text>
 <Text style={styles.body}>
   Sovelluksen avulla voit seurata syömiäsi kasviksia ja halutessasi haastaa
