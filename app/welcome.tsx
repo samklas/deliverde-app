@@ -14,7 +14,7 @@ export default function Welcome() {
           </View>
         </View>
 
-        <Text style={styles.title}>Tervetuloa DeliVerde-sovellukseen!</Text>
+        <Text style={styles.title} adjustsFontSizeToFit numberOfLines={2}>Tervetuloa DeliVerde -sovellukseen!</Text>
 
         <Text style={styles.body}>
   DeliVerde-sovelluksen avulla päivittäisen kasvistavoitteen seuraamisesta tulee helppoa ja hauskaa!
