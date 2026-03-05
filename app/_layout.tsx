@@ -52,7 +52,7 @@ export default function RootLayout() {
             setInitialRoute("(tabs)");
           } else {
             // User is authenticated but hasn't completed profile
-            setInitialRoute("userDetails");
+            setInitialRoute("welcome");
           }
         } else {
           // User not logged in
@@ -138,13 +138,13 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="info"
+          name="welcome"
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
-          name="email"
+          name="info"
           options={{
             headerShown: true,
             title: "",
@@ -153,7 +153,7 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="friendCode"
+          name="email"
           options={{
             headerShown: true,
             title: "",
@@ -180,6 +180,21 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="groups"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="leaderboard-view"
+          options={{
+            headerShown: true,
+            title: "",
+            headerBackTitle: "Takaisin",
+            headerTintColor: "#0c4c25",
+          }}
+        />
       </Stack>
     </View>
   );

@@ -77,7 +77,8 @@ const AnalysisResultsModal = observer(
 
     const handleAddSelected = async () => {
       const totalGrams = calculateTotalGrams();
-      const newDailyTotal = dailyTotal + Math.round(totalGrams);
+      const roundedGrams = Math.round(totalGrams);
+      const newDailyTotal = dailyTotal + roundedGrams;
 
       setDailyTotal(newDailyTotal);
       setDailyTotalForCurrentUser(newDailyTotal);

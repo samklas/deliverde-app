@@ -25,6 +25,8 @@ const AddVegetableModal = observer(
     const { dailyTotal, setDailyTotal } = userStore;
 
     const isBerry = vegetable?.category === "marjat";
+    const isSmallVeggie = !isBerry && (vegetable?.averageWeight ?? 0) < 20;
+    const useGramPicker = isBerry || isSmallVeggie;
 
     const handleAddVegetable = async () => {
       const grams = calculateTotalGrams();
@@ -65,7 +67,7 @@ const AddVegetableModal = observer(
     const calculateTotalGrams = () => {
       if (!vegetable) return 0;
 
-      if (isBerry) {
+      if (useGramPicker) {
         return parseInt(selectedHundreds) * 100 + parseInt(selectedTens);
       }
 
@@ -84,7 +86,7 @@ const AddVegetableModal = observer(
             <Text style={{ margin: "auto", marginTop: 30, fontSize: 20 }}>
               {calculateTotalGrams()}g
             </Text>
-            {isBerry ? (
+            {useGramPicker ? (
               <View
                 style={{
                   flexDirection: "row",

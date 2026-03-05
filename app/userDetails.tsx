@@ -40,6 +40,7 @@ export default function UserDetails() {
     { id: "1", item: require("@/assets/images/avatar2.jpg") },
     { id: "2", item: require("@/assets/images/avatar3.jpg") },
     { id: "3", item: require("@/assets/images/avatar4.jpg") },
+    { id: "4", item: require("@/assets/images/avatar5.png") },
   ];
 
   // Load any saved onboarding data (in case user closed app mid-flow)
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",
@@ -245,9 +246,9 @@ const styles = StyleSheet.create({
     borderColor: "#37891C",
   },
   avatarImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
   },
   continueButton: {
     backgroundColor: "#37891C",

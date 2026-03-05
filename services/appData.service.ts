@@ -1,14 +1,17 @@
 import { fetchRecipes, getRecipeOfMonth } from "./recipes.service";
 import { getUserDetails, getLeaderboardUsers } from "./users.service";
+import { getUserGroups } from "./groups.service";
 import recipeStore from "@/stores/recipeStore";
 import userStore from "@/stores/userStore";
 import leaderboardStore from "@/stores/leaderboardStore";
+import groupsStore from "@/stores/groupsStore";
 
 export const loadAppData = async (): Promise<void> => {
-  const [recipes, userDetails, leaderboardUsers] = await Promise.all([
+  const [recipes, userDetails, leaderboardUsers, userGroups] = await Promise.all([
     fetchRecipes(),
     getUserDetails(),
     getLeaderboardUsers(),
+    getUserGroups().catch(() => []), // Gracefully handle errors
   ]);
 
   // Populate recipe store
@@ -28,4 +31,7 @@ export const loadAppData = async (): Promise<void> => {
 
   // Populate leaderboard store
   leaderboardStore.setUsers(leaderboardUsers);
+
+  // Populate groups store
+  groupsStore.setGroups(userGroups);
 };

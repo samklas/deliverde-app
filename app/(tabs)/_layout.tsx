@@ -1,3 +1,4 @@
+import { FontAwesome6 } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
@@ -36,15 +37,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="leaderboard"
-        options={{
-          title: "Tulokset",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="trophy" color={color} />
-          ),
-        }}
-      />
+     
       <Tabs.Screen
         name="greens"
         options={{
@@ -54,21 +47,22 @@ export default function TabLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="groups"
+        options={{
+          title: "Ryhmät",
+          tabBarIcon: ({ color }) => (
+            
+            <FontAwesome6 size={24} name="user-group" color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="recipes"
         options={{
           title: "Reseptit",
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="book" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="shop"
-        options={{
-          title: "Kauppa",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="shopping-cart" color={color} />
           ),
         }}
       />

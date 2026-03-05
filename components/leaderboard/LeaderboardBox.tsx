@@ -3,22 +3,20 @@ import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { observer } from "mobx-react-lite";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import LeaderboardModal from "./LeaderboardModal";
+import { useRouter } from "expo-router";
 import React from "react";
 
 const LeaderboardBox = observer(() => {
-  const { setIsVisible, users } = leaderboardStore;
+  const { users } = leaderboardStore;
   const sortedUsers = users.slice(0, 3);
-
-  // Only render if we have valid users with non-empty uids
-  //if (!users.length || !users[0].uid) return null;
+  const router = useRouter();
 
   return (
-    <TouchableOpacity onPress={() => setIsVisible(true)} activeOpacity={0.8}>
+    <TouchableOpacity onPress={() => router.push("/leaderboard-view")} activeOpacity={0.8}>
       <View style={styles.box}>
         <View style={styles.headerRow}>
           <View style={styles.titleContainer}>
-            
+
             <Text style={styles.boxTitle} numberOfLines={2} adjustsFontSizeToFit>Kuukauden salaattisankarit</Text>
           </View>
         </View>
@@ -33,7 +31,6 @@ const LeaderboardBox = observer(() => {
           ))}
         </View>
       </View>
-      <LeaderboardModal />
     </TouchableOpacity>
   );
 });

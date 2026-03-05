@@ -33,4 +33,21 @@ export {
   type AuthResult,
 } from "./auth.service";
 
-export { analyzeVegetableImage } from "./vision.service";
+export {
+  analyzeVegetableImage,
+  getAnalysisUsage,
+  incrementAnalysisCount,
+  getRemainingAnalyses,
+} from "./vision.service";
+
+export {
+  createGroup,
+  joinGroup,
+  leaveGroup,
+  deleteGroup,
+  getUserGroups,
+  getGroup,
+  getGroupMembers,
+  getGroupLeaderboard,
+  getGroupLeaderboardEntries,
+} from "./groups.service";

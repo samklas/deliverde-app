@@ -17,15 +17,19 @@ export default function Info() {
   const infoItems = [
     {
       title: "Seuraa kasvisten kulutusta",
-      description: "Kirjaa syömäsi kasvikset ja kerää pisteitä jokaisesta 100 grammasta.",
+      description: "Kirjaa syömäsi kasvikset Tavoitteet-välilehdellä ja näe edistymisesi kohti päivittäistä tavoitettasi.",
     },
     {
-      title: "Saavuta päivittäinen tavoite",
-      description: "Valitse oma kasvistavoitteesi ja ansaitse bonuspisteitä kun saavutat sen.",
+      title: "Kerää pisteitä",
+      description: "Jokaista 100g syötyä kasvista kohden ansaitset pisteen ja saavuttamalla päiväkohtaisen tavoitteen saat 3 bonuspistettä.",
     },
     {
-      title: "Kilpaile kavereita vastaan",
-      description: "Vertaa pisteitäsi muihin ja nouse tulostaulun kärkeen.",
+      title: "Kilpaile leikkimielisesti",
+      description: "Voit kilpailla leikkimielisesti muita käyttäjiä vastaan keräämilläsi pisteillä Etusivu-välilehdeltä löytyvällä tulostaululla.",
+    },
+    {
+      title: "Haasta ystävät ja perheenjäsenet",
+      description: "Voit perustaa ryhmiä ja haastaa ystäviä tai perheenjäseniä mukaan kilpailemaan Ryhmät-välilehdellä.",
     },
     {
       title: "Löydä uusia reseptejä",
@@ -42,12 +46,12 @@ export default function Info() {
         {/* Progress indicator */}
         <View style={styles.progressContainer}>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: "20%" }]} />
+            <View style={[styles.progressFill, { width: "40%" }]} />
           </View>
         </View>
 
-        <Text style={styles.title}>Tervetuloa!</Text>
-        <Text style={styles.subtitle}>Näin DeliVerde toimii</Text>
+        <Text style={styles.title}>Näin sovellus toimii</Text>
+       
 
         {/* Info cards */}
         <View style={styles.infoContainer}>
@@ -82,11 +86,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.medium,
-    paddingTop: 100,
+    paddingTop: 40,
     paddingBottom: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
     textAlign: "center",

@@ -11,17 +11,16 @@ const LeaderboardTab = observer(() => {
   const currentUserId = auth.currentUser?.uid;
   const [showInfoModal, setShowInfoModal] = useState(false);
 
-  // Find current user's position
-  const currentUserIndex = users.findIndex(
-    (user) => user.uid === currentUserId
-  );
+  const currentUserIndex = users.findIndex((user) => user.uid === currentUserId);
   const isCurrentUserInTop10 = currentUserIndex < 10;
 
   if (!users.length || !users[0]?.username) {
     return (
       <View style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Ladataan tulostaulua...</Text>
+        <View style={styles.content}>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Ladataan tulostaulua...</Text>
+          </View>
         </View>
       </View>
     );
@@ -31,9 +30,11 @@ const LeaderboardTab = observer(() => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>Kuukauden salaattisankarit</Text>
+          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit>
+            Kuukauden salaattisankarit
+          </Text>
         </View>
-        {/* Highlight current user's position */}
+
         {currentUserIndex !== -1 && (
           <View style={styles.currentUserCard}>
             <View style={styles.rankBadge}>
@@ -47,13 +48,15 @@ const LeaderboardTab = observer(() => {
             </View>
           </View>
         )}
+
         <Pressable onPress={() => setShowInfoModal(true)} style={styles.infoLink}>
           <Ionicons name="help-circle-outline" size={18} color="#37891C" />
           <Text style={styles.infoLinkText}>Mistä voin saada pisteitä?</Text>
         </Pressable>
+
         <View style={styles.divider} />
+
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {/* Map users by position between 1-10 */}
           {users.slice(0, 10).map((user, index) => (
             <View
               key={user.uid || index}
@@ -65,12 +68,9 @@ const LeaderboardTab = observer(() => {
               <Text style={styles.leaderboardPosition}>
                 {index + 1}. {user.username}
               </Text>
-              <Text style={styles.leaderboardScore}>
-                {user.points} pistettä
-              </Text>
+              <Text style={styles.leaderboardScore}>{user.points} pistettä</Text>
             </View>
           ))}
-          {/* Show current user's position if outside top 10 */}
           {!isCurrentUserInTop10 && currentUserIndex !== -1 && (
             <View>
               <View style={styles.divider} />
@@ -87,7 +87,6 @@ const LeaderboardTab = observer(() => {
         </ScrollView>
       </View>
 
-      {/* Points Info Modal */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -137,19 +136,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    paddingTop: 20,
   },
   content: {
     flex: 1,
     backgroundColor: theme.colors.background,
     width: "100%",
-    padding: theme.spacing.large,
+    paddingHorizontal: theme.spacing.large,
+    paddingBottom: theme.spacing.large,
   },
   header: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 20,
+    marginTop: 20,
   },
   title: {
     fontSize: theme.fonts.title.fontSize,
@@ -232,6 +232,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: theme.fontFamily.medium,
     marginLeft: 6,
+    marginTop: 4,
+    marginBottom: 4,
+    textAlign: "center",
   },
   infoModalOverlay: {
     flex: 1,
