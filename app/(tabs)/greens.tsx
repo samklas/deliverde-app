@@ -5,9 +5,9 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { db } from "@/firebaseConfig";
-import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
+import React, { useState, useEffect, useRef } from "react";
+import { auth, db } from "@/firebaseConfig";
+import { collection, doc, getDocs, onSnapshot, writeBatch } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
@@ -30,6 +30,7 @@ const Tab = observer(() => {
   const [isCelebrationVisible, setIsCelebrationVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
     if (dailyTotal < dailyTarget) setHasCelebrated(false);
@@ -88,12 +89,40 @@ const Tab = observer(() => {
         await AsyncStorage.setItem("todayVegetables", JSON.stringify([]));
         setTodayVegetables([]);
       }
+      hasLoaded.current = true;
     };
 
     fetchVegetables();
     getLastUsedVegetables();
     getDailyTotal();
     getTodayVegetables();
+  }, []);
+
+  // Listen for real-time Firestore updates to handle the 3 AM cloud function reset
+  // while the app is open
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    const unsubscribe = onSnapshot(doc(db, "users", uid), async (snapshot) => {
+      if (!hasLoaded.current) return; // skip initial snapshot, handled by initialization
+      if (!snapshot.exists()) return;
+
+      const firestoreTotal = snapshot.data().dailyTotal ?? 0;
+
+      // If the date has changed it means the cloud function ran — clear today's vegetables
+      const today = new Date().toDateString();
+      const storedDate = await AsyncStorage.getItem("todayVegetablesDate");
+      if (storedDate !== today) {
+        await AsyncStorage.setItem("todayVegetablesDate", today);
+        await AsyncStorage.setItem("todayVegetables", JSON.stringify([]));
+        setTodayVegetables([]);
+      }
+
+      setDailyTotal(firestoreTotal);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // Trigger celebration when daily goal is reached and modal is closed
@@ -116,14 +145,8 @@ const Tab = observer(() => {
   }, [lastUsedVegetables]);
 
   useEffect(() => {
-    const saveTodayVegetables = async () => {
-      await AsyncStorage.setItem(
-        "todayVegetables",
-        JSON.stringify(todayVegetables)
-      );
-    };
-
-    saveTodayVegetables();
+    if (!hasLoaded.current) return;
+    AsyncStorage.setItem("todayVegetables", JSON.stringify(todayVegetables));
   }, [todayVegetables]);
 
   const handleAddVegetable = (vegetable: TodayVegetable) => {
