@@ -28,7 +28,7 @@ const LeaderboardTab = observer(() => {
     }
   }, []);
 
-  useFocusEffect(loadLeaderboard);
+  useFocusEffect(useCallback(() => { loadLeaderboard(); }, [loadLeaderboard]));
 
   const currentUserIndex = users.findIndex((user) => user.uid === currentUserId);
   const isCurrentUserInTop10 = currentUserIndex < 10;

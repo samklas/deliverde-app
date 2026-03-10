@@ -59,7 +59,6 @@ export default function RootLayout() {
           setInitialRoute("login");
         }
       } catch (e) {
-        console.error("Error during app initialization:", e);
         // On error, check if user is still authenticated to avoid incorrect logout
         const currentUser = auth.currentUser;
         setInitialRoute(currentUser ? "(tabs)" : "login");

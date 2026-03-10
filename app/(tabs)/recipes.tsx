@@ -42,7 +42,7 @@ const Tab = observer(() => {
     }
   }, []);
 
-  useFocusEffect(loadRecipes);
+  useFocusEffect(useCallback(() => { loadRecipes(); }, [loadRecipes]));
 
   return (
     <View style={styles.overlay}>
