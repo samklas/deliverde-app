@@ -1,15 +1,22 @@
 import leaderboardStore from "@/stores/leaderboardStore";
+import { getLeaderboardUsers } from "@/services/users.service";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { observer } from "mobx-react-lite";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 
 const LeaderboardBox = observer(() => {
   const { users } = leaderboardStore;
-  const sortedUsers = users.slice(0, 3);
+  const sortedUsers = users.filter((u) => u.uid).slice(0, 3);
   const router = useRouter();
+
+  useEffect(() => {
+    getLeaderboardUsers()
+      .then((fetched) => leaderboardStore.setUsers(fetched))
+      .catch(() => {});
+  }, []);
 
   return (
     <TouchableOpacity onPress={() => router.push("/leaderboard-view")} activeOpacity={0.8}>

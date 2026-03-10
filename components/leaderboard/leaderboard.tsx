@@ -1,18 +1,57 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Modal } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import leaderboardStore from "@/stores/leaderboardStore";
+import { getLeaderboardUsers } from "@/services/users.service";
 import { auth } from "@/firebaseConfig";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 
 const LeaderboardTab = observer(() => {
   const { users } = leaderboardStore;
   const currentUserId = auth.currentUser?.uid;
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const loadLeaderboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(false);
+      const fetched = await getLeaderboardUsers();
+      leaderboardStore.setUsers(fetched);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => { loadLeaderboard(); }, [loadLeaderboard]));
 
   const currentUserIndex = users.findIndex((user) => user.uid === currentUserId);
   const isCurrentUserInTop10 = currentUserIndex < 10;
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#37891C" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Ionicons name="alert-circle-outline" size={48} color="#ccc" />
+        <Text style={styles.errorText}>Tulostaulun lataus epäonnistui</Text>
+        <Pressable style={styles.retryButton} onPress={loadLeaderboard}>
+          <Text style={styles.retryText}>Yritä uudelleen</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (!users.length || !users[0]?.username) {
     return (
@@ -137,6 +176,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  centered: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
   content: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -235,6 +279,22 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 4,
     textAlign: "center",
+  },
+  errorText: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.regular,
+    color: "#999",
+  },
+  retryButton: {
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  retryText: {
+    color: theme.colors.primary,
+    fontFamily: theme.fontFamily.medium,
   },
   infoModalOverlay: {
     flex: 1,
