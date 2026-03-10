@@ -8,7 +8,8 @@ import LeaderboardBox from "@/components/leaderboard/LeaderboardBox";
 import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
 import { useRouter } from "expo-router";
 import { useFavorites } from "@/hooks";
-import React from "react";
+import { fetchRecipeOfMonth } from "@/services/recipes.service";
+import React, { useEffect } from "react";
 
 const Tab = observer(() => {
   const router = useRouter();
@@ -19,6 +20,13 @@ const Tab = observer(() => {
 
   // Use live favorites if available, otherwise use stored ones
   const currentFavorites = liveFavorites.length > 0 ? liveFavorites : favoriteRecipes;
+
+  useEffect(() => {
+    if (recipeOfMonth?.id) return;
+    fetchRecipeOfMonth()
+      .then((recipe) => { if (recipe) recipeStore.setRecipeOfMonth(recipe); })
+      .catch(() => {});
+  }, []);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>

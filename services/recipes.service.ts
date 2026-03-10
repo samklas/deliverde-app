@@ -1,4 +1,4 @@
-import { collection, getDocs, DocumentData, QuerySnapshot } from "firebase/firestore";
+import { collection, getDocs, query, where, DocumentData, QuerySnapshot } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
 import { getImageUrl } from "@/utils/utils";
@@ -30,6 +30,13 @@ export const fetchRecipes = async (): Promise<Recipe[]> => {
 
 export const getRecipeOfMonth = (recipes: Recipe[]): Recipe | undefined => {
   return recipes.find((recipe) => recipe.recipeOfMonth);
+};
+
+export const fetchRecipeOfMonth = async (): Promise<Recipe | undefined> => {
+  const q = query(collection(db, "recipes"), where("recipeOfMonth", "==", true));
+  const querySnapshot = await getDocs(q);
+  const results = await mapRecipes(querySnapshot);
+  return results[0];
 };
 
 export const filterFavoriteRecipes = (
