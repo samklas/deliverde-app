@@ -41,6 +41,12 @@ export {
 } from "./vision.service";
 
 export {
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  cancelDailyReminder,
+} from "./notifications.service";
+
+export {
   createGroup,
   joinGroup,
   leaveGroup,

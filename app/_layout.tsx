@@ -5,7 +5,14 @@ import { View } from "react-native";
 import "../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { loadAppData, checkUserExists } from "@/services";
+import {
+  loadAppData,
+  checkUserExists,
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  cancelDailyReminder,
+} from "@/services";
+import userStore from "@/stores/userStore";
 import {
   useFonts,
   Poppins_400Regular,
@@ -49,6 +56,16 @@ export default function RootLayout() {
           if (profileExists) {
             // User has completed profile - load all app data
             await loadAppData();
+            // Request notification permissions, then sync reminder state
+            const granted = await requestNotificationPermissions();
+            if (granted) {
+              const { dailyTotal, dailyTarget } = userStore;
+              if (dailyTotal >= dailyTarget) {
+                await cancelDailyReminder();
+              } else {
+                await scheduleDailyReminder();
+              }
+            }
             setInitialRoute("(tabs)");
           } else {
             // User is authenticated but hasn't completed profile

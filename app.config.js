@@ -59,6 +59,14 @@ export default {
           },
         },
       ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/images/logo_nav.png",
+          color: "#37891C",
+          defaultChannel: "daily-reminder",
+        },
+      ],
       "expo-apple-authentication",
       "@react-native-google-signin/google-signin",
     ],
