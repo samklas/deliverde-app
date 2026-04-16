@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { auth, db } from "@/firebaseConfig";
-import { collection, doc, getDocs, onSnapshot, writeBatch } from "firebase/firestore";
+import { collection, doc, onSnapshot, writeBatch } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
@@ -35,32 +35,28 @@ const Tab = observer(() => {
   useEffect(() => {
     if (dailyTotal < dailyTarget) setHasCelebrated(false);
 
-    const fetchVegetables = async () => {
-      setIsLoading(true);
-      const cachedVegetables = await AsyncStorage.getItem("vegetables");
-      if (cachedVegetables !== null) {
-        const veggies: Vegetable[] = JSON.parse(cachedVegetables);
-        setVegetables(veggies);
-      } else {
-        try {
-          const querySnapshot = await getDocs(collection(db, "vegetables"));
-          const fetchedVegetables = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Vegetable[];
+    // Real-time listener — fires on mount and whenever the Firestore
+    // "vegetables" collection changes
+    const unsubscribeVegetables = onSnapshot(
+      collection(db, "vegetables"),
+      async (snapshot) => {
+        const fetchedVegetables = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Vegetable[];
 
-          await AsyncStorage.setItem(
-            "vegetables",
-            JSON.stringify(fetchedVegetables)
-          );
-
-          setVegetables(fetchedVegetables);
-        } catch (error) {
-          console.error("Error fetching vegetables: ", error);
-        }
+        setVegetables(fetchedVegetables);
+        await AsyncStorage.setItem(
+          "vegetables",
+          JSON.stringify(fetchedVegetables)
+        );
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Error listening to vegetables: ", error);
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    };
+    );
 
     const getLastUsedVegetables = async () => {
       const lastUsed = await AsyncStorage.getItem("lastUsedVegetables");
@@ -92,10 +88,11 @@ const Tab = observer(() => {
       hasLoaded.current = true;
     };
 
-    fetchVegetables();
     getLastUsedVegetables();
     getDailyTotal();
     getTodayVegetables();
+
+    return () => unsubscribeVegetables();
   }, []);
 
   // Listen for real-time Firestore updates to handle the 3 AM cloud function reset
