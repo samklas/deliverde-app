@@ -1,117 +1,221 @@
-import { db, auth } from "@/firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, router } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ImageBackground,
   Pressable,
   StyleSheet,
-  TextInput,
   View,
   Text,
+  Platform,
+  Modal,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import { WebView } from "react-native-webview";
+import { AntDesign } from "@expo/vector-icons";
+import * as AppleAuthentication from "expo-apple-authentication";
+import {
+  storage,
+  loadAppData,
+  signInWithApple,
+  signInWithGoogle,
+  signInAnonymous,
+  type AuthResult,
+} from "@/services";
+import { STORAGE_KEYS } from "@/constants";
+import { theme } from "@/theme";
+import React from "react";
+
+type LoadingMethod = "apple" | "google" | "anonymous" | null;
 
 export default function Login() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [loadingMethod, setLoadingMethod] = useState<LoadingMethod>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [anonymousModalVisible, setAnonymousModalVisible] = useState(false);
 
-  const getUsername = async (uid: string) => {
-    const docRef = doc(db, "users", uid);
-    const document = await getDoc(docRef);
-    if (document.exists()) {
-      return document.data().username as string;
-    }
-
-    throw new Error("error");
-  };
-
-  const handleLogin = async () => {
-    try {
-      setIsLoading(true);
-      //const auth = getAuth();
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      const username = await getUsername(userCredential.user.uid);
-
-      storeUserId(userCredential.user.uid, username);
-      getUserId();
-      router.push("/(tabs)");
-    } catch (error) {
-      console.error("Error logging in:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const storeUserId = async (uid: string, username: string) => {
-    try {
-      await AsyncStorage.multiSet([
-        ["id", uid],
-        ["username", username],
+  const handleAuthResult = async (result: AuthResult) => {
+    if (result.isNewUser) {
+      router.navigate("/welcome");
+    } else {
+      await storage.multiSet([
+        [STORAGE_KEYS.USER_ID, result.uid],
+        [STORAGE_KEYS.USERNAME, result.username || ""],
       ]);
-    } catch (e) {
-      console.log("error: " + e);
+      await loadAppData();
+      router.replace("/(tabs)");
     }
   };
 
-  const getUserId = async () => {
+  const handleAppleSignIn = async () => {
     try {
-      const value = await AsyncStorage.getItem("id");
-      if (value !== null) {
-        return value;
+      setLoadingMethod("apple");
+      setErrorMessage("");
+      const result = await signInWithApple();
+      await handleAuthResult(result);
+    } catch (error: any) {
+      if (error.code === "ERR_REQUEST_CANCELED") {
+        return;
       }
-    } catch (e) {
-      // error reading value
+      setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setLoadingMethod(null);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoadingMethod("google");
+      setErrorMessage("");
+      const result = await signInWithGoogle();
+      await handleAuthResult(result);
+    } catch (error: any) {
+      if (error.code === "SIGN_IN_CANCELLED") {
+        return;
+      }
+      setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setLoadingMethod(null);
+    }
+  };
+
+  const handleAnonymousSignIn = async () => {
+    setAnonymousModalVisible(false);
+    try {
+      setLoadingMethod("anonymous");
+      setErrorMessage("");
+      const result = await signInAnonymous();
+      await handleAuthResult(result);
+    } catch (error) {
+      setErrorMessage("Kirjautuminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setLoadingMethod(null);
     }
   };
 
   return (
     <ImageBackground
-      source={require("../assets/images/background.jpeg")}
+      source={require("../assets/images/Deliverde_tervetuloa2.jpeg")}
       style={styles.container}
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <Text style={styles.title}>Tervetuloa</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Sähköposti"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Salasana"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <Pressable
-          style={styles.button}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Kirjaudutaan..." : "Kirjaudu sisään"}
+        <View style={styles.content}>
+          <Text style={styles.title}>Tervetuloa</Text>
+          <Text style={styles.subtitle}>
+            Kirjaudu sisään jatkaaksesi. Kirjautumalla hyväksyt{" "}
+          
+            <Text
+              style={styles.link}
+              onPress={() => setPrivacyModalVisible(true)}
+            >
+              tietosuojakäytännön
+            </Text>
+            .
           </Text>
-        </Pressable>
 
-        <Link href="/register" style={styles.link}>
-          Eikö ole tiliä? Luo tili painamalla tästä!
-        </Link>
+          {/* Apple Sign-In - iOS only */}
+          {Platform.OS === "ios" && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
+              cornerRadius={8}
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            />
+          )}
+
+          {/* Google Sign-In - Android only */}
+          {Platform.OS === "android" && (
+            <Pressable
+              style={styles.googleButton}
+              onPress={handleGoogleSignIn}
+              disabled={loadingMethod !== null}
+            >
+              <AntDesign name="google" size={20} color="white" style={styles.googleIcon} />
+              <Text style={styles.googleButtonText}>
+                {loadingMethod === "google" ? "Kirjaudutaan..." : "Jatka Google-tilillä"}
+              </Text>
+            </Pressable>
+          )}
+
+          <Text style={styles.orText}>Tai</Text>
+
+          <Pressable
+            style={styles.anonymousButton}
+            onPress={() => setAnonymousModalVisible(true)}
+            disabled={loadingMethod !== null}
+          >
+            <Text style={styles.anonymousButtonText}>
+              {loadingMethod === "anonymous" ? "Kirjaudutaan..." : "Jatka anonyymisti"}
+            </Text>
+          </Pressable>
+
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
+        </View>
       </View>
+
+      <Modal
+        visible={privacyModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPrivacyModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.webViewContainer}>
+              <WebView
+                source={{ uri: "https://deliverde-shop.myshopify.com/policies/privacy-policy" }}
+                style={styles.webView}
+                startInLoadingState={true}
+                renderLoading={() => (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                  </View>
+                )}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setPrivacyModalVisible(false)}
+            >
+              <Text style={styles.modalCloseButtonText}>Sulje</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={anonymousModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setAnonymousModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.anonymousModalContent}>
+            <Text style={styles.anonymousModalTitle}>Anonyymi käyttö</Text>
+            <Text style={styles.anonymousModalText}>
+              Jatkamalla anonyymisti voit käyttää sovellusta ilman kirjautumista. Huomioithan kuitenkin, että tällöin tietosi tallennetaan vain laitteellesi. Jos poistat sovelluksen tai vaihdat laitetta, tietosi menetetään.
+            </Text>
+            <View style={styles.anonymousModalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setAnonymousModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Peruuta</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleAnonymousSignIn}
+              >
+                <Text style={styles.confirmButtonText}>Jatka</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -119,43 +223,180 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: theme.colors.background,
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 1)",
-    padding: 16,
+   // backgroundColor: theme.colors.overlay,
     justifyContent: "center",
+    padding: theme.spacing.medium,
+  },
+  content: {
+    alignItems: "center",
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 20,
+    fontSize: 36,
+    fontFamily: theme.fontFamily.bold,
+    color: "#fff",
+    marginBottom: 8,
     textAlign: "center",
   },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 12,
-    paddingHorizontal: 10,
-  },
-  button: {
-    backgroundColor: "#0c4c25",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  buttonText: {
-    color: "white",
+  subtitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.regular,
+    color: "#fff",
+    marginBottom: 40,
+    textAlign: "center",
+  },
+  appleButton: {
+    height: 48,
+    width: "100%",
+    marginBottom: 16,
+  },
+  googleButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 8,
+    alignItems: "center",
+    flexDirection: "row",
+    width: "100%",
+    height: 48,
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  googleIcon: {
+    marginRight: 10,
+  },
+  googleButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  errorText: {
+    color: theme.colors.error,
+    textAlign: "center",
+    marginTop: 16,
+    fontFamily: theme.fontFamily.regular,
   },
   link: {
-    color: "#0c4c25",
+    textDecorationLine: "underline",
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.medium,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    width: "100%",
+    height: "80%",
+  },
+  webViewContainer: {
+    flex: 1,
+    borderRadius: theme.borderRadius.medium,
+    overflow: "hidden",
+  },
+  webView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+  },
+  modalCloseButton: {
+    marginTop: theme.spacing.medium,
+    padding: theme.spacing.small,
+    backgroundColor: "#37891C",
+    borderRadius: theme.borderRadius.medium,
+    alignItems: "center",
+  },
+  modalCloseButtonText: {
+    color: "white",
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 16,
+  },
+  orText: {
+    color: "white",
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 14,
+    marginVertical: 16,
     textAlign: "center",
+  },
+  anonymousButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+    height: 48,
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  anonymousButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  anonymousModalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    width: "100%",
+  },
+  anonymousModalTitle: {
+    fontSize: 22,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.medium,
+    textAlign: "center",
+  },
+  anonymousModalText: {
+    fontSize: 15,
+    fontFamily: theme.fontFamily.regular,
+    color: theme.colors.text,
+    lineHeight: 24,
+    marginBottom: theme.spacing.medium,
+  },
+  anonymousModalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    padding: theme.spacing.small,
+    borderRadius: theme.borderRadius.medium,
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 16,
+  },
+  confirmButton: {
+    flex: 1,
+    padding: theme.spacing.small,
+    backgroundColor: "#37891C",
+    borderRadius: theme.borderRadius.medium,
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    color: "white",
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 16,
   },
 });

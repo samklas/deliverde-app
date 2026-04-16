@@ -11,16 +11,7 @@ class LeaderboardStore {
   }
 
   _leaderboard = {
-    isVisible: false,
     users: initUsers,
-  };
-
-  get isVisible() {
-    return this._leaderboard.isVisible;
-  }
-
-  setIsVisible = (isVisible: boolean) => {
-    this._leaderboard.isVisible = isVisible;
   };
 
   get users() {

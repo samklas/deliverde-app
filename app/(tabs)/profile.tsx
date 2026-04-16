@@ -1,8 +1,7 @@
 import { auth } from "@/firebaseConfig";
 import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -10,35 +9,46 @@ import {
   StyleSheet,
   Image,
   Alert,
-  ImageBackground,
   Pressable,
+  Share,
+  ScrollView,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser, isAnonymousUser, deleteAccount } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
+import DailyGoalModal from "@/components/DailyGoalModal";
+import React from "react";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [goalModalVisible, setGoalModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const { avatarId, dailyTarget } = userStore;
   const router = useRouter();
 
   const handleLogout = async () => {
+    const isAnonymous = isAnonymousUser();
+
     Alert.alert(
-      "Vahvista uloskirjautuminen",
-      "Oletko varma, että haluat kirjautua ulos?",
+      isAnonymous ? "Vahvista uloskirjautuminen" : "Vahvista uloskirjautuminen",
+      isAnonymous
+        ? "Olet kirjautunut anonyymisti. Jos kirjaudut ulos, kaikki tietosi poistetaan pysyvästi. Haluatko jatkaa?"
+        : "Oletko varma, että haluat kirjautua ulos?",
       [
         {
           text: "Kyllä",
           onPress: async () => {
             try {
+              if (isAnonymous) {
+                // Delete account and data for anonymous users
+                await deleteAccount();
+              }
+              await storage.clearUserData();
               auth.signOut();
-              // remove all the data from async storage
-              await AsyncStorage.multiRemove([
-                "id",
-                "username",
-                "dailyTotal",
-                "vegetables",
-                "lastUsedVegetables",
-              ]);
-              router.push("/login");
             } catch (error) {
               console.error("Error logging out:", error);
             }
@@ -46,20 +56,48 @@ export default function Tab() {
         },
         {
           text: "Ei",
-          onPress: () => console.log("Logout cancelled"),
-          //style: "cancel",
+          onPress: () => {},
         },
       ],
-
       { cancelable: false }
     );
   };
 
-  const getUsername = async () => {
-    const username = await AsyncStorage.getItem("username");
+  const handleDeleteAccount = () => {
+    setDeleteModalVisible(true);
+  };
 
-    if (username) {
-      setUsername(username);
+  const handleAccountDeleted = () => {
+    setDeleteModalVisible(false);
+    router.replace("/login");
+  };
+
+  const handleSaveGoal = async (level: string, target: number) => {
+    await setLevelForCurrentUser(level);
+    userStore.setDailyTarget(target);
+  };
+
+  const loadUsername = async () => {
+    const storedUsername = await storage.get(STORAGE_KEYS.USERNAME);
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  };
+
+  const loadInviteCode = async () => {
+    const code = await getInviteCodeForCurrentUser();
+    setInviteCode(code);
+  };
+
+  const shareInviteCode = async () => {
+    if (inviteCode) {
+      try {
+        await Share.share({
+          message: `Liity mukaan DeliVerdeen! Käytä kutsukoodiani: ${inviteCode}`,
+        });
+      } catch (error) {
+        console.error("Error sharing invite code:", error);
+      }
     }
   };
 
@@ -73,94 +111,154 @@ export default function Tab() {
     if (avatarId === "3") {
       return require("../../assets/images/avatar4.jpg");
     }
+    if (avatarId === "4") {
+      return require("../../assets/images/avatar5.png");
+    }
   };
 
   useEffect(() => {
-    getUsername();
+    loadUsername();
+    loadInviteCode();
   }, []);
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.profileHeader}>
             <Image source={getAvatar()} style={styles.avatar} />
             <Text style={styles.username}>{username}</Text>
           </View>
 
-          <View style={[styles.box, { marginTop: 50 }]}>
-            <Text style={styles.sectionTitle}>Päivän tavoite</Text>
-            <View style={styles.goalItem}>
-              <Text> Syö {dailyTarget}g vihanneksia 🥬</Text>
-            </View>
-          </View>
-          <Pressable
-            style={[
-              {
-                flex: 0,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              },
-              styles.box,
-            ]}
-            onPress={() => router.push("/feedback")}
+<Pressable
+            style={[styles.box, styles.goalBox]}
+            onPress={() => setGoalModalVisible(true)}
           >
-            <Text>Lähetä palautetta</Text>
-            <Ionicons name="arrow-forward" size={20} />
+            <Text style={styles.sectionTitle}>Päivän tavoite</Text>
+            <View style={styles.boxContent}>
+              <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
+            </View>
           </Pressable>
 
-          <Pressable
-            style={{
-              alignItems: "center",
-              marginBottom: 30,
-              flex: 1,
-              justifyContent: "flex-end",
-            }}
-            onPress={async () => await handleLogout()}
+
+
+<Pressable
+            style={styles.box}
+            onPress={() => router.push("/feedback")}
           >
-            <Text
-              style={{
-                color: theme.colors.primary,
-                fontWeight: "500",
-                borderWidth: 2,
-                borderColor: theme.colors.primary,
-                borderRadius: 20,
-                paddingTop: 10,
-                paddingBottom: 10,
-                paddingLeft: 20,
-                paddingRight: 20,
-              }}
-            >
-              Kirjaudu ulos
-            </Text>
+            <View style={styles.boxContent}>
+              <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Lähetä palautetta</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
+            </View>
           </Pressable>
-        </View>
-      </View>
-    </ImageBackground>
+
+          <View style={styles.logoutContainer}>
+            <Pressable style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutText}>Kirjaudu ulos</Text>
+            </Pressable>
+            <Pressable style={styles.deleteButton} onPress={handleDeleteAccount}>
+              <Text style={styles.deleteText}>Poista tili</Text>
+            </Pressable>
+          </View>
+
+          <Pressable style={styles.infoButton} onPress={() => setInfoModalVisible(true)}>
+            <Text style={styles.infoButtonText}>?</Text>
+          </Pressable>
+          <DeleteAccountModal
+          visible={deleteModalVisible}
+          onClose={() => setDeleteModalVisible(false)}
+          onDeleted={handleAccountDeleted}
+        />
+
+        <DailyGoalModal
+          visible={goalModalVisible}
+          currentTarget={dailyTarget}
+          onClose={() => setGoalModalVisible(false)}
+          onSave={handleSaveGoal}
+        />
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={infoModalVisible}
+          onRequestClose={() => setInfoModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Text style={styles.modalTitle}>Näin DeliVerde toimii</Text>
+                {[
+                  { title: "Seuraa kasvisten kulutusta", description: "Kirjaa syömäsi kasvikset Tavoitteet-välilehdellä ja näe edistymisesi kohti päivittäistä tavoitettasi." },
+                  { title: "Kerää pisteitä", description: "Jokaista 100g syötyä kasvista kohden ansaitset pisteen ja saavuttamalla päiväkohtaisen tavoitteen saat 3 bonuspistettä." },
+                  { title: "Kilpaile leikkimielisesti", description: "Voit kilpailla leikkimielisesti muita käyttäjiä vastaan keräämilläsi pisteillä Etusivu-välilehdeltä löytyvällä tulostaululla." },
+                  { title: "Haasta ystävät ja perheenjäsenet", description: "Voit perustaa ryhmiä ja haastaa ystäviä tai perheenjäseniä mukaan kilpailemaan Ryhmät-välilehdellä." },
+                  { title: "Löydä uusia reseptejä", description: "Selaa reseptejä ja saa inspiraatiota kasvispitoiseen ruokavalioon." },
+                ].map((item, index) => (
+                  <View key={index} style={styles.infoItem}>
+                    <View style={styles.infoNumber}>
+                      <Text style={styles.infoNumberText}>{index + 1}</Text>
+                    </View>
+                    <View style={styles.infoItemContent}>
+                      <Text style={styles.infoItemTitle}>{item.title}</Text>
+                      <Text style={styles.infoItemDescription}>{item.description}</Text>
+                    </View>
+                  </View>
+                ))}
+                <Pressable style={styles.modalCloseButton} onPress={() => setInfoModalVisible(false)}>
+                  <Text style={styles.modalCloseButtonText}>Sulje</Text>
+                </Pressable>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+</ScrollView>
+
+        
+      
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    marginTop: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  scrollContent: {
+    paddingTop: 50,
+    paddingBottom: 30,
   },
   overlay: {
     flex: 1,
-    backgroundColor: theme.colors.overlay,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
     padding: theme.spacing.medium,
   },
   profileHeader: {
     alignItems: "center",
     marginTop: 20,
+  },
+  infoButton: {
+    alignSelf: "center",
+    marginTop: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoButtonText: {
+    color: theme.colors.primary,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
   avatar: {
     width: 120,
@@ -170,29 +268,143 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginBottom: 20,
-  },
-  goalsSection: {
-    marginTop: 20,
-    backgroundColor: theme.colors.background,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     marginBottom: 15,
     color: theme.colors.primary,
   },
-  goalItem: {},
+  boxContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  goalText: {
+    fontFamily: theme.fontFamily.regular,
+    fontSize: 16,
+  },
+  helpText: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    marginTop: 10,
+  },
+  goalBox: {
+    marginTop: 50,
+  },
   box: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
-    marginBottom: theme.spacing.medium,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  logoutContainer: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  logoutButton: {
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  logoutText: {
+    color: theme.colors.primary,
+    fontFamily: theme.fontFamily.medium,
+  },
+  deleteButton: {
+    borderWidth: 2,
+    borderColor: theme.colors.error,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 15,
+  },
+  deleteText: {
+    color: theme.colors.error,
+    fontFamily: theme.fontFamily.medium,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 48,
+    maxHeight: "85%",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.medium,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 20,
+  },
+  infoNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#37891C",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+    marginTop: 2,
+  },
+  infoNumberText: {
+    color: "white",
+    fontSize: 15,
+    fontFamily: theme.fontFamily.bold,
+  },
+  infoItemContent: {
+    flex: 1,
+  },
+  infoItemTitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 4,
+  },
+  infoItemDescription: {
+    fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    lineHeight: 20,
+  },
+  modalCloseButton: {
+    backgroundColor: "#37891C",
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  modalCloseButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

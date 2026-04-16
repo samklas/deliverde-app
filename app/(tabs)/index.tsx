@@ -1,217 +1,60 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  ScrollView,
-  ActivityIndicator,
-  Pressable,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo/vector-icons
+import { Text, StyleSheet, ScrollView, Pressable, Linking } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/theme";
 import { observer } from "mobx-react-lite";
 import recipeStore from "@/stores/recipeStore";
-import { useEffect, useState } from "react";
-import {
-  collection,
-  DocumentData,
-  getDocs,
-  onSnapshot,
-  QuerySnapshot,
-  getDoc,
-  doc,
-  limit,
-} from "firebase/firestore";
-import { auth, db } from "@/firebaseConfig";
-import { Recipe } from "@/types/recipe";
-import RecipeBoxV2 from "@/components/recipe/RecipeBoxV2";
-import { getCurrentYearMonth, getImageUrl } from "@/utils/utils";
-
+import RecipeBox from "@/components/recipe/RecipeBox";
 import LeaderboardBox from "@/components/leaderboard/LeaderboardBox";
 import DailyChallengeBox from "@/components/challenges/DailyChallengeBox";
-import LoadingIndicator from "@/components/common/LoadingIndicator";
-import leaderboardStore from "@/stores/leaderboardStore";
-import { LeaderboardUser } from "@/types/users";
-import userStore from "@/stores/userStore";
 import { useRouter } from "expo-router";
+import { useFavorites } from "@/hooks";
+import { fetchRecipeOfMonth } from "@/services/recipes.service";
+import React, { useEffect } from "react";
 
 const Tab = observer(() => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const {
-    setRecipes,
-    setRecipeOfMonth,
-    favoriteRecipes,
-    recipeOfMonth,
-    recipes,
-    setFavoriteRecipes,
-  } = recipeStore;
-  const { setDailyTotal, setDailyTarget, setStreak } = userStore; // todo: change to user store
-  const { setAvatarId } = userStore;
-  const { setUsers } = leaderboardStore;
-
   const router = useRouter();
+  const { recipes, recipeOfMonth, favoriteRecipes } = recipeStore;
 
-  const getRecipes = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "recipes"));
-      const recipes = await mapRecipes(querySnapshot);
-      setRecipes(recipes);
-      const recipeOfMonth = getRecipeOfMonth(recipes);
-      if (recipeOfMonth) setRecipeOfMonth(recipeOfMonth);
-    } catch (err) {
-      console.error("Error occured while fetching recipes: ", err);
-    }
-  };
+  // Real-time listener for favorites (keeps favorites in sync)
+  const { favoriteRecipes: liveFavorites } = useFavorites(recipes);
 
-  const mapRecipes = async (
-    querySnapshot: QuerySnapshot<DocumentData, DocumentData>
-  ) => {
-    let recipes: Recipe[] = [];
-    for (const doc of querySnapshot.docs) {
-      const data = doc.data();
-      const recipe: Recipe = {
-        id: doc.id,
-        created: data.created,
-        imageUrl: await getImageUrl(data.imageUrl),
-        title: data.title,
-        ingredients: data.ingredients,
-        instructions: data.instructions,
-        details: {
-          duration: data.details.duration,
-          difficultyLevel: data.details.difficultyLevel,
-          portionaAmount: data.details.portionAmount,
-        },
-        recipeOfMonth: data.recipeOfMonth,
-      };
-
-      recipes.push(recipe);
-    }
-    return recipes;
-  };
-
-  const getRecipeOfMonth = (recipes: Recipe[]) => {
-    const recipeOfMonth = recipes.find((recipe) => recipe.recipeOfMonth);
-    if (recipeOfMonth) return recipeOfMonth;
-  };
-
-  const filterFavoriteRecipes = (favoriteRecipeIds: string[]) => {
-    const filteredRecipes = recipes.filter((recipe) =>
-      favoriteRecipeIds.includes(recipe.id)
-    );
-
-    setFavoriteRecipes(filteredRecipes);
-  };
-
-  const getUserDetails = async () => {
-    try {
-      const userId = auth.currentUser?.uid;
-      if (!userId) return;
-
-      const userDoc = await getDoc(doc(db, "users", userId));
-      const userData = userDoc.data();
-
-      if (!userData) return;
-
-      const levelTargets: Record<string, number> = {
-        beginner: 300,
-        intermediate: 500,
-        advanced: 800,
-      };
-
-      setDailyTotal(userData.dailyTotal ?? 0);
-      setDailyTarget(levelTargets[userData.level] ?? 800);
-      setStreak(userData.streak ?? 0);
-      setAvatarId(userData.avatarId);
-    } catch (error) {
-      console.error("Error fetching user's details:", error);
-    }
-  };
-
-  const getLeaderboardUsers = async () => {
-    //todo: limit 100 rows?
-    const querySnapshot = await getDocs(collection(db, `leaderboard`));
-    const leaderboardUsers: LeaderboardUser[] = querySnapshot.docs.map(
-      (doc) => ({
-        uid: doc.data().uid,
-        avatarId: doc.data().avatarId,
-        username: doc.data().username,
-        points: doc.data().points,
-      })
-    );
-    setUsers(leaderboardUsers);
-  };
-
-  // real time listener for user's favorite recipes
-  useEffect(() => {
-    const userId = auth.currentUser?.uid;
-    const usersRef = collection(db, `users/${userId}`, "favoriteRecipes");
-
-    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-      let ids: string[] = [];
-      for (const doc of snapshot.docs) {
-        ids.push(doc.id);
-      }
-
-      filterFavoriteRecipes(ids);
-    });
-
-    return () => unsubscribe();
-  }, [recipes]);
+  // Use live favorites if available, otherwise use stored ones
+  const currentFavorites = liveFavorites.length > 0 ? liveFavorites : favoriteRecipes;
 
   useEffect(() => {
-    const initData = async () => {
-      setIsLoading(true);
-      await getRecipes();
-      await getUserDetails();
-      await getLeaderboardUsers();
-      setIsLoading(false);
-    };
-
-    initData();
+    if (recipeOfMonth?.id) return;
+    fetchRecipeOfMonth()
+      .then((recipe) => { if (recipe) recipeStore.setRecipeOfMonth(recipe); })
+      .catch(() => {});
   }, []);
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/background.jpeg")}
-      style={styles.container}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        {isLoading ? (
-          <LoadingIndicator />
-        ) : (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <DailyChallengeBox />
-            <LeaderboardBox />
-
-            {recipeOfMonth && (
-              <RecipeBoxV2
-                recipe={recipeOfMonth}
-                userFavoriteRecipes={favoriteRecipes}
-                isRecipeOfMonth
-              />
-            )}
-            <Pressable
-              style={[
-                {
-                  flex: 0,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                },
-                styles.box,
-              ]}
-              onPress={() => router.push("/feedback")}
-            >
-              <Text style={{ color: "#0c4c25", fontWeight: "bold" }}>
-                Lähetä palautetta
-              </Text>
-              <Ionicons name="arrow-forward" size={20} color={"#0c4c25"} />
-            </Pressable>
-          </ScrollView>
-        )}
-      </View>
-    </ImageBackground>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      <Pressable
+        style={styles.shopLinkContainer}
+        onPress={() => Linking.openURL("https://deliverde-shop.myshopify.com/collections/all")}
+      >
+        <Ionicons name="bag-handle-outline" size={18} color={theme.colors.primary} />
+        <Text style={styles.shopLink}>DeliVerde Shoppiin</Text>
+        
+      </Pressable>
+      <DailyChallengeBox />
+      <LeaderboardBox />
+      {recipeOfMonth && recipeOfMonth.id && (
+        <RecipeBox
+          recipe={recipeOfMonth}
+          userFavoriteRecipes={currentFavorites}
+          isRecipeOfMonth
+        />
+      )}
+      <Pressable
+        style={[styles.feedbackButton, styles.box]}
+        onPress={() => router.push("/feedback")}
+      >
+        <Text style={styles.feedbackText}>Lähetä palautetta</Text>
+        <Ionicons name="arrow-forward" size={20} color={theme.colors.primary} />
+      </Pressable>
+    </ScrollView>
   );
 });
 
@@ -220,12 +63,12 @@ export default Tab;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: theme.colors.overlay,
-    padding: theme.spacing.medium,
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   box: {
     backgroundColor: theme.colors.background,
@@ -237,5 +80,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  feedbackButton: {
+    flex: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  feedbackText: {
+    color: theme.colors.primary,
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  shopLinkContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    alignSelf: "center",
+    marginBottom: theme.spacing.medium,
+  },
+  shopLink: {
+    color: theme.colors.primary,
+    fontFamily: theme.fontFamily.semiBold,
+    textDecorationLine: "underline",
+    fontSize: 15,
   },
 });

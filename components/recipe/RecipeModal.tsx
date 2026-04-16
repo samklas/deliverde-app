@@ -12,6 +12,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Recipe } from "@/types/recipe";
 import { Image } from "expo-image";
+import { capitalizeFirstLetter } from "@/utils/formatting";
+import { theme } from "@/theme";
 
 type Props = {
   selectedRecipe: Recipe | null;
@@ -54,7 +56,7 @@ export default function RecipeModal({
                 </TouchableOpacity>
               </ImageBackground>
               <Text style={styles.modalTitle}>
-                {modifyFirstLetterToUpperCase(selectedRecipe.title)}
+                {capitalizeFirstLetter(selectedRecipe.title)}
               </Text>
               <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                 <View style={styles.box}>
@@ -71,15 +73,7 @@ export default function RecipeModal({
 
                   <View>
                     <Text style={styles.instructionsTitle}>Valmistus</Text>
-                    <Text
-                      style={{
-                        paddingLeft: 20,
-                        paddingRight: 20,
-                        fontSize: 16,
-                        color: "#666",
-                        marginBottom: 50,
-                      }}
-                    >
+                    <Text style={styles.instructionsText}>
                       {selectedRecipe.instructions}
                     </Text>
                   </View>
@@ -93,10 +87,6 @@ export default function RecipeModal({
   );
 }
 
-const modifyFirstLetterToUpperCase = (value: string) => {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-};
-
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -105,10 +95,11 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginTop: 20,
     marginBottom: 20,
     color: "#0c4c25",
+    textAlign: "center"
   },
   closeButton: {
     marginTop: 20,
@@ -123,7 +114,7 @@ const styles = StyleSheet.create({
   ingredientsContainer: {},
   ingredientsTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     marginTop: 12,
     marginBottom: 5,
     paddingLeft: 20,
@@ -132,17 +123,27 @@ const styles = StyleSheet.create({
   },
   ingredientsList: {
     fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
     color: "#666",
     marginBottom: 12,
     textAlign: "left",
   },
   instructionsTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     marginTop: 12,
     marginBottom: 5,
     width: "100%",
     paddingLeft: 20,
+  },
+  instructionsText: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    marginBottom: 50,
+    lineHeight: 24,
   },
   scrollViewContainer: {
     // Add any necessary styles for the scroll view container

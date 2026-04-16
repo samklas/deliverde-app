@@ -2,23 +2,14 @@ import userStore from "@/stores/userStore";
 import { theme } from "@/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { observer } from "mobx-react-lite";
-import { View, Text, StyleSheet } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
 
 const DailyChallengeBox = observer(() => {
-  const { dailyTotal, dailyTarget, streak } = userStore;
-  return (
-    <View style={styles.combinedBox}>
-      {streak > 1 && (
-        <View>
-          <View style={styles.streakHeader}>
-            <Ionicons name="leaf" size={24} color="#4cd964" />
-            <Text style={styles.streakCount}>{streak} päivän putki!</Text>
-          </View>
-          <Text style={styles.streakSubtext}>Jatka hyvää työtä!</Text>
+  const { dailyTotal, dailyTarget} = userStore;
 
-          <View style={styles.goalsDivider} />
-        </View>
-      )}
+  return (
+      <View style={styles.box}>
       <Text style={styles.boxTitle}>Päivän tavoite</Text>
       <View style={styles.goalRow}>
         <Ionicons
@@ -26,29 +17,32 @@ const DailyChallengeBox = observer(() => {
             dailyTotal >= dailyTarget ? "checkmark-circle" : "radio-button-off"
           }
           size={24}
-          color="#4cd964"
+          color="#37891C"
         />
         <Text style={styles.goalText}>Syö {dailyTarget}g vihanneksia</Text>
       </View>
-    </View>
+      </View>
   );
 });
 
 export default DailyChallengeBox;
 
 const styles = StyleSheet.create({
-  combinedBox: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
-    padding: 20,
-    marginBottom: theme.spacing.medium,
+  box: {
+    backgroundColor: "white",
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.secondary,
+    borderLeftColor: "#37891C",
   },
   streakHeader: {
     flexDirection: "row",
@@ -57,13 +51,14 @@ const styles = StyleSheet.create({
   },
   streakCount: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.bold,
     marginLeft: theme.spacing.small,
     color: theme.colors.primary,
   },
   streakSubtext: {
     color: "#666",
     fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
     marginBottom: 4,
   },
   goalsDivider: {
@@ -73,7 +68,7 @@ const styles = StyleSheet.create({
   },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     marginBottom: theme.spacing.small,
   },
@@ -86,6 +81,7 @@ const styles = StyleSheet.create({
   goalText: {
     marginLeft: theme.spacing.small,
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.regular,
     color: theme.colors.text,
   },
 });

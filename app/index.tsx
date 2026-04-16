@@ -1,22 +1,12 @@
-import { router } from "expo-router";
-
-import { useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { Redirect } from "expo-router";
 import { auth } from "@/firebaseConfig";
+import React from "react";
 
 export default function Index() {
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push("/(tabs)");
-      } else {
-        router.push("/login");
-      }
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, []);
-
-  return null;
+  // Auth state is already checked in _layout.tsx during splash
+  // This is just a fallback redirect
+  if (auth.currentUser) {
+    return <Redirect href="/(tabs)" />;
+  }
+  return <Redirect href="/login" />;
 }

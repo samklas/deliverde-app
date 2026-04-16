@@ -6,359 +6,268 @@ import {
   Pressable,
   Alert,
   Image,
+  Keyboard,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { useState } from "react";
-import { auth } from "@/firebaseConfig";
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
-import { db } from "@/firebaseConfig";
+import { useState, useEffect, useRef } from "react";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getCurrentYearMonth } from "@/utils/utils";
-import userStore from "@/stores/userStore";
+import { theme } from "@/theme";
+import { storage } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
+import { db } from "@/firebaseConfig";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import React from "react";
+
+// Check if username is already taken
+const isUsernameAvailable = async (username: string): Promise<boolean> => {
+  const q = query(
+    collection(db, "users"),
+    where("username", "==", username.trim())
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.empty;
+};
 
 export default function UserDetails() {
   const [username, setUsername] = useState("");
-  const [level, setLevel] = useState("aloittelija");
-  const [isLoading, setIsLoading] = useState(false);
-  const levels = ["beginner", "intermediate", "advanced"];
   const [selectedAvatar, setSelectedAvatar] = useState("");
-  const { setAvatarId } = userStore;
-  const avatar1 = {
-    id: "1",
-    item: require("@/assets/images/avatar2.jpg"),
-  };
-  const avatar2 = {
-    id: "2",
-    item: require("@/assets/images/avatar3.jpg"),
-  };
-  const avatar3 = {
-    id: "3",
-    item: require("@/assets/images/avatar4.jpg"),
-  };
-  const avatars = [avatar1, avatar2, avatar3];
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  const isUsernameAvailable = async (username: string) => {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("username", "==", username));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.empty;
-  };
+  const avatars = [
+    { id: "1", item: require("@/assets/images/avatar2.jpg") },
+    { id: "2", item: require("@/assets/images/avatar3.jpg") },
+    { id: "3", item: require("@/assets/images/avatar4.jpg") },
+    { id: "4", item: require("@/assets/images/avatar5.png") },
+  ];
 
-  const isValid = async () => {
+  // Load any saved onboarding data (in case user closed app mid-flow)
+  useEffect(() => {
+    const loadSavedData = async () => {
+      const savedUsername = await storage.get(STORAGE_KEYS.ONBOARDING_USERNAME);
+      const savedAvatar = await storage.get(STORAGE_KEYS.ONBOARDING_AVATAR);
+      if (savedUsername) setUsername(savedUsername);
+      if (savedAvatar) setSelectedAvatar(savedAvatar);
+    };
+    loadSavedData();
+  }, []);
+
+  const handleContinue = async () => {
     if (!username.trim()) {
       Alert.alert("Virhe", "Käyttäjänimi on pakollinen");
-      return false;
+      return;
     }
-    if (!(await isUsernameAvailable(username))) {
-      Alert.alert("Virhe", "Käyttäjänimi on jo käytössä");
-      return false;
+    if (!selectedAvatar) {
+      Alert.alert("Virhe", "Valitse avatar");
+      return;
     }
 
-    return true;
-  };
-
-  const addUser = async () => {
-    const uid = auth.currentUser?.uid;
-
-    if ((await isValid()) && uid) {
-      setIsLoading(true);
-      try {
-        // Using setDoc with custom ID (uid) instead of addDoc
-        await setDoc(doc(db, "users", uid), {
-          username: username,
-          level: level,
-          createdAt: new Date(),
-          uid: uid,
-          dailyTotal: 0,
-          score: 0,
-          streak: 0,
-          avatarId: selectedAvatar,
-        });
-
-        await addUserToLeaderBoard(uid);
-
-        await AsyncStorage.multiSet([
-          ["id", uid],
-          ["username", username],
-        ]);
-
-        setAvatarId(selectedAvatar);
-
-        router.push("/(tabs)");
-      } catch (error) {
-        console.error("Error adding user:", error);
-        Alert.alert("Virhe", "Käyttäjätietojen tallentaminen epäonnistui");
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    try {
+      // Check if username is available
+      const available = await isUsernameAvailable(username);
+      if (!available) {
+        Alert.alert("Virhe", "Käyttäjänimi on jo käytössä. Valitse toinen nimi.");
+        return;
       }
-    }
-  };
 
-  const addUserToLeaderBoard = async (uid: string) => {
-    await setDoc(doc(db, `leaderboard`, uid), {
-      username: username,
-      uid: uid,
-      avatarId: selectedAvatar,
-      points: 0,
-    });
+      // Save to storage before navigating (persists if app is closed)
+      await storage.multiSet([
+        [STORAGE_KEYS.ONBOARDING_USERNAME, username.trim()],
+        [STORAGE_KEYS.ONBOARDING_AVATAR, selectedAvatar],
+      ]);
+
+      router.push("/userLevel");
+    } catch (error) {
+      console.error("Error checking username:", error);
+      Alert.alert("Virhe", "Käyttäjänimen tarkistus epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <View style={styles.overlay}>
-      <Text style={styles.title}> Tili luotu onnistuneesti! </Text>
-      <Text style={styles.text}>
-        Laitetaan vielä muutamat asetukset kuntoon, niin sen jälkeen olemme
-        valmiit aloittamaan!
-      </Text>
-      {/* <Text style={styles.title}>Käyttäjätiedot</Text> */}
-      <Text style={styles.levelLabel}>Käyttäjänimi</Text>
-      <TextInput
-        style={styles.input}
-        value={username}
-        onChangeText={setUsername}
-        placeholder="Käyttäjänimi"
-      />
-
-      <Text style={styles.levelLabel}>Taso</Text>
-      <Text style={{ marginBottom: 10, color: "#8D8D8D" }}>
-        Valitse itsellesi sopiva taso alla olevista vaihtoehdoista. Taso
-        määrittää, kuinka paljon vihanneksia pyrit syömään päivittäin. Voit
-        muokata tasoasi myöhemmin Profiili-näkymässä, jos haluat säätää
-        tavoitteitasi.
-      </Text>
-      <View style={styles.levelButtons}>
-        {levels.map((lvl) => (
-          <Pressable
-            key={lvl}
-            style={[styles.levelButton, level === lvl && styles.selectedLevel]}
-            onPress={() => setLevel(lvl)}
-          >
-            {/* <Text
-              style={[
-                styles.levelText,
-                level === lvl && styles.selectedLevelText,
-              ]}
-            >
-              {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
-            </Text> */}
-
-            {lvl === "beginner" && (
-              <View>
-                <Text
-                  style={[
-                    styles.levelText,
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  Satunnainen haukkailija | 300g
-                </Text>
-                {/* <Text
-                  style={[
-                    { textAlign: "center", color: "#8D8D8D" },
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  300g
-                </Text> */}
-              </View>
-            )}
-            {lvl === "intermediate" && (
-              <View>
-                <Text
-                  style={[
-                    styles.levelText,
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  Vihannesmestari | 500g
-                </Text>
-                {/* <Text
-                  style={[
-                    { textAlign: "center", color: "#8D8D8D" },
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  500g
-                </Text> */}
-              </View>
-            )}
-            {lvl === "advanced" && (
-              <View>
-                <Text
-                  style={[
-                    styles.levelText,
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  Vihreä legenda | 800g
-                </Text>
-                {/* <Text
-                  style={[
-                    { textAlign: "center", color: "#8D8D8D" },
-                    level === lvl && styles.selectedLevelText,
-                  ]}
-                >
-                  800g
-                </Text> */}
-              </View>
-            )}
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={styles.levelLabel}>Avatar</Text>
-      <View style={styles.avatarSelection}>
-        {avatars.map((avatar, index) => (
-          <Pressable
-            key={index}
-            onPress={() => setSelectedAvatar(avatar.id)}
-            style={[
-              styles.avatarButton,
-              selectedAvatar === avatar.id && styles.selectedAvatar,
-            ]}
-          >
-            <Image source={avatar.item} style={styles.avatarImage} />
-          </Pressable>
-        ))}
-      </View>
-      <Pressable
-        style={styles.continueButton}
-        onPress={addUser}
-        disabled={isLoading}
+    <KeyboardAvoidingView
+      style={styles.overlay}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
+      <ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={Keyboard.dismiss}
       >
-        <Text style={styles.continueButtonText}>
-          {isLoading ? "Tallennetaan..." : "Jatka"}
-        </Text>
-      </Pressable>
-    </View>
+            {/* Progress indicator */}
+            <View style={styles.progressContainer}>
+              <View style={styles.progressTrack}>
+                <View style={[styles.progressFill, { width: "80%" }]} />
+              </View>
+            </View>
+
+            <Text style={styles.title}>Luo profiili</Text>
+            <Text style={styles.subtitle}>Kerro meille hieman itsestäsi</Text>
+
+            {/* Avatar Selection */}
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Valitse avatar</Text>
+              <View style={styles.avatarSelection}>
+                {avatars.map((avatar) => (
+                  <Pressable
+                    key={avatar.id}
+                    onPress={() => setSelectedAvatar(avatar.id)}
+                    style={[
+                      styles.avatarButton,
+                      selectedAvatar === avatar.id && styles.selectedAvatar,
+                    ]}
+                  >
+                    <Image source={avatar.item} style={styles.avatarImage} />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            {/* Username Input */}
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Käyttäjänimi</Text>
+              <TextInput
+                style={styles.input}
+                value={username}
+                onChangeText={setUsername}
+                placeholder="Kirjoita käyttäjänimesi"
+                placeholderTextColor="#999"
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 100);
+                }}
+              />
+            </View>
+
+            {/* Continue Button */}
+            <Pressable
+              style={[styles.continueButton, isLoading && styles.continueButtonDisabled]}
+              onPress={handleContinue}
+              disabled={isLoading}
+            >
+              <Text style={styles.continueButtonText}>
+                {isLoading ? "Tarkistetaan..." : "Jatka"}
+              </Text>
+            </Pressable>
+          </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
-  },
-  todayBox: {
-    backgroundColor: "white",
-    padding: 40,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-    flexDirection: "column",
+    backgroundColor: theme.colors.background,
   },
   overlay: {
     flex: 1,
-    // backgroundColor: "rgba(255, 255, 255, 0.9)",
-    padding: 16,
-    justifyContent: "center",
+    backgroundColor: theme.colors.overlay,
+  },
+  scrollContent: {
+    padding: theme.spacing.medium,
+    paddingTop: 60,
+    paddingBottom: 40,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 20,
+    fontSize: 28,
+    fontFamily: theme.fontFamily.bold,
+    color: theme.colors.primary,
     textAlign: "center",
+    marginBottom: 8,
   },
-  text: {
+  subtitle: {
     fontSize: 16,
-    // fontWeight: "bold",
-    // color: "#0c4c25",
-    marginBottom: 50,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
     textAlign: "center",
+    marginBottom: 24,
+  },
+  progressContainer: {
+    marginBottom: 24,
+  },
+  progressTrack: {
+    height: 10,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#37891C",
+    borderRadius: 5,
+  },
+  card: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 12,
   },
   input: {
     height: 50,
-    borderColor: "#ccc",
+    borderColor: "#e0e0e0",
     borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    backgroundColor: "white",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  levelLabel: {
+    borderRadius: theme.borderRadius.medium,
+    paddingHorizontal: 16,
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#0c4c25",
-    marginBottom: 10,
-  },
-  levelButtons: {
-    flexDirection: "column",
-    gap: 10,
-    marginBottom: 20,
-  },
-  levelButton: {
-    width: "100%",
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  selectedLevel: {
-    backgroundColor: "#0c4c25",
-  },
-  levelText: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  selectedLevelText: {
-    color: "white",
-  },
-  continueButton: {
-    backgroundColor: "#0c4c25",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  continueButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.regular,
+    backgroundColor: "#fafafa",
   },
   avatarSelection: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginBottom: 20,
+    paddingVertical: 8,
   },
   avatarButton: {
-    padding: 5,
-    borderWidth: 2,
+    padding: 4,
+    borderWidth: 3,
     borderColor: "transparent",
     borderRadius: 50,
   },
   selectedAvatar: {
-    borderColor: "#0c4c25",
+    borderColor: "#37891C",
   },
   avatarImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+  },
+  continueButton: {
+    backgroundColor: "#37891C",
+    padding: 14,
+    borderRadius: theme.borderRadius.large,
+    alignItems: "center",
+    marginTop: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  continueButtonDisabled: {
+    opacity: 0.7,
+  },
+  continueButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
   },
 });

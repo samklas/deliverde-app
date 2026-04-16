@@ -1,129 +1,160 @@
-import { db } from "@/firebaseConfig";
-import { theme } from "@/theme";
-import { addDoc, collection } from "firebase/firestore";
-import { useState } from "react";
 import {
-  Alert,
-  Keyboard,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from "react-native";
+import { useState } from "react";
+import { db } from "@/firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
+import { theme } from "@/theme";
+import { router } from "expo-router";
+import React from "react";
 
-const Feedback = () => {
+export default function Feedback() {
   const [feedback, setFeedback] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (feedback === "") {
-      Alert.alert("Palaute puuttuu!");
+    if (!feedback.trim()) {
+      Alert.alert("Virhe", "Kirjoita palautetta ennen lähettämistä");
       return;
     }
 
+    setIsLoading(true);
     try {
-      // Add a new document with a generated ID
       await addDoc(collection(db, "feedback"), {
         createdAt: new Date(),
-        feedback: feedback,
+        feedback: feedback.trim(),
       });
-      Alert.alert("Kiitos palautteestasi!");
+      Alert.alert("Kiitos!", "Palautteesi on lähetetty onnistuneesti.", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
       setFeedback("");
     } catch (error) {
-      Alert.alert("Virhe tallennettaessa palautetta! Yritä uudestaan.");
+      console.error("Error submitting feedback:", error);
+      Alert.alert("Virhe", "Palautteen lähettäminen epäonnistui. Yritä uudelleen.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <TouchableWithoutFeedback
-      style={{ backgroundColor: "#fff" }}
-      onPress={Keyboard.dismiss}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.container}>
-        <Text style={styles.heading}>Palautteesi on meille tärkeää!</Text>
-        <Text style={{ textAlign: "center" }}>
-          Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin
-          paremman. Siksi arvostamme suuresti jokaista kommenttia, risua ja
-          ruusua.
-        </Text>
-        <Text style={{ textAlign: "center", marginTop: 10 }}>
-          Kiitos, että autat meitä parantamaan! 💚
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Lähetä palautetta</Text>
+        <Text style={styles.subtitle}>
+          Palautteesi on meille tärkeää! Haluamme jatkuvasti kehittää sovellustamme ja tehdä siitä entistäkin paremman.
         </Text>
 
-        <TextInput
-          style={styles.input}
-          multiline
-          placeholder="Kirjoita palautteesi tähän..."
-          placeholderTextColor="#ccc"
-          value={feedback}
-          onChangeText={setFeedback}
-        />
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Palautteesi</Text>
+          <TextInput
+            style={styles.input}
+            multiline
+            placeholder="Kirjoita palautteesi tähän..."
+            placeholderTextColor="#999"
+            value={feedback}
+            onChangeText={setFeedback}
+            textAlignVertical="top"
+          />
+        </View>
 
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={() => handleSubmit()}
+        <Pressable
+          style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={isLoading}
         >
-          <Text style={styles.submitText}>Lähetä</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableWithoutFeedback>
+          <Text style={styles.submitButtonText}>
+            {isLoading ? "Lähetetään..." : "Lähetä"}
+          </Text>
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    marginTop: 0,
-    width: "100%",
-    backgroundColor: "white",
+    backgroundColor: theme.colors.overlay,
   },
-  heading: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
+  scrollContent: {
+    padding: theme.spacing.medium,
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+  title: {
+    fontSize: 32,
+    fontFamily: theme.fontFamily.bold,
     color: theme.colors.primary,
+    textAlign: "center",
+    marginBottom: 12,
   },
-  label: { fontSize: 16, marginVertical: 10 },
-  ratingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  ratingButton: {
-    backgroundColor: "#eee",
-    padding: 10,
-    borderRadius: 8,
-    width: 50,
-    alignItems: "center",
-  },
-  selected: { backgroundColor: "#5cb85c" },
-  ratingText: { fontSize: 16 },
-  input: {
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    padding: 15,
+  subtitle: {
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
-    height: 100,
-    width: "100%",
-    textAlignVertical: "top",
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  card: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+    marginBottom: 12,
+  },
+  input: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: theme.borderRadius.medium,
+    padding: 16,
+    fontSize: 16,
+    fontFamily: theme.fontFamily.regular,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    minHeight: 120,
   },
   submitButton: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#37891C",
     padding: 18,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.large,
     alignItems: "center",
-    marginTop: 50,
-    width: "100%",
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  submitText: { color: "white", fontWeight: "bold", fontSize: 18 },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontFamily: theme.fontFamily.semiBold,
+  },
 });
-
-export default Feedback;

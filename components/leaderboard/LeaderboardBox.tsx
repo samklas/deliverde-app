@@ -1,30 +1,43 @@
 import leaderboardStore from "@/stores/leaderboardStore";
+import { getLeaderboardUsers } from "@/services/users.service";
 import { theme } from "@/theme";
+import { Ionicons } from "@expo/vector-icons";
 import { observer } from "mobx-react-lite";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import LeaderboardModal from "./LeaderboardModal";
+import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
 
 const LeaderboardBox = observer(() => {
-  const { setIsVisible, users } = leaderboardStore;
-  const sortedUsers = users.slice(0, 3);
+  const { users } = leaderboardStore;
+  const sortedUsers = users.filter((u) => u.uid).slice(0, 3);
+  const router = useRouter();
 
-  // Only render if we have valid users with non-empty uids
-  //if (!users.length || !users[0].uid) return null;
+  useEffect(() => {
+    getLeaderboardUsers()
+      .then((fetched) => leaderboardStore.setUsers(fetched))
+      .catch(() => {});
+  }, []);
 
   return (
-    <TouchableOpacity onPress={() => setIsVisible(true)}>
-      <View style={[styles.box, styles.pressableBox]}>
-        <Text style={styles.boxTitle}>Kuukauden salaattisankarit</Text>
-        {sortedUsers.map((user, i) => (
-          <Row
-            key={user.uid || i}
-            name={user.username}
-            totalScore={user.points}
-            position={i + 1}
-          />
-        ))}
+    <TouchableOpacity onPress={() => router.push("/leaderboard-view")} activeOpacity={0.8}>
+      <View style={styles.box}>
+        <View style={styles.headerRow}>
+          <View style={styles.titleContainer}>
+
+            <Text style={styles.boxTitle} numberOfLines={2} adjustsFontSizeToFit>Kuukauden salaattisankarit</Text>
+          </View>
+        </View>
+        <View style={styles.leaderboardList}>
+          {sortedUsers.map((user, i) => (
+            <Row
+              key={user.uid || i}
+              name={user.username}
+              totalScore={user.points}
+              position={i + 1}
+            />
+          ))}
+        </View>
       </View>
-      <LeaderboardModal />
     </TouchableOpacity>
   );
 });
@@ -34,13 +47,33 @@ type RowProps = {
   totalScore: number;
   position: number;
 };
+
+const getMedalColor = (position: number) => {
+  switch (position) {
+    case 1: return "#37891C"; // Gold
+    case 2: return "#37891C"; // Silver
+    case 3: return "#37891C"; // Bronze
+    default: return "#999";
+  }
+};
+
 const Row = ({ name, totalScore, position }: RowProps) => {
+  const medalColor = getMedalColor(position);
+
   return (
-    <View style={styles.leaderboardRow}>
-      <Text style={styles.leaderboardPosition}>
-        {position}. {name}
-      </Text>
-      <Text style={styles.leaderboardScore}>{totalScore} pistettä</Text>
+    <View style={[styles.leaderboardRow, position === 1 && styles.firstPlaceRow]}>
+      <View style={styles.positionContainer}>
+        <View style={[styles.positionBadge, { backgroundColor: medalColor }]}>
+          <Text style={styles.positionNumber}>{position}</Text>
+        </View>
+        <Text style={[styles.leaderboardName, position === 1 && styles.firstPlaceName]}>
+          {name}
+        </Text>
+      </View>
+      <View style={styles.scoreContainer}>
+        <Text style={styles.leaderboardScore}>{totalScore}</Text>
+        <Text style={styles.scoreLabel}>pistettä</Text>
+      </View>
     </View>
   );
 };
@@ -48,43 +81,86 @@ const Row = ({ name, totalScore, position }: RowProps) => {
 const styles = StyleSheet.create({
   box: {
     backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.large,
+    borderRadius: 20,
     padding: theme.spacing.medium,
     marginBottom: theme.spacing.medium,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     elevation: 3,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.medium,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  trophyIcon: {
+    marginRight: 8,
   },
   boxTitle: {
     fontSize: theme.fonts.subtitle.fontSize,
-    fontWeight: "bold",
+    fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
-    marginBottom: theme.spacing.small,
   },
-  pressableBox: {
-    opacity: 1,
-    // Add active state styling when pressed
-    //  android_ripple: { color: "rgba(0,0,0,0.1)" },
+  leaderboardList: {
+    gap: 8,
   },
   leaderboardRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: theme.spacing.small,
+    backgroundColor: "rgba(55, 137, 28, 0.04)",
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.small,
   },
-  leaderboardPosition: {
-    fontSize: theme.fonts.regular.fontSize,
-    // color: theme.colors.primary,
+  firstPlaceRow: {
+    backgroundColor: "rgba(55, 137, 28, 0.04)",
+  },
+  positionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  positionBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  positionNumber: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.bold,
+    color: "white",
   },
   leaderboardName: {
     fontSize: theme.fonts.regular.fontSize,
+    fontFamily: theme.fontFamily.medium,
     color: theme.colors.text,
+  },
+  firstPlaceName: {
+    color: theme.colors.primary,
+    fontFamily: theme.fontFamily.semiBold,
+  },
+  scoreContainer: {
+    alignItems: "flex-end",
   },
   leaderboardScore: {
     fontSize: theme.fonts.regular.fontSize,
-    color: "#666",
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+  },
+  scoreLabel: {
+    fontSize: 12,
+    fontFamily: theme.fontFamily.regular,
+    color: "#888",
   },
 });
 

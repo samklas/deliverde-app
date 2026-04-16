@@ -55,7 +55,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
           fontSize={size * 0.2}
           fill={progressColor}
         >
-          {`${progress}%`}
+          {`${Math.round(progress)}%`}
         </SvgText>
       </Svg>
     </View>
