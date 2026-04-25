@@ -42,8 +42,7 @@ export {
 
 export {
   requestNotificationPermissions,
-  scheduleDailyReminder,
-  cancelDailyReminder,
+  savePushToken,
 } from "./notifications.service";
 
 export {

@@ -1,8 +1,7 @@
 import * as Notifications from "expo-notifications";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
-
-const REMINDER_NOTIFICATION_ID_KEY = "dailyReminderNotificationId";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -29,43 +28,18 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return status === "granted";
 }
 
-async function isReminderScheduled(): Promise<boolean> {
-  const id = await AsyncStorage.getItem(REMINDER_NOTIFICATION_ID_KEY);
-  if (!id) return false;
-
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  return scheduled.some((n) => n.identifier === id);
-}
-
-// Schedules a daily repeating notification at 8 PM if not already scheduled.
-// Call this when the daily goal is not yet met.
-export async function scheduleDailyReminder(): Promise<void> {
+// Gets the Expo push token and saves it to Firestore so the backend can send dynamic notifications.
+export async function savePushToken(userId: string): Promise<void> {
   const { status } = await Notifications.getPermissionsAsync();
   if (status !== "granted") return;
 
-  if (await isReminderScheduled()) return;
-
-  const id = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "Muista päivän tavoitteesi! 🥦",
-      body: "Avaa sovellus ja lisää tämän päivän kasvikset.",
-      sound: true,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 20,
-      minute: 10,
-    },
-  });
-
-  await AsyncStorage.setItem(REMINDER_NOTIFICATION_ID_KEY, id);
-}
-
-// Cancels the daily reminder. Call this when the daily goal is achieved.
-export async function cancelDailyReminder(): Promise<void> {
-  const id = await AsyncStorage.getItem(REMINDER_NOTIFICATION_ID_KEY);
-  if (id) {
-    await Notifications.cancelScheduledNotificationAsync(id);
-    await AsyncStorage.removeItem(REMINDER_NOTIFICATION_ID_KEY);
+  try {
+    const token = await Notifications.getExpoPushTokenAsync({
+      projectId: "d5e813b3-5de7-4c04-a7a5-9b284370f1b7",
+    });
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { expoPushToken: token.data });
+  } catch {
+    // Physical device required for push tokens; silently skip on simulator
   }
 }

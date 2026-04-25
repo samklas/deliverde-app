@@ -9,10 +9,8 @@ import {
   loadAppData,
   checkUserExists,
   requestNotificationPermissions,
-  scheduleDailyReminder,
-  cancelDailyReminder,
+  savePushToken,
 } from "@/services";
-import userStore from "@/stores/userStore";
 import {
   useFonts,
   Poppins_400Regular,
@@ -56,15 +54,10 @@ export default function RootLayout() {
           if (profileExists) {
             // User has completed profile - load all app data
             await loadAppData();
-            // Request notification permissions, then sync reminder state
+            // Request notification permissions, then register push token for backend notifications
             const granted = await requestNotificationPermissions();
             if (granted) {
-              const { dailyTotal, dailyTarget } = userStore;
-              if (dailyTotal >= dailyTarget) {
-                await cancelDailyReminder();
-              } else {
-                await scheduleDailyReminder();
-              }
+              await savePushToken(user.uid);
             }
             setInitialRoute("(tabs)");
           } else {
