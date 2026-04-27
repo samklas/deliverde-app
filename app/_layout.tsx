@@ -5,7 +5,12 @@ import { View } from "react-native";
 import "../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { loadAppData, checkUserExists } from "@/services";
+import {
+  loadAppData,
+  checkUserExists,
+  requestNotificationPermissions,
+  savePushToken,
+} from "@/services";
 import {
   useFonts,
   Poppins_400Regular,
@@ -49,6 +54,11 @@ export default function RootLayout() {
           if (profileExists) {
             // User has completed profile - load all app data
             await loadAppData();
+            // Request notification permissions, then register push token for backend notifications
+            const granted = await requestNotificationPermissions();
+            if (granted) {
+              await savePushToken(user.uid);
+            }
             setInitialRoute("(tabs)");
           } else {
             // User is authenticated but hasn't completed profile

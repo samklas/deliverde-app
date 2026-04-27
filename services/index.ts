@@ -41,6 +41,11 @@ export {
 } from "./vision.service";
 
 export {
+  requestNotificationPermissions,
+  savePushToken,
+} from "./notifications.service";
+
+export {
   createGroup,
   joinGroup,
   leaveGroup,

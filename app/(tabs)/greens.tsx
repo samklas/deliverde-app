@@ -18,7 +18,11 @@ import { observer } from "mobx-react-lite";
 import { Ionicons } from "@expo/vector-icons";
 
 import userStore from "@/stores/userStore";
-import { getDailyTotalForCurrentUser, setDailyTotalForCurrentUser } from "@/services";
+import {
+  getDailyTotalForCurrentUser,
+  setDailyTotalForCurrentUser,
+  cancelDailyReminder,
+} from "@/services";
 
 const Tab = observer(() => {
   const { dailyTotal, dailyTarget, setDailyTotal } = userStore;
@@ -127,6 +131,7 @@ const Tab = observer(() => {
     if (progress >= 100 && !hasCelebrated && !isAddModalVisible) {
       setHasCelebrated(true);
       setIsCelebrationVisible(true);
+      cancelDailyReminder();
     }
   }, [progress, hasCelebrated, isAddModalVisible]);
 
