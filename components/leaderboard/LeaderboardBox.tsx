@@ -2,13 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withRepeat,
-  withSequence,
-  withTiming,
-  withDelay,
   FadeInDown,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,12 +16,6 @@ import {
 import { theme } from '@/theme';
 
 // ─── constants ────────────────────────────────────────────────────────────────
-
-const RANK_GRADIENTS: Record<number, readonly [string, string]> = {
-  1: ['#FFD93D', '#F5A623'],
-  2: ['#D4D4D4', '#A8A8A8'],
-  3: ['#E8A87C', '#C47B3E'],
-};
 
 const FINNISH_MONTHS = [
   'tammikuu', 'helmikuu', 'maaliskuu', 'huhtikuu', 'toukokuu', 'kesäkuu',
@@ -48,28 +35,21 @@ const LeaderboardRow = ({
   points,
   rank,
   delay,
+  onPress,
 }: {
   name: string;
   points: number;
   rank: number;
   delay: number;
+  onPress: () => void;
 }) => {
-  const scale = useSharedValue(1);
-  const scaleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const [a, b] = RANK_GRADIENTS[rank] ?? (['#aaa', '#888'] as const);
   const isFirst = rank === 1;
 
   return (
     <Animated.View entering={FadeInDown.delay(delay).springify().damping(15)}>
-      <Pressable
-        onPressIn={() => { scale.value = withSpring(0.97, { damping: 16 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 16 }); }}
-      >
-        <Animated.View style={[s.row, scaleStyle]}>
-          <LinearGradient colors={[a, b]} style={s.rankBadge}>
+      <Pressable onPress={onPress}>
+        <View style={s.row}>
+          <LinearGradient colors={["#37891C", "#37891C"]} style={s.rankBadge}>
             <Text style={s.rankNum}>{rank}</Text>
           </LinearGradient>
 
@@ -80,7 +60,7 @@ const LeaderboardRow = ({
           <View style={s.scoreBlock}>
             <Text style={[s.scoreNum, isFirst && s.scoreNumFirst]}>{points}</Text>
           </View>
-        </Animated.View>
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -89,46 +69,17 @@ const LeaderboardRow = ({
 // ─── PreviousWinnerCard ───────────────────────────────────────────────────────
 
 const PreviousWinnerCard = ({ winner }: { winner: PreviousMonthWinner }) => {
-  const sparkAOpacity = useSharedValue(0.9);
-  const sparkAScale = useSharedValue(1);
-  const sparkBOpacity = useSharedValue(0.6);
-  const sparkBScale = useSharedValue(1);
-
-  useEffect(() => {
-    const pulse = (opacity: typeof sparkAOpacity, scale: typeof sparkAScale, delay: number) => {
-      opacity.value = withDelay(delay, withRepeat(
-        withSequence(withTiming(0.1, { duration: 700 }), withTiming(0.9, { duration: 700 })),
-        -1, true
-      ));
-      scale.value = withDelay(delay, withRepeat(
-        withSequence(withTiming(0.6, { duration: 700 }), withTiming(1, { duration: 700 })),
-        -1, true
-      ));
-    };
-    pulse(sparkAOpacity, sparkAScale, 0);
-    pulse(sparkBOpacity, sparkBScale, 500);
-  }, []);
-
-  const sparkAStyle = useAnimatedStyle(() => ({
-    opacity: sparkAOpacity.value,
-    transform: [{ scale: sparkAScale.value }],
-  }));
-  const sparkBStyle = useAnimatedStyle(() => ({
-    opacity: sparkBOpacity.value,
-    transform: [{ scale: sparkBScale.value }],
-  }));
-
   return (
     <Animated.View entering={FadeInDown.delay(480).springify().damping(15)}>
       <LinearGradient
-        colors={['#d8f2c2', '#9fda63', '#6bbd2d']}
+        colors={['#eefbe4', '#9fda63', '#6bbd2d']}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0.7, y: 1.2 }}
         style={s.winnerCard}
       >
         {/* Left */}
         <View style={s.winnerLeft}>
-          <Text style={s.winnerLabel}>VIIME KUUN MESTARI</Text>
+          <Text style={s.winnerLabel}>VIIME KUUN VOITTAJA</Text>
           <Text style={s.winnerName}>{winner.username}</Text>
           <Text style={s.winnerSub}>
             {winner.points} pistettä · {formatMonthKey(winner.monthKey)}
@@ -140,8 +91,8 @@ const PreviousWinnerCard = ({ winner }: { winner: PreviousMonthWinner }) => {
           <View style={s.trophyCircle}>
             <Text style={{ fontSize: 17 }}>🌱</Text>
           </View>
-          <Animated.Text style={[s.sparkA, sparkAStyle]}>✦</Animated.Text>
-          <Animated.Text style={[s.sparkB, sparkBStyle]}>✦</Animated.Text>
+          <Text style={s.sparkA}>✦</Text>
+          <Text style={s.sparkB}>✦</Text>
         </View>
 
       </LinearGradient>
@@ -166,18 +117,9 @@ const LeaderboardBox = observer(() => {
       .catch(() => {});
   }, []);
 
-  const cardScale = useSharedValue(1);
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: cardScale.value }],
-  }));
-
   return (
-    <Pressable
-      onPressIn={() => { cardScale.value = withSpring(0.98, { damping: 16 }); }}
-      onPressOut={() => { cardScale.value = withSpring(1, { damping: 16 }); }}
-      onPress={() => router.push('/leaderboard-view')}
-    >
-      <Animated.View style={[s.card, cardStyle]}>
+    <Pressable onPress={() => router.push('/leaderboard-view')}>
+      <View style={s.card}>
         {/* Header */}
         <View style={s.cardHeader}>
           <Text style={s.cardTitle}>Kuukauden salaattisankarit</Text>
@@ -195,6 +137,7 @@ const LeaderboardBox = observer(() => {
               points={user.points}
               rank={i + 1}
               delay={i * 60}
+              onPress={() => router.push('/leaderboard-view')}
             />
           ))}
         </View>
@@ -210,7 +153,7 @@ const LeaderboardBox = observer(() => {
             <PreviousWinnerCard winner={previousWinner} />
           </View>
         )}
-      </Animated.View>
+      </View>
     </Pressable>
   );
 });

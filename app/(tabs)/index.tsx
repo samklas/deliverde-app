@@ -15,10 +15,7 @@ const Tab = observer(() => {
   const router = useRouter();
   const { recipes, recipeOfMonth, favoriteRecipes } = recipeStore;
 
-  // Real-time listener for favorites (keeps favorites in sync)
   const { favoriteRecipes: liveFavorites } = useFavorites(recipes);
-
-  // Use live favorites if available, otherwise use stored ones
   const currentFavorites = liveFavorites.length > 0 ? liveFavorites : favoriteRecipes;
 
   useEffect(() => {
@@ -36,7 +33,6 @@ const Tab = observer(() => {
       >
         <Ionicons name="bag-handle-outline" size={18} color={theme.colors.primary} />
         <Text style={styles.shopLink}>DeliVerde Shoppiin</Text>
-        
       </Pressable>
       <DailyChallengeBox />
       <LeaderboardBox />

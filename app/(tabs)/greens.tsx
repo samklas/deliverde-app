@@ -21,7 +21,6 @@ import userStore from "@/stores/userStore";
 import {
   getDailyTotalForCurrentUser,
   setDailyTotalForCurrentUser,
-  cancelDailyReminder,
 } from "@/services";
 
 const Tab = observer(() => {
@@ -131,7 +130,6 @@ const Tab = observer(() => {
     if (progress >= 100 && !hasCelebrated && !isAddModalVisible) {
       setHasCelebrated(true);
       setIsCelebrationVisible(true);
-      cancelDailyReminder();
     }
   }, [progress, hasCelebrated, isAddModalVisible]);
 

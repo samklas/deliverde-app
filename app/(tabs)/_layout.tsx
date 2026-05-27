@@ -17,7 +17,7 @@ export default function TabLayout() {
         headerBackground: () => {
           return (
             <Image
-              source={require("../../assets/images/Deliverde_header.jpg")} // Adjust the path to your image
+              source={require("../../assets/images/Deliverde_header.jpg")}
               style={{
                 height: "100%",
                 width: "100%",
@@ -37,7 +37,6 @@ export default function TabLayout() {
           ),
         }}
       />
-     
       <Tabs.Screen
         name="greens"
         options={{
@@ -47,12 +46,11 @@ export default function TabLayout() {
           ),
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="groups"
         options={{
           title: "Ryhmät",
           tabBarIcon: ({ color }) => (
-            
             <FontAwesome6 size={24} name="user-group" color={color} />
           ),
         }}
