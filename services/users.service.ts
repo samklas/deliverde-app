@@ -77,7 +77,6 @@ export const getPreviousMonthWinner = async (): Promise<PreviousMonthWinner | nu
   if (!historyDoc.exists()) return null;
 
   const { topUsers } = historyDoc.data();
-  console.log("Top users for month", monthKey, topUsers);
   if (!topUsers?.length) return null;
 
   const winner = topUsers.find((u: { rank: number }) => u.rank === 1) ?? topUsers[0];
