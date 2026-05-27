@@ -61,6 +61,29 @@ export const getUserDetails = async (): Promise<UserDetails | null> => {
   };
 };
 
+export type PreviousMonthWinner = {
+  username: string;
+  points: number;
+  monthKey: string;
+};
+
+export const getPreviousMonthWinner = async (): Promise<PreviousMonthWinner | null> => {
+  const now = new Date();
+  const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+  const month = now.getMonth() === 0 ? 12 : now.getMonth();
+  const monthKey = `${year}-${String(month).padStart(2, "0")}`;
+
+  const historyDoc = await getDoc(doc(db, "leaderboardHistory", monthKey));
+  if (!historyDoc.exists()) return null;
+
+  const { topUsers } = historyDoc.data();
+  console.log("Top users for month", monthKey, topUsers);
+  if (!topUsers?.length) return null;
+
+  const winner = topUsers.find((u: { rank: number }) => u.rank === 1) ?? topUsers[0];
+  return { username: winner.username, points: winner.points, monthKey };
+};
+
 export const getLeaderboardUsers = async (): Promise<LeaderboardUser[]> => {
   const querySnapshot = await getDocs(collection(db, "leaderboard"));
   return querySnapshot.docs.map((doc) => ({
