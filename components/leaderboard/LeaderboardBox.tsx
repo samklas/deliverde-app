@@ -15,20 +15,17 @@ import {
 } from '@/services/users.service';
 import { theme } from '@/theme';
 
-// ─── constants ────────────────────────────────────────────────────────────────
 
-const FINNISH_MONTHS = [
+const MONTHS = [
   'tammikuu', 'helmikuu', 'maaliskuu', 'huhtikuu', 'toukokuu', 'kesäkuu',
   'heinäkuu', 'elokuu', 'syyskuu', 'lokakuu', 'marraskuu', 'joulukuu',
 ];
 
 const formatMonthKey = (key: string): string => {
   const [year, m] = key.split('-');
-  const name = FINNISH_MONTHS[parseInt(m, 10) - 1] ?? '';
+  const name = MONTHS[parseInt(m, 10) - 1] ?? '';
   return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${year}`;
 };
-
-// ─── LeaderboardRow ───────────────────────────────────────────────────────────
 
 const LeaderboardRow = ({
   name,
@@ -66,15 +63,13 @@ const LeaderboardRow = ({
   );
 };
 
-// ─── PreviousWinnerCard ───────────────────────────────────────────────────────
-
 const PreviousWinnerCard = ({ winner }: { winner: PreviousMonthWinner }) => {
   return (
     <Animated.View entering={FadeInDown.delay(480).springify().damping(15)}>
       <LinearGradient
-        colors={['#eefbe4', '#9fda63', '#6bbd2d']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.7, y: 1.2 }}
+        colors={['#E9F7DA', '#80cf42']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
         style={s.winnerCard}
       >
         {/* Left */}
@@ -100,7 +95,6 @@ const PreviousWinnerCard = ({ winner }: { winner: PreviousMonthWinner }) => {
   );
 };
 
-// ─── Main component ───────────────────────────────────────────────────────────
 
 const LeaderboardBox = observer(() => {
   const { users } = leaderboardStore;
@@ -160,7 +154,6 @@ const LeaderboardBox = observer(() => {
 
 export default LeaderboardBox;
 
-// ─── styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
   // Matches the shadow/radius style of other app cards
@@ -219,7 +212,7 @@ const s = StyleSheet.create({
   rankBadge: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
