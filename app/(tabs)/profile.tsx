@@ -15,18 +15,21 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser, isAnonymousUser, deleteAccount } from "@/services";
+import { storage, setLevelForCurrentUser, getInviteCodeForCurrentUser, getEmailForCurrentUser, setEmailForCurrentUser, isAnonymousUser, deleteAccount } from "@/services";
 import { STORAGE_KEYS } from "@/constants";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import DailyGoalModal from "@/components/DailyGoalModal";
+import EmailModal from "@/components/EmailModal";
 import React from "react";
 
 export default function Tab() {
   const [username, setUsername] = useState("");
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [goalModalVisible, setGoalModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [emailModalVisible, setEmailModalVisible] = useState(false);
   const { avatarId, dailyTarget } = userStore;
   const router = useRouter();
 
@@ -94,6 +97,21 @@ export default function Tab() {
     setInviteCode(code);
   };
 
+  const loadEmail = async () => {
+    const currentEmail = await getEmailForCurrentUser();
+    setEmail(currentEmail);
+  };
+
+  const handleSaveEmail = async (newEmail: string) => {
+    await setEmailForCurrentUser(newEmail);
+    setEmail(newEmail);
+  };
+
+  const handleRemoveEmail = async () => {
+    await setEmailForCurrentUser(null);
+    setEmail(null);
+  };
+
   const shareInviteCode = async () => {
     if (inviteCode) {
       try {
@@ -124,6 +142,7 @@ export default function Tab() {
   useEffect(() => {
     loadUsername();
     loadInviteCode();
+    loadEmail();
   }, []);
 
   return (
@@ -150,6 +169,19 @@ export default function Tab() {
           </Pressable>
 
 
+
+<Pressable
+            style={styles.box}
+            onPress={() => setEmailModalVisible(true)}
+          >
+            <Text style={styles.sectionTitle}>Sähköposti</Text>
+            <View style={styles.boxContent}>
+              <Text style={styles.goalText}>
+                {email ?? "Lisää sähköposti palkintoja varten"}
+              </Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
+            </View>
+          </Pressable>
 
 <Pressable
             style={styles.box}
@@ -195,6 +227,14 @@ export default function Tab() {
           currentTarget={dailyTarget}
           onClose={() => setGoalModalVisible(false)}
           onSave={handleSaveGoal}
+        />
+
+        <EmailModal
+          visible={emailModalVisible}
+          currentEmail={email}
+          onClose={() => setEmailModalVisible(false)}
+          onSave={handleSaveEmail}
+          onRemove={handleRemoveEmail}
         />
 
         <Modal

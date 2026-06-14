@@ -1,5 +1,5 @@
 import { auth, db } from "@/firebaseConfig";
-import { doc, updateDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, updateDoc, getDoc, collection, getDocs, deleteField } from "firebase/firestore";
 import { LEVEL_TARGETS } from "@/constants";
 import { LeaderboardUser } from "@/types/users";
 
@@ -100,6 +100,33 @@ export const setLevelForCurrentUser = async (level: string): Promise<void> => {
   }
   const userRef = doc(db, "users", uid);
   await updateDoc(userRef, { level });
+};
+
+export const getEmailForCurrentUser = async (): Promise<string | null> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return null;
+
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const userData = userDoc.data();
+
+  return userData?.email ?? null;
+};
+
+export const setEmailForCurrentUser = async (email: string | null): Promise<void> => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) {
+    throw new Error("User is not authenticated");
+  }
+
+  const userRef = doc(db, "users", uid);
+  const trimmedEmail = email?.trim();
+
+  if (!trimmedEmail) {
+    await updateDoc(userRef, { email: deleteField() });
+    return;
+  }
+
+  await updateDoc(userRef, { email: trimmedEmail });
 };
 
 export const getInviteCodeForCurrentUser = async (): Promise<string | null> => {

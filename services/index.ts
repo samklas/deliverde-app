@@ -13,6 +13,8 @@ export {
   getLeaderboardUsers,
   setLevelForCurrentUser,
   getInviteCodeForCurrentUser,
+  getEmailForCurrentUser,
+  setEmailForCurrentUser,
   type UserDetails,
 } from "./users.service";
 
