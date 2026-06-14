@@ -18,6 +18,8 @@ export {
 
 export { storage } from "./storage.service";
 
+export { getCurrentMonthPrize, getCurrentMonthId } from "./prizes.service";
+
 export { loadAppData } from "./appData.service";
 
 export {

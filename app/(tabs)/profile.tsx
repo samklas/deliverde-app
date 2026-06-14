@@ -72,6 +72,11 @@ export default function Tab() {
     router.replace("/login");
   };
 
+  const handleResetPrizeModal = async () => {
+    await storage.remove(STORAGE_KEYS.LAST_SEEN_PRIZE_MONTH);
+    Alert.alert("Valmis", "Palkintoilmoitus näytetään seuraavalla käynnistyksellä.");
+  };
+
   const handleSaveGoal = async (level: string, target: number) => {
     await setLevelForCurrentUser(level);
     userStore.setDailyTarget(target);
@@ -155,6 +160,17 @@ export default function Tab() {
               <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
             </View>
           </Pressable>
+
+          {__DEV__ && (
+            <Pressable style={styles.box} onPress={handleResetPrizeModal}>
+              <View style={styles.boxContent}>
+                <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>
+                  [DEV] Nollaa palkintoilmoitus
+                </Text>
+                <Ionicons name="refresh" size={20} color={theme.colors.primary} />
+              </View>
+            </Pressable>
+          )}
 
           <View style={styles.logoutContainer}>
             <Pressable style={styles.logoutButton} onPress={handleLogout}>

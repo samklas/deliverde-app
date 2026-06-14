@@ -10,7 +10,13 @@ import {
   checkUserExists,
   requestNotificationPermissions,
   savePushToken,
+  getCurrentMonthPrize,
+  getCurrentMonthId,
+  storage,
 } from "@/services";
+import { STORAGE_KEYS } from "@/constants";
+import { MonthlyPrize } from "@/types/prize";
+import PrizeAnnouncementModal from "@/components/PrizeAnnouncementModal";
 import {
   useFonts,
   Poppins_400Regular,
@@ -25,6 +31,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const [monthlyPrize, setMonthlyPrize] = useState<MonthlyPrize | null>(null);
   const router = useRouter();
   const segments = useSegments();
   const hasInitialized = useRef(false);
@@ -59,6 +66,20 @@ export default function RootLayout() {
             if (granted) {
               await savePushToken(user.uid);
             }
+
+            // Show the monthly prize announcement once per month, if active
+            try {
+              const prize = await getCurrentMonthPrize();
+              if (prize) {
+                const lastSeenMonth = await storage.get(STORAGE_KEYS.LAST_SEEN_PRIZE_MONTH);
+                if (lastSeenMonth !== getCurrentMonthId()) {
+                  setMonthlyPrize(prize);
+                }
+              }
+            } catch {
+              // Non-critical: skip the prize announcement on error
+            }
+
             setInitialRoute("(tabs)");
           } else {
             // User is authenticated but hasn't completed profile
@@ -206,6 +227,16 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      {monthlyPrize && (
+        <PrizeAnnouncementModal
+          visible={!!monthlyPrize}
+          prize={monthlyPrize}
+          onClose={async () => {
+            await storage.set(STORAGE_KEYS.LAST_SEEN_PRIZE_MONTH, getCurrentMonthId());
+            setMonthlyPrize(null);
+          }}
+        />
+      )}
     </View>
   );
 }

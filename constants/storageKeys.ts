@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   ONBOARDING_FRIEND_CODE: "onboarding_friend_code",
   USER_GROUPS: "userGroups",
   IMAGE_ANALYSIS_USAGE: "imageAnalysisUsage",
+  LAST_SEEN_PRIZE_MONTH: "lastSeenPrizeMonth",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
