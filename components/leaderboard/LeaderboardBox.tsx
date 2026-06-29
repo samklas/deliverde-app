@@ -67,9 +67,9 @@ const PreviousWinnerCard = ({ winner }: { winner: PreviousMonthWinner }) => {
   return (
     <Animated.View entering={FadeInDown.delay(480).springify().damping(15)}>
       <LinearGradient
-        colors={['#E9F7DA', '#80cf42']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+        colors={['#357F1A', '#42A022', '#5CB82E']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={s.winnerCard}
       >
         {/* Left */}
@@ -84,10 +84,8 @@ const PreviousWinnerCard = ({ winner }: { winner: PreviousMonthWinner }) => {
         {/* Right */}
         <View style={s.winnerRight}>
           <View style={s.trophyCircle}>
-            <Text style={{ fontSize: 17 }}>🌱</Text>
+            <Text style={{ fontSize: 17 }}>🏆</Text>
           </View>
-          <Text style={s.sparkA}>✦</Text>
-          <Text style={s.sparkB}>✦</Text>
         </View>
 
       </LinearGradient>
@@ -286,47 +284,32 @@ const s = StyleSheet.create({
     gap: 5,
   },
   trophyCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#2D7A1F',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sparkA: {
-    fontSize: 11,
-    color: '#37891C',
-    marginTop: 3,
-    opacity: 0.9,
-  },
-  sparkB: {
-    fontSize: 7,
-    color: '#2D7A1F',
-    opacity: 0.6,
-    marginTop: 8,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   winnerLabel: {
     fontSize: 10,
     fontFamily: theme.fontFamily.bold,
-    color: '#2D7A1F',
+    color: 'rgba(255,255,255,0.8)',
     letterSpacing: 1.5,
     marginBottom: 3,
   },
   winnerName: {
     fontSize: 22,
     fontFamily: theme.fontFamily.bold,
-    color: '#184B10',
+    color: 'white',
     marginBottom: 3,
     lineHeight: 26,
   },
   winnerSub: {
     fontSize: 12,
     fontFamily: theme.fontFamily.regular,
-    color: '#2D7A1F',
+    color: 'rgba(255,255,255,0.85)',
   },
 });
