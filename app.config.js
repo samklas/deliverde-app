@@ -69,6 +69,14 @@ export default {
       ],
       "expo-apple-authentication",
       "@react-native-google-signin/google-signin",
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            useFrameworks: "static",
+          },
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
