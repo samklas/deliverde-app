@@ -1,110 +1,28 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle, useAnimatedProps,
-  withTiming, withRepeat, withSequence,
-  interpolate, interpolateColor, Extrapolation, Easing,
-  createAnimatedComponent, SharedValue,
+  useSharedValue, useAnimatedStyle,
+  withTiming, withRepeat, withSequence, withSpring,
+  interpolateColor, Easing,
 } from 'react-native-reanimated';
-import Svg, { Rect, Ellipse, Circle, G } from 'react-native-svg';
 import { observer } from 'mobx-react-lite';
 import * as Haptics from 'expo-haptics';
 import { theme } from '@/theme';
 import userStore from '@/stores/userStore';
 
 const { width: SW } = Dimensions.get('window');
-const VB_W = 320;
-const VB_H = 120;
-const GROUND_Y = 85;
-const TRACK_W = SW - 64; // screen - (16px screen margin × 2) - (16px card padding × 2)
+// card has 16px padding, scrollview has 16px horizontal padding each side
+const TRACK_W = SW - 64;
 
-const AnimatedRect    = createAnimatedComponent(Rect);
-const AnimatedEllipse = createAnimatedComponent(Ellipse);
-const AnimatedCircle  = createAnimatedComponent(Circle);
-const AnimatedG       = createAnimatedComponent(G);
-
-type PlantDef = {
-  x: number; stemH: number;
-  leafW: number; leafH: number; vegR: number;
-  vegColor: string; leafColor: string; stemColor: string;
-  startAt: number; leafAt: number; vegAt: number;
-  phase: number;
+const getMsg = (raw: number, remaining: number): string => {
+  if (raw >= 1)    return 'Tavoite saavutettu! Olen tosi ylpeä sinusta! 🎉';
+  if (raw >= 0.75) return `Vain ${remaining}g jäljellä — sinä pystyt tähän!`;
+  if (raw >= 0.5)  return 'Puolivälissä! Olet tekemässä hienoa työtä!';
+  if (raw >= 0.25) return 'Hyvää menoa! Jatka samaan malliin!';
+  if (raw > 0)     return 'Hyvä alku! Jokainen gramma lasketaan.';
+  return 'Hei! Aloitetaan tänään yhdessä! 🌱';
 };
 
-const PLANTS: PlantDef[] = [
-  { x: 38,  stemH: 26, leafW: 13, leafH: 7,  vegR: 5, vegColor: '#EF5350', leafColor: '#4CAF50', stemColor: '#2E7D32', startAt: 0.04, leafAt: 0.13, vegAt: 0.55, phase: -0.75 },
-  { x: 95,  stemH: 38, leafW: 18, leafH: 10, vegR: 7, vegColor: '#FB8C00', leafColor: '#66BB6A', stemColor: '#388E3C', startAt: 0.12, leafAt: 0.24, vegAt: 0.60, phase:  0.55 },
-  { x: 158, stemH: 46, leafW: 21, leafH: 12, vegR: 9, vegColor: '#E91E63', leafColor: '#43A047', stemColor: '#2E7D32', startAt: 0.22, leafAt: 0.36, vegAt: 0.56, phase: -0.25 },
-  { x: 220, stemH: 36, leafW: 17, leafH: 10, vegR: 7, vegColor: '#FF7043', leafColor: '#558B2F', stemColor: '#33691E', startAt: 0.33, leafAt: 0.47, vegAt: 0.65, phase:  0.85 },
-  { x: 276, stemH: 28, leafW: 14, leafH: 8,  vegR: 5, vegColor: '#7E57C2', leafColor: '#4CAF50', stemColor: '#2E7D32', startAt: 0.42, leafAt: 0.57, vegAt: 0.71, phase: -0.55 },
-];
-
-// ── Plant ─────────────────────────────────────────────────────────────────────
-type PlantProps = { def: PlantDef; progress: SharedValue<number>; sway: SharedValue<number>; glow: SharedValue<number> };
-
-function Plant({ def, progress, sway, glow }: PlantProps) {
-  const top = GROUND_Y - def.stemH;
-
-  const stemProps = useAnimatedProps(() => {
-    const t = interpolate(progress.value, [def.startAt, def.startAt + 0.18], [0, 1], Extrapolation.CLAMP);
-    const h = t * def.stemH;
-    return { y: GROUND_Y - h, height: h };
-  });
-
-  const lLeafProps = useAnimatedProps(() => ({
-    opacity: interpolate(progress.value, [def.leafAt, def.leafAt + 0.14], [0, 1], Extrapolation.CLAMP),
-  }));
-
-  const rLeafProps = useAnimatedProps(() => ({
-    opacity: interpolate(progress.value, [def.leafAt, def.leafAt + 0.14], [0, 1], Extrapolation.CLAMP),
-  }));
-
-  const vegProps = useAnimatedProps(() => {
-    const t = interpolate(progress.value, [def.vegAt, def.vegAt + 0.12], [0, 1], Extrapolation.CLAMP);
-    return { opacity: t, r: def.vegR * 0.3 + def.vegR * 0.7 * t };
-  });
-
-  const glowProps = useAnimatedProps(() => {
-    const visible = interpolate(progress.value, [0.98, 1], [0, 1], Extrapolation.CLAMP);
-    return {
-      opacity: visible * interpolate(glow.value, [0, 1], [0.12, 0.45]),
-      r: def.vegR + interpolate(glow.value, [0, 1], [2, 9]),
-    };
-  });
-
-  const groupProps = useAnimatedProps(() => ({
-    rotation: sway.value * def.phase * 2.5,
-  }));
-
-  return (
-    <AnimatedG originX={def.x} originY={GROUND_Y} animatedProps={groupProps}>
-      {/* Stem */}
-      <AnimatedRect x={def.x - 2} width={4} rx={2} fill={def.stemColor} animatedProps={stemProps} />
-      {/* Left leaf */}
-      <AnimatedEllipse
-        cx={def.x - def.leafW * 0.7} cy={top + 9}
-        rx={def.leafW} ry={def.leafH * 0.65}
-        fill={def.leafColor} rotation={-25}
-        originX={def.x - def.leafW * 0.7} originY={top + 9}
-        animatedProps={lLeafProps}
-      />
-      {/* Right leaf */}
-      <AnimatedEllipse
-        cx={def.x + def.leafW * 0.7} cy={top + 17}
-        rx={def.leafW} ry={def.leafH * 0.65}
-        fill={def.leafColor} rotation={25}
-        originX={def.x + def.leafW * 0.7} originY={top + 17}
-        animatedProps={rLeafProps}
-      />
-      {/* Vegetable */}
-      <AnimatedCircle cx={def.x} cy={top - 1} fill={def.vegColor} animatedProps={vegProps} />
-      {/* Harvest glow ring (visible only at 100%) */}
-      <AnimatedCircle cx={def.x} cy={top - 1} fill="#FFD740" animatedProps={glowProps} />
-    </AnimatedG>
-  );
-}
-
-// ── Main ──────────────────────────────────────────────────────────────────────
 const DailyChallengeBox = observer(() => {
   const { dailyTotal, dailyTarget } = userStore;
   const wasComplete = useRef(false);
@@ -112,47 +30,59 @@ const DailyChallengeBox = observer(() => {
   const raw = dailyTarget > 0 ? Math.min(dailyTotal / dailyTarget, 1) : 0;
   const isComplete = raw >= 1;
   const pct = Math.round(raw * 100);
+  const remaining = Math.max(0, dailyTarget - dailyTotal);
+  const msg = getMsg(raw, remaining);
+  const prevMsg = useRef(msg);
 
   const progressAnim = useSharedValue(0);
-  const swayAnim     = useSharedValue(0);
-  const glowAnim     = useSharedValue(0);
+  const bobAnim      = useSharedValue(0);
+  const bubbleScale  = useSharedValue(1);
+  const bubbleOpacity = useSharedValue(1);
 
-  // Smooth progress animation
+  // Smooth progress fill
   useEffect(() => {
-    progressAnim.value = withTiming(raw, { duration: 900, easing: Easing.out(Easing.cubic) });
+    progressAnim.value = withTiming(raw, { duration: 800, easing: Easing.out(Easing.cubic) });
   }, [raw]);
 
-  // Ambient sway — always running
+  // Gentle mascot bob
   useEffect(() => {
-    swayAnim.value = withRepeat(
+    bobAnim.value = withRepeat(
       withSequence(
-        withTiming( 1, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-1, { duration: 3500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-5, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
+        withTiming( 0, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
       ),
       -1, false,
     );
   }, []);
 
-  // Harvest glow + haptic on completion
+  // Bubble pop when message changes
+  useEffect(() => {
+    if (msg !== prevMsg.current) {
+      prevMsg.current = msg;
+      bubbleOpacity.value = 0;
+      bubbleScale.value = 0.88;
+      bubbleOpacity.value = withTiming(1, { duration: 220 });
+      bubbleScale.value = withSpring(1, { damping: 12, stiffness: 220 });
+    }
+  }, [msg]);
+
+  // Haptic on completion
   useEffect(() => {
     if (isComplete && !wasComplete.current) {
       wasComplete.current = true;
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-      glowAnim.value = withRepeat(
-        withSequence(
-          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1, false,
-      );
     } else if (!isComplete) {
       wasComplete.current = false;
-      glowAnim.value = withTiming(0, { duration: 400 });
     }
   }, [isComplete]);
 
-  const cardStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progressAnim.value, [0, 0.5, 1], ['#FFFFFF', '#EEF8E8', '#FEFDE8']),
+  const mascotStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: bobAnim.value }],
+  }));
+
+  const bubbleStyle = useAnimatedStyle(() => ({
+    opacity: bubbleOpacity.value,
+    transform: [{ scale: bubbleScale.value }],
   }));
 
   const barFillStyle = useAnimatedStyle(() => ({
@@ -160,79 +90,55 @@ const DailyChallengeBox = observer(() => {
     backgroundColor: interpolateColor(
       progressAnim.value,
       [0, 0.75, 1],
-      ['#66BB6A', '#37891C', '#FFC107'],
+      ['#4CAF50', '#37891C', '#FFC107'],
     ),
   }));
 
-  const msg =
-    isComplete    ? 'Upea sadonkorjuu! Tavoite saavutettu! 🌟'
-    : raw >= 0.75 ? 'Melkein perillä — puutarha kukoistaa!'
-    : raw >= 0.5  ? 'Puolivälissä! Kasvit varttuvat hienosti.'
-    : raw >= 0.25 ? 'Hyvää vauhtia! Kasvit versovat.'
-    : raw > 0     ? 'Hyvä alku! Puutarha herää eloon.'
-    :               'Aloita päivä syömällä vihanneksia.';
-
-  const sceneW = SW - 48;
-  const sceneH = Math.round((sceneW / VB_W) * VB_H);
-
-  const skyFill = isComplete ? '#FFFDE7' : raw >= 0.5 ? '#EAF7E0' : '#F6FAF4';
-  const groundFill = '#33691E';
-
   return (
-    <Animated.View
-      style={[styles.card, cardStyle]}
-      accessible
-      accessibilityLabel={`Päivän tavoite: ${dailyTotal} grammaa ${dailyTarget}:stä. ${pct} prosenttia saavutettu.`}
-      accessibilityRole="progressbar"
-      accessibilityValue={{ min: 0, max: dailyTarget, now: dailyTotal }}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Päivän tavoite</Text>
-        <View style={styles.gramsRow}>
-          <Text style={styles.gramsNow}>{dailyTotal}</Text>
-          <Text style={styles.gramsOf}> / {dailyTarget}g</Text>
+    <View style={styles.card}>
+      {/* Mascot + speech bubble */}
+      <View style={styles.topSection}>
+        {/* Bubble floats top-right, above the mascot */}
+        <Animated.View style={[styles.bubble, bubbleStyle]}>
+          <Text style={styles.bubbleText}>{msg}</Text>
+          {/* Tail points down-left toward mascot */}
+          <View style={styles.tail} />
+        </Animated.View>
+
+        {/* Mascot centered below */}
+        <Animated.Image
+          source={require('../../assets/images/avatar2.jpg')}
+          style={[styles.mascot, mascotStyle]}
+        />
+      </View>
+
+      {/* Progress section */}
+      <View style={styles.progressSection}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.goalLabel}>Päivän tavoite</Text>
+          <View style={styles.gramsRow}>
+            <Text style={styles.gramsNow}>{dailyTotal}</Text>
+            <Text style={styles.gramsOf}> / {dailyTarget}g</Text>
+          </View>
         </View>
-      </View>
 
-      {/* Garden scene */}
-      <View style={[styles.scene, { width: sceneW, height: sceneH }]}>
-        <Svg width={sceneW} height={sceneH} viewBox={`0 0 ${VB_W} ${VB_H}`}>
-          {/* Sky */}
-          <Rect x={0} y={0} width={VB_W} height={GROUND_Y} fill={skyFill} />
-          {/* Ground */}
-          <Rect x={0} y={GROUND_Y} width={VB_W} height={VB_H - GROUND_Y} fill={groundFill} />
-          {/* Ground surface highlight */}
-          <Rect x={0} y={GROUND_Y} width={VB_W} height={2} fill="rgba(255,255,255,0.16)" />
-          {/* Soil texture */}
-          {[22, 68, 122, 182, 238, 294].map((tx) => (
-            <Ellipse key={tx} cx={tx} cy={GROUND_Y + 7} rx={5} ry={2.5} fill="rgba(0,0,0,0.1)" />
-          ))}
-          {/* Plants */}
-          {PLANTS.map((def, i) => (
-            <Plant key={i} def={def} progress={progressAnim} sway={swayAnim} glow={glowAnim} />
-          ))}
-        </Svg>
-      </View>
+        <View style={styles.track}>
+          <Animated.View style={[styles.fill, barFillStyle]} />
+        </View>
 
-      {/* Progress bar */}
-      <View style={styles.track}>
-        <Animated.View style={[styles.fill, barFillStyle]} />
+        <Text style={styles.pctLabel}>{pct}%</Text>
       </View>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.pct}>{pct}%</Text>
-        <Text style={styles.msg} numberOfLines={1}>{msg}</Text>
-      </View>
-    </Animated.View>
+    </View>
   );
 });
 
 export default DailyChallengeBox;
 
+const BUBBLE_BG = '#F2FAF0';
+
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 16,
     marginBottom: 20,
@@ -241,17 +147,56 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.09,
     shadowRadius: 14,
     elevation: 4,
-    overflow: 'hidden',
   },
-  header: {
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  mascot: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F2FAF0',
+  },
+  bubble: {
+    alignSelf: 'flex-end',
+    maxWidth: '72%',
+    backgroundColor: BUBBLE_BG,
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
+    marginBottom: 6,
+  },
+  tail: {
+    position: 'absolute',
+    bottom: -9,
+    left: 16,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 9,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: BUBBLE_BG,
+  },
+  bubbleText: {
+    fontFamily: theme.fontFamily.medium,
+    fontSize: 14,
+    color: theme.colors.primary,
+    lineHeight: 20,
+  },
+  progressSection: {
+    gap: 6,
+  },
+  progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginBottom: 12,
   },
-  title: {
-    fontSize: 17,
+  goalLabel: {
     fontFamily: theme.fontFamily.semiBold,
+    fontSize: 15,
     color: theme.colors.primary,
   },
   gramsRow: {
@@ -259,46 +204,29 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   gramsNow: {
-    fontSize: 22,
     fontFamily: theme.fontFamily.bold,
+    fontSize: 20,
     color: '#37891C',
   },
   gramsOf: {
-    fontSize: 14,
     fontFamily: theme.fontFamily.regular,
+    fontSize: 13,
     color: '#888',
   },
-  scene: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
   track: {
-    height: 5,
-    backgroundColor: '#E8E8E8',
-    borderRadius: 3,
+    height: 10,
+    backgroundColor: '#E8F5E0',
+    borderRadius: 5,
     overflow: 'hidden',
-    marginBottom: 8,
   },
   fill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 5,
   },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pct: {
-    fontSize: 13,
-    fontFamily: theme.fontFamily.bold,
+  pctLabel: {
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 12,
     color: '#37891C',
-    minWidth: 34,
-  },
-  msg: {
-    flex: 1,
-    fontSize: 13,
-    fontFamily: theme.fontFamily.regular,
-    color: '#666',
+    textAlign: 'right',
   },
 });
