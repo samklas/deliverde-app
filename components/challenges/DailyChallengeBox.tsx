@@ -126,7 +126,7 @@ const DailyChallengeBox = observer(() => {
             <Text style={styles.bubbleGrams}>
               {dailyTotal} g <Text style={styles.bubbleGramsUnit}>kasviksia</Text>
             </Text>
-            <Text style={styles.bubblePct}>{pct}% tavoitteesta{isComplete ? ' 🎉' : ''}</Text>
+            <Text style={styles.bubblePct}>{pct}% tavoitteesta</Text>
             {/* Tail points down toward mascot */}
             <View style={styles.tail} />
           </Animated.View>
