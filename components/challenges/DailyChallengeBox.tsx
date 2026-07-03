@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
-  useSharedValue, useAnimatedStyle,
+  useSharedValue, useAnimatedStyle, useAnimatedProps,
   withTiming, withRepeat, withSequence, withSpring,
   interpolateColor, Easing,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 import { observer } from 'mobx-react-lite';
 import * as Haptics from 'expo-haptics';
 import { theme } from '@/theme';
@@ -12,16 +13,18 @@ import userStore from '@/stores/userStore';
 
 const { width: SW } = Dimensions.get('window');
 // card has 16px padding, scrollview has 16px horizontal padding each side
-const TRACK_W = SW - 64;
+const CARD_INNER_W = SW - 64;
 
-const getMsg = (raw: number, remaining: number): string => {
-  if (raw >= 1)    return 'Tavoite saavutettu! Olen tosi ylpeä sinusta! 🎉';
-  if (raw >= 0.75) return `Vain ${remaining}g jäljellä — sinä pystyt tähän!`;
-  if (raw >= 0.5)  return 'Puolivälissä! Olet tekemässä hienoa työtä!';
-  if (raw >= 0.25) return 'Hyvää menoa! Jatka samaan malliin!';
-  if (raw > 0)     return 'Hyvä alku! Jokainen gramma lasketaan.';
-  return 'Hei! Aloitetaan tänään yhdessä! 🌱';
-};
+// Arc geometry: 180° half circle arching over the bubble + mascot
+const SIZE = Math.min(CARD_INNER_W, 240);
+const STROKE = 10;
+const R = (SIZE - STROKE) / 2;
+const C = SIZE / 2;
+const SVG_H = C + STROKE / 2;
+const ARC_PATH = `M ${C - R} ${C} A ${R} ${R} 0 0 1 ${C + R} ${C}`;
+const ARC_LEN = Math.PI * R;
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 const DailyChallengeBox = observer(() => {
   const { dailyTotal, dailyTarget } = userStore;
@@ -30,9 +33,7 @@ const DailyChallengeBox = observer(() => {
   const raw = dailyTarget > 0 ? Math.min(dailyTotal / dailyTarget, 1) : 0;
   const isComplete = raw >= 1;
   const pct = Math.round(raw * 100);
-  const remaining = Math.max(0, dailyTarget - dailyTotal);
-  const msg = getMsg(raw, remaining);
-  const prevMsg = useRef(msg);
+  const prevTotal = useRef(dailyTotal);
 
   const progressAnim = useSharedValue(0);
   const bobAnim      = useSharedValue(0);
@@ -55,16 +56,16 @@ const DailyChallengeBox = observer(() => {
     );
   }, []);
 
-  // Bubble pop when message changes
+  // Bubble pop when the numbers change
   useEffect(() => {
-    if (msg !== prevMsg.current) {
-      prevMsg.current = msg;
+    if (dailyTotal !== prevTotal.current) {
+      prevTotal.current = dailyTotal;
       bubbleOpacity.value = 0;
       bubbleScale.value = 0.88;
       bubbleOpacity.value = withTiming(1, { duration: 220 });
       bubbleScale.value = withSpring(1, { damping: 12, stiffness: 220 });
     }
-  }, [msg]);
+  }, [dailyTotal]);
 
   // Haptic on completion
   useEffect(() => {
@@ -85,48 +86,56 @@ const DailyChallengeBox = observer(() => {
     transform: [{ scale: bubbleScale.value }],
   }));
 
-  const barFillStyle = useAnimatedStyle(() => ({
-    width: progressAnim.value * TRACK_W,
-    backgroundColor: interpolateColor(
+  const arcProps = useAnimatedProps(() => ({
+    strokeDashoffset: ARC_LEN * (1 - progressAnim.value),
+    stroke: interpolateColor(
       progressAnim.value,
-      [0, 0.75, 1],
-      ['#4CAF50', '#37891C', '#FFC107'],
+      [0, 0.75],
+      ['#4CAF50', '#37891C'],
     ),
+    // round linecap draws a dot even at zero length — hide it until there is progress
+    opacity: progressAnim.value > 0.002 ? 1 : 0,
   }));
 
   return (
     <View style={styles.card}>
-      {/* Mascot + speech bubble */}
-      <View style={styles.topSection}>
-        {/* Bubble floats top-right, above the mascot */}
-        <Animated.View style={[styles.bubble, bubbleStyle]}>
-          <Text style={styles.bubbleText}>{msg}</Text>
-          {/* Tail points down-left toward mascot */}
-          <View style={styles.tail} />
-        </Animated.View>
+      <Text style={styles.goalLabel}>Päivän tavoite {dailyTarget}g kasviksia</Text>
 
-        {/* Mascot centered below */}
-        <Animated.Image
-          source={require('../../assets/images/avatar2.jpg')}
-          style={[styles.mascot, mascotStyle]}
-        />
-      </View>
+      <View style={styles.arcWrap}>
+        <Svg width={SIZE} height={SVG_H} style={styles.arcSvg}>
+          <Path
+            d={ARC_PATH}
+            stroke="#E8F5E0"
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            fill="none"
+          />
+          <AnimatedPath
+            d={ARC_PATH}
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            strokeDasharray={`${ARC_LEN} ${ARC_LEN}`}
+            fill="none"
+            animatedProps={arcProps}
+          />
+        </Svg>
 
-      {/* Progress section */}
-      <View style={styles.progressSection}>
-        <View style={styles.progressHeader}>
-          <Text style={styles.goalLabel}>Päivän tavoite</Text>
-          <View style={styles.gramsRow}>
-            <Text style={styles.gramsNow}>{dailyTotal}</Text>
-            <Text style={styles.gramsOf}> / {dailyTarget}g</Text>
-          </View>
+        {/* Bubble + mascot inside the arc */}
+        <View style={styles.arcContent}>
+          <Animated.View style={[styles.bubble, bubbleStyle]}>
+            <Text style={styles.bubbleGrams}>
+              {dailyTotal} g <Text style={styles.bubbleGramsUnit}>kasviksia</Text>
+            </Text>
+            <Text style={styles.bubblePct}>{pct}% tavoitteesta{isComplete ? ' 🎉' : ''}</Text>
+            {/* Tail points down toward mascot */}
+            <View style={styles.tail} />
+          </Animated.View>
+
+          <Animated.Image
+            source={require('../../assets/images/avatar2.jpg')}
+            style={[styles.mascot, mascotStyle]}
+          />
         </View>
-
-        <View style={styles.track}>
-          <Animated.View style={[styles.fill, barFillStyle]} />
-        </View>
-
-        <Text style={styles.pctLabel}>{pct}%</Text>
       </View>
     </View>
   );
@@ -148,9 +157,25 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 4,
   },
-  topSection: {
+  goalLabel: {
+    fontFamily: theme.fontFamily.semiBold,
+    fontSize: 15,
+    color: theme.colors.primary,
+    textAlign: 'center',
+  },
+  arcWrap: {
+    alignSelf: 'center',
+    width: SIZE,
+    marginTop: 8,
+  },
+  arcSvg: {
+    position: 'absolute',
+    top: 0,
+  },
+  arcContent: {
     alignItems: 'center',
-    marginBottom: 16,
+    // keeps the bubble's top corners inside the curve of the half circle
+    paddingTop: SIZE * 0.18,
   },
   mascot: {
     width: 80,
@@ -159,18 +184,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2FAF0',
   },
   bubble: {
-    alignSelf: 'flex-end',
-    maxWidth: '72%',
+    alignItems: 'center',
     backgroundColor: BUBBLE_BG,
     borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 13,
-    marginBottom: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 14,
   },
   tail: {
     position: 'absolute',
     bottom: -9,
-    left: 16,
+    alignSelf: 'center',
     width: 0,
     height: 0,
     borderLeftWidth: 8,
@@ -180,53 +204,20 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderTopColor: BUBBLE_BG,
   },
-  bubbleText: {
-    fontFamily: theme.fontFamily.medium,
-    fontSize: 14,
-    color: theme.colors.primary,
-    lineHeight: 20,
-  },
-  progressSection: {
-    gap: 6,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  goalLabel: {
-    fontFamily: theme.fontFamily.semiBold,
-    fontSize: 15,
-    color: theme.colors.primary,
-  },
-  gramsRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  gramsNow: {
+  bubbleGrams: {
     fontFamily: theme.fontFamily.bold,
     fontSize: 20,
     color: '#37891C',
   },
-  gramsOf: {
-    fontFamily: theme.fontFamily.regular,
+  bubbleGramsUnit: {
+    fontFamily: theme.fontFamily.medium,
+    fontSize: 14,
+    color: theme.colors.primary,
+  },
+  bubblePct: {
+    fontFamily: theme.fontFamily.medium,
     fontSize: 13,
-    color: '#888',
-  },
-  track: {
-    height: 10,
-    backgroundColor: '#E8F5E0',
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    borderRadius: 5,
-  },
-  pctLabel: {
-    fontFamily: theme.fontFamily.semiBold,
-    fontSize: 12,
-    color: '#37891C',
-    textAlign: 'right',
+    color: theme.colors.primary,
+    marginTop: 1,
   },
 });
