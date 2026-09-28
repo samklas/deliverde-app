@@ -40,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="greens"
         options={{
-          title: "Tavoitteet",
+          title: "Kasvikset",
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="leaf" color={color} />
           ),
