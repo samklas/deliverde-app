@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   View,
@@ -14,6 +14,11 @@ import { Recipe } from "@/types/recipe";
 import { Image } from "expo-image";
 import { capitalizeFirstLetter } from "@/utils/formatting";
 import { theme } from "@/theme";
+import { auth, db } from "@/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { rateRecipe } from "@/services/recipes.service";
+import StarRating from "./StarRating";
+import recipeStore from "@/stores/recipeStore";
 
 type Props = {
   selectedRecipe: Recipe | null;
@@ -26,6 +31,61 @@ export default function RecipeModal({
   isVisible,
   setIsVisible,
 }: Props) {
+  const [ratingStats, setRatingStats] = useState({ sum: 0, count: 0 });
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  useEffect(() => {
+    if (!selectedRecipe) return;
+
+    setRatingStats({
+      sum: selectedRecipe.ratingSum ?? 0,
+      count: selectedRecipe.ratingCount ?? 0,
+    });
+    setUserRating(null);
+
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    const userRatingRef = doc(db, `users/${userId}/recipeRatings/${selectedRecipe.id}`);
+    getDoc(userRatingRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          setUserRating(snapshot.data().value);
+        }
+      })
+      .catch((error) => console.error("Error fetching user rating: ", error));
+  }, [selectedRecipe?.id]);
+
+  const handleRate = async (value: number) => {
+    if (!selectedRecipe || isSubmittingRating) return;
+
+    const previousValue = userRating ?? 0;
+    const previousStats = ratingStats;
+    const newStats = {
+      sum: previousStats.sum - previousValue + value,
+      count: previousValue ? previousStats.count : previousStats.count + 1,
+    };
+
+    setIsSubmittingRating(true);
+    setUserRating(value);
+    setRatingStats(newStats);
+    recipeStore.updateRecipeRating(selectedRecipe.id, newStats.sum, newStats.count);
+
+    try {
+      await rateRecipe(selectedRecipe.id, value);
+    } catch (error) {
+      console.error("Error rating recipe: ", error);
+      setUserRating(previousValue || null);
+      setRatingStats(previousStats);
+      recipeStore.updateRecipeRating(selectedRecipe.id, previousStats.sum, previousStats.count);
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
+  const averageRating = ratingStats.count > 0 ? ratingStats.sum / ratingStats.count : 0;
+
   const closeModal = () => {
     setIsVisible(false);
   };
@@ -58,6 +118,19 @@ export default function RecipeModal({
               <Text style={styles.modalTitle}>
                 {capitalizeFirstLetter(selectedRecipe.title)}
               </Text>
+              <View style={styles.ratingSection}>
+                <StarRating
+                  rating={userRating ?? Math.round(averageRating)}
+                  size={28}
+                  readonly={false}
+                  onRate={handleRate}
+                />
+                <Text style={styles.ratingText}>
+                  {ratingStats.count > 0
+                    ? `${averageRating.toFixed(1).replace(".", ",")} (${ratingStats.count})`
+                    : "Ei arvosteluja"}
+                </Text>
+              </View>
               <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                 <View style={styles.box}>
                   <Text style={styles.ingredientsTitle}>Ainesosat</Text>
@@ -104,6 +177,16 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     color: "blue",
+  },
+  ratingSection: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontFamily: theme.fontFamily.regular,
+    color: "#666",
+    marginTop: 6,
   },
   modalImage: {
     width: "100%",

@@ -1,5 +1,5 @@
-import { collection, getDocs, query, where, DocumentData, QuerySnapshot } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
+import { collection, getDocs, query, where, DocumentData, QuerySnapshot, doc, runTransaction } from "firebase/firestore";
+import { auth, db } from "@/firebaseConfig";
 import { Recipe } from "@/types/recipe";
 import { getImageUrl } from "@/utils/utils";
 
@@ -17,6 +17,8 @@ export const mapRecipes = async (
       ingredients: data.ingredients,
       instructions: data.instructions,
       recipeOfMonth: data.recipeOfMonth,
+      ratingSum: data.ratingSum ?? 0,
+      ratingCount: data.ratingCount ?? 0,
     };
     recipes.push(recipe);
   }
@@ -44,4 +46,34 @@ export const filterFavoriteRecipes = (
   favoriteRecipeIds: string[]
 ): Recipe[] => {
   return recipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
+};
+
+export const getAverageRating = (recipe: Recipe): number => {
+  if (!recipe.ratingCount) return 0;
+  return recipe.ratingSum / recipe.ratingCount;
+};
+
+export const rateRecipe = async (recipeId: string, value: number): Promise<void> => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    throw new Error("User must be signed in to rate a recipe");
+  }
+
+  const recipeRef = doc(db, "recipes", recipeId);
+  const userRatingRef = doc(db, `users/${userId}/recipeRatings/${recipeId}`);
+
+  await runTransaction(db, async (transaction) => {
+    const recipeSnap = await transaction.get(recipeRef);
+    const userRatingSnap = await transaction.get(userRatingRef);
+
+    const previousValue = userRatingSnap.exists() ? userRatingSnap.data().value : 0;
+    const currentSum = recipeSnap.data()?.ratingSum ?? 0;
+    const currentCount = recipeSnap.data()?.ratingCount ?? 0;
+
+    const newSum = currentSum - previousValue + value;
+    const newCount = userRatingSnap.exists() ? currentCount : currentCount + 1;
+
+    transaction.set(userRatingRef, { value, ratedAt: new Date() });
+    transaction.update(recipeRef, { ratingSum: newSum, ratingCount: newCount });
+  });
 };

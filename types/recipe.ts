@@ -6,4 +6,6 @@ export type Recipe = {
   ingredients: string[];
   instructions: string;
   recipeOfMonth: boolean;
+  ratingSum: number;
+  ratingCount: number;
 };

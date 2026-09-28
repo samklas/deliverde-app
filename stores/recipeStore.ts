@@ -9,6 +9,8 @@ const initRecipe: Recipe = {
   ingredients: [],
   instructions: "",
   recipeOfMonth: false,
+  ratingSum: 0,
+  ratingCount: 0,
 };
 
 class RecipeStore {
@@ -44,6 +46,18 @@ class RecipeStore {
 
   setRecipeOfMonth = (recipe: Recipe) => {
     this._recipes.recipeOfMonth = recipe;
+  };
+
+  updateRecipeRating = (recipeId: string, ratingSum: number, ratingCount: number) => {
+    const applyRating = (recipe: Recipe): Recipe =>
+      recipe.id === recipeId ? { ...recipe, ratingSum, ratingCount } : recipe;
+
+    this._recipes.recipes = this._recipes.recipes.map(applyRating);
+    this._recipes.favoriteRecipes = this._recipes.favoriteRecipes.map(applyRating);
+
+    if (this._recipes.recipeOfMonth.id === recipeId) {
+      this._recipes.recipeOfMonth = applyRating(this._recipes.recipeOfMonth);
+    }
   };
 }
 

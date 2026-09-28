@@ -3,6 +3,8 @@ export {
   fetchRecipes,
   getRecipeOfMonth,
   filterFavoriteRecipes,
+  getAverageRating,
+  rateRecipe,
 } from "./recipes.service";
 
 export {

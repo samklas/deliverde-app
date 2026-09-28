@@ -8,6 +8,7 @@ import { useState } from "react";
 import { auth, db } from "@/firebaseConfig";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { capitalizeFirstLetter } from "@/utils/formatting";
+import { getAverageRating } from "@/services/recipes.service";
 import React from "react";
 
 type Props = {
@@ -84,6 +85,16 @@ export default function RecipeBox({
           <Text style={styles.recipeTitle}>
             {capitalizeFirstLetter(recipe.title)}
           </Text>
+
+          {recipe.ratingCount > 0 && (
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingValueText}>
+                {getAverageRating(recipe).toFixed(1).replace(".", ",")}
+              </Text>
+              <Icon name="star" size={14} color="#37891C" style={styles.ratingStarIcon} />
+              <Text style={styles.ratingCountText}>({recipe.ratingCount})</Text>
+            </View>
+          )}
         </View>
       </Pressable>
 
@@ -139,5 +150,25 @@ const styles = StyleSheet.create({
     fontFamily: theme.fontFamily.semiBold,
     color: theme.colors.primary,
     textAlign: "center",
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 6,
+  },
+  ratingValueText: {
+    fontSize: 13,
+    fontFamily: theme.fontFamily.semiBold,
+    color: theme.colors.primary,
+  },
+  ratingStarIcon: {
+    marginLeft: 4,
+    marginRight: 4,
+  },
+  ratingCountText: {
+    fontSize: 12,
+    fontFamily: theme.fontFamily.regular,
+    color: "#999",
   },
 });
