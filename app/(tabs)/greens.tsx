@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddVegetablesModal from "@/components/AddVegetablesModal";
 import { Vegetable, TodayVegetable } from "@/types/vegetable";
 import { theme } from "@/theme";
-import CircularProgress from "@/components/CircularProgress";
+import AvatarFillProgress from "@/components/AvatarFillProgress";
 import CelebrationModal from "@/components/CelebrationModal";
 import { observer } from "mobx-react-lite";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,7 +24,7 @@ import {
 } from "@/services";
 
 const Tab = observer(() => {
-  const { dailyTotal, dailyTarget, setDailyTotal } = userStore;
+  const { dailyTotal, dailyTarget, setDailyTotal, avatarId } = userStore;
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
   const [lastUsedVegetables, setLastUsedVegetables] = useState<Vegetable[]>([]);
   const [todayVegetables, setTodayVegetables] = useState<TodayVegetable[]>([]);
@@ -34,6 +34,22 @@ const Tab = observer(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const hasLoaded = useRef(false);
+
+  // The modal covers the whole screen while vegetables are being added, so
+  // applying dailyTotal changes straight away would make the avatar update
+  // invisibly behind it. Instead we freeze what's shown while the modal is
+  // open and only reveal the real value once it closes ("Valmis"), so the
+  // user actually gets to watch the avatar animate.
+  const [displayedTotal, setDisplayedTotal] = useState(dailyTotal);
+  useEffect(() => {
+    if (!isAddModalVisible) {
+      setDisplayedTotal(dailyTotal);
+    }
+  }, [dailyTotal, isAddModalVisible]);
+  const displayedProgress = Math.min(
+    (displayedTotal / dailyTarget) * 100,
+    100
+  );
 
   useEffect(() => {
     if (dailyTotal < dailyTarget) setHasCelebrated(false);
@@ -175,15 +191,13 @@ const Tab = observer(() => {
       <View style={styles.todayBox}>
         <Text style={styles.title}>Päivän tavoite</Text>
         <View style={styles.progressWrapper}>
-          <CircularProgress
-            size={120}
-            strokeWidth={12}
-            progress={progress}
-            backgroundColor="#e0e0e0"
-            progressColor="#4caf50"
+          <AvatarFillProgress
+            avatarId={avatarId}
+            progress={displayedProgress}
+            size={140}
           />
           <Text style={styles.progressText}>
-            {dailyTotal}g / {dailyTarget}g
+            {displayedTotal}g / {dailyTarget}g
           </Text>
         </View>
       </View>
