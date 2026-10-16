@@ -12,15 +12,15 @@ const getAvatar = (avatarId: string) => {
     return require("../assets/images/avatar2_transparent.png");
   }
   if (avatarId === "2") {
-    return require("../assets/images/avatar3.jpg");
+    return require("../assets/images/avatar3_transparent.png");
   }
   if (avatarId === "3") {
-    return require("../assets/images/avatar4.jpg");
+    return require("../assets/images/avatar4_transparent.png");
   }
   if (avatarId === "4") {
-    return require("../assets/images/avatar5.png");
+    return require("../assets/images/avatar5_transparent.png");
   }
-  return require("../assets/images/avatar2.jpg");
+  return require("../assets/images/avatar2_transparent.png");
 };
 
 type Props = {
