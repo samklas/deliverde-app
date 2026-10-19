@@ -70,7 +70,11 @@ const DailyChallengeBox = observer(() => {
       </View>
 
       <Animated.View style={[styles.avatarWrap, avatarStyle]}>
-        <Image source={getAvatar(avatarId)} style={styles.avatar} />
+        <Image
+          source={getAvatar(avatarId)}
+          resizeMode="contain"
+          style={styles.avatar}
+        />
       </Animated.View>
     </View>
   );

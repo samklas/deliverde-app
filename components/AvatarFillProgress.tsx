@@ -40,29 +40,35 @@ const AvatarFillProgress = ({ avatarId, progress, size = 120 }: Props) => {
     });
   }, [clamped]);
 
-  // Grey overlay fades out as progress grows, revealing the full-color avatar underneath
+  // Grey overlay shrinks from the top down as progress grows, revealing the
+  // full-color avatar underneath from bottom to top.
   const overlayStyle = useAnimatedStyle(() => ({
-    opacity: 1 - fillAnim.value,
+    height: (1 - fillAnim.value) * size,
   }));
 
   const avatarSource = getAvatar(avatarId);
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      {/* Full-color avatar underneath */}
+      {/* Full-color avatar underneath. contain (rather than the default
+          cover) keeps the whole avatar visible since the source images
+          aren't square and would otherwise get cropped to fit the box. */}
       <Image
         source={avatarSource}
+        resizeMode="contain"
         style={[styles.image, { width: size, height: size }]}
       />
 
-      {/* Grey silhouette of the same avatar on top — tintColor recolors its
-          non-transparent pixels, so the grey matches the avatar's own shape
-          instead of a box. Its opacity controls how much color shows through. */}
+      {/* Grey silhouette of the same avatar on top, clipped to a shrinking
+          box anchored at the top so the reveal animates bottom-to-top.
+          tintColor recolors its non-transparent pixels, so the grey matches
+          the avatar's own shape instead of a box. */}
       <Animated.View
-        style={[styles.image, { width: size, height: size }, overlayStyle]}
+        style={[styles.clip, { width: size }, overlayStyle]}
       >
         <Image
           source={avatarSource}
+          resizeMode="contain"
           style={[
             styles.image,
             { width: size, height: size, tintColor: "rgba(170, 170, 170, 0.92)" },
@@ -83,5 +89,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
+  },
+  clip: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    overflow: "hidden",
   },
 });

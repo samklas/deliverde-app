@@ -153,7 +153,11 @@ export default function Tab() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.profileHeader}>
-            <Image source={getAvatar()} style={styles.avatar} />
+            <Image
+              source={getAvatar()}
+              resizeMode="contain"
+              style={styles.avatar}
+            />
             <Text style={styles.username}>{username}</Text>
           </View>
 
