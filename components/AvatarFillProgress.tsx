@@ -23,6 +23,24 @@ const getAvatar = (avatarId: string) => {
   return require("../assets/images/avatar2_transparent.png");
 };
 
+// Each avatar PNG has a different amount of transparent padding baked in
+// above/below the actual figure (measured from each file's alpha channel
+// bounding box, then mapped through the same "contain" letterboxing the
+// <Image> below applies, since a couple of these images are wide enough to
+// get vertical letterbox bars inside the square box). If the reveal clips
+// against the raw box instead of this content area, low progress gets
+// "spent" uncovering blank space at the bottom (no visible change) and the
+// final stretch toward 100% only uncovers blank space at the top (looks
+// fully revealed while still short).
+const AVATAR_CONTENT_BOUNDS: Record<string, { top: number; bottom: number }> =
+  {
+    "1": { top: 0.098, bottom: 0.911 }, // avatar2_transparent.png
+    "2": { top: 0.09, bottom: 0.887 }, // avatar3_transparent.png
+    "3": { top: 0.07, bottom: 0.962 }, // avatar4_transparent.png
+    "4": { top: 0.113, bottom: 0.803 }, // avatar5_transparent.png
+  };
+const DEFAULT_CONTENT_BOUNDS = AVATAR_CONTENT_BOUNDS["1"];
+
 type Props = {
   avatarId: string;
   progress: number; // 0-100
@@ -40,10 +58,16 @@ const AvatarFillProgress = ({ avatarId, progress, size = 120 }: Props) => {
     });
   }, [clamped]);
 
+  const { top, bottom } =
+    AVATAR_CONTENT_BOUNDS[avatarId] ?? DEFAULT_CONTENT_BOUNDS;
+  const contentRange = bottom - top;
+
   // Grey overlay shrinks from the top down as progress grows, revealing the
-  // full-color avatar underneath from bottom to top.
+  // full-color avatar underneath from bottom to top. The shrink is mapped
+  // onto the figure's actual content area (top..bottom), not the raw image
+  // box, so every bit of progress uncovers visible artwork.
   const overlayStyle = useAnimatedStyle(() => ({
-    height: (1 - fillAnim.value) * size,
+    height: (bottom - fillAnim.value * contentRange) * size,
   }));
 
   const avatarSource = getAvatar(avatarId);
